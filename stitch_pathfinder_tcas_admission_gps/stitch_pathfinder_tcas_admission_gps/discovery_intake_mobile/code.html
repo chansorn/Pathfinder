@@ -1,0 +1,264 @@
+<!DOCTYPE html><html lang="th"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PathFinder Mobile — ค้นหาตัวตนและพื้นฐานของคุณ</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'warm-alabaster': '#FAF9F6',
+        'deep-sage': '#1F3A3D',
+        'eucalyptus-green': '#6B9080',
+        'warm-sand': '#EAE4D7',
+        'muted-terracotta': '#D98A4E',
+        'primary': '#1F3A3D',
+        'on-primary': '#FFFFFF',
+        'primary-container': '#D9F6FA',
+        'on-primary-container': '#021F22',
+        'secondary': '#6B9080',
+        'on-secondary': '#002116',
+        'secondary-container': '#D2FAE7',
+        'on-secondary-container': '#12372A',
+        'secondary-text': '#2A4D40',
+        'tertiary': '#D98A4E',
+        'on-tertiary': '#301400',
+        'tertiary-container': '#FFEDE4',
+        'on-tertiary-container': '#4F2500',
+        'tertiary-text': '#713700',
+        'surface': '#FAF9F6',
+        'on-surface': '#1F3A3D',
+        'surface-container-lowest': '#FDFCF9',
+        'surface-container-low': '#EAE4D7',
+        'surface-container': '#E3E2E0',
+        'on-surface-variant': '#464745',
+        'outline': '#777775',
+        'outline-variant': '#C7C6C4',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+      },
+      borderRadius: {
+        'sm': '8px',
+        'DEFAULT': '12px',
+        'md': '14px',
+        'lg': '20px',
+        'xl': '28px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '24px',
+      },
+      fontFamily: {
+        'display': ['"Google Sans"', 'sans-serif'],
+        'headline': ['"Google Sans"', 'sans-serif'],
+        'title': ['"Google Sans"', 'sans-serif'],
+        'body': ['"Google Sans"', 'sans-serif'],
+        'label': ['"Google Sans"', 'sans-serif'],
+        'metric': ['"JetBrains Mono"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '54px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'display-lg-mobile': ['30px', { lineHeight: '38px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'headline-lg-mobile': ['24px', { lineHeight: '32px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-md': ['22px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '700' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-lg': ['17px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['15px', { lineHeight: '24px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['15px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0.1px', fontWeight: '600' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.2px', fontWeight: '600' }],
+        'metric-md': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '240ms',
+        'surface-exit': '160ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+        'surface-exit': 'cubic-bezier(0.3, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&amp;family=Noto+Sans+Thai+Looped:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons { display: inline-block; width: 1em; height: 1em; line-height: 1 !important; box-sizing: content-box; overflow: hidden; white-space: nowrap; direction: ltr; vertical-align: middle; }
+    button {
+      transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), background-color 220ms ease, border-color 220ms ease, color 180ms ease, box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    button:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -8px rgba(31, 58, 61, 0.2);
+    }
+    button:not(:disabled):active {
+      transform: translateY(0) scale(0.97);
+      transition-duration: 90ms;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      button { transition: none !important; transform: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+  <div class="min-h-[884px] flex flex-col justify-between" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+    <!-- Mobile Top Header -->
+    <header class="w-full border-b border-outline-variant bg-surface">
+      <div class="px-gutter-md py-gutter-sm flex items-center justify-between gap-gutter-sm">
+        <span class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">PathFinder</span>
+
+        <div class="flex items-center gap-gutter-xs">
+          <div role="group" aria-label="Language" class="inline-flex items-center p-0.5 rounded-full bg-surface-container-low border border-outline-variant">
+            <button type="button" data-lang-btn="th" class="px-2 py-0.5 rounded-full bg-primary text-on-primary font-label text-label-sm">TH</button>
+            <button type="button" data-lang-btn="en" class="px-2 py-0.5 rounded-full text-on-surface-variant font-label text-label-sm">EN</button>
+          </div>
+          <span data-th="ขั้นที่ 1/3" data-en="Step 1/3" class="inline-flex items-center px-gutter-sm py-0.5 rounded-full bg-surface-container-low border border-outline-variant font-metric text-label-sm text-on-surface tabular-nums" data-design-text-token="label-sm">
+            ขั้นที่ 1/3
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Stepper Content -->
+    <main class="flex-1 px-gutter-md py-gutter-lg flex flex-col gap-gutter-lg">
+
+      <!-- Step Progress -->
+      <section class="flex flex-col gap-gutter-xs">
+        <div class="flex items-center justify-between">
+          <span data-th="1. ความสนใจ • 2. พื้นฐาน • 3. เป้าหมาย" data-en="1. Interests • 2. Baseline • 3. Target" class="font-label text-label-sm text-secondary-text" data-design-text-token="label-sm">1. ความสนใจ • 2. พื้นฐาน • 3. เป้าหมาย</span>
+          <span class="font-metric text-label-sm text-on-surface tabular-nums" data-design-text-token="label-sm">33%</span>
+        </div>
+        <div role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" aria-label="Discovery progress" class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+          <div class="h-full rounded-full bg-secondary" style="width: 33%;"></div>
+        </div>
+      </section>
+
+      <!-- Step 1 Card -->
+      <section class="p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+        <header class="flex flex-col gap-gutter-xs">
+          <span data-th="ขั้นที่ 1 • ความสนใจ" data-en="Step 1 • Curiosity" class="font-label text-label-sm text-secondary-text uppercase tracking-wider" data-design-text-token="label-sm">ขั้นที่ 1 • ความสนใจ</span>
+          <h1 data-th="เรื่องไหนที่ทำให้คุณสนุกเวลาทำ?" data-en="What subjects or problems energize you?" class="font-headline text-headline-lg-mobile text-on-surface text-balance" data-design-text-token="headline-lg-mobile">
+            เรื่องไหนที่ทำให้คุณสนุกเวลาทำ?
+          </h1>
+          <p data-th="เลือก 2–4 ด้านที่คุณชอบ เพื่อจับคู่คณะที่ใช่ที่สุดสำหรับคุณ" data-en="Pick 2–4 areas you enjoy exploring to match your ideal majors." class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+            เลือก 2–4 ด้านที่คุณชอบ เพื่อจับคู่คณะที่ใช่ที่สุดสำหรับคุณ
+          </p>
+        </header>
+
+        <div class="flex flex-wrap gap-gutter-sm" role="group" aria-label="Student interests">
+          <button type="button" data-interest-chip aria-pressed="true" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary border border-primary font-label text-label-md">
+            <span class="material-symbols-outlined text-[15px]" aria-hidden="true">check_circle</span>
+            <span data-th="เทคโนโลยี &amp; AI" data-en="Technology &amp; AI" data-design-text-token="label-md">เทคโนโลยี &amp; AI</span>
+          </button>
+          <button type="button" data-interest-chip aria-pressed="true" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary border border-primary font-label text-label-md">
+            <span class="material-symbols-outlined text-[15px]" aria-hidden="true">check_circle</span>
+            <span data-th="ออกแบบผลิตภัณฑ์ &amp; UX" data-en="Product &amp; UX Design" data-design-text-token="label-md">ออกแบบผลิตภัณฑ์ &amp; UX</span>
+          </button>
+          <button type="button" data-interest-chip aria-pressed="false" class="inline-flex items-center px-gutter-md py-gutter-xs rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+            <span data-th="สุขภาพและการแพทย์" data-en="Healthcare" data-design-text-token="label-md">สุขภาพและการแพทย์</span>
+          </button>
+          <button type="button" data-interest-chip aria-pressed="false" class="inline-flex items-center px-gutter-md py-gutter-xs rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+            <span data-th="ธุรกิจและเศรษฐศาสตร์" data-en="Business &amp; Econ" data-design-text-token="label-md">ธุรกิจและเศรษฐศาสตร์</span>
+          </button>
+          <button type="button" data-interest-chip aria-pressed="false" class="inline-flex items-center px-gutter-md py-gutter-xs rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+            <span data-th="หุ่นยนต์" data-en="Robotics" data-design-text-token="label-md">หุ่นยนต์</span>
+          </button>
+          <button type="button" data-interest-chip aria-pressed="false" class="inline-flex items-center px-gutter-md py-gutter-xs rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+            <span data-th="สื่อและการเล่าเรื่อง" data-en="Storytelling" data-design-text-token="label-md">สื่อและการเล่าเรื่อง</span>
+          </button>
+          <button type="button" data-interest-chip aria-pressed="false" class="inline-flex items-center px-gutter-md py-gutter-xs rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+            <span data-th="ข้อมูลและงานวิจัย" data-en="Data &amp; Research" data-design-text-token="label-md">ข้อมูลและงานวิจัย</span>
+          </button>
+        </div>
+
+        <div class="p-gutter-sm rounded-lg bg-surface-container-low flex items-center justify-between gap-gutter-sm">
+          <span data-th="เลือกแล้ว 2 ด้าน" data-en="2 interests selected" class="font-label text-label-sm text-on-surface" data-design-text-token="label-sm">เลือกแล้ว 2 ด้าน</span>
+          <span data-th="พร้อมไปขั้นถัดไป" data-en="Ready for Step 2" class="font-label text-label-sm text-secondary-text" data-design-text-token="label-sm">พร้อมไปขั้นถัดไป</span>
+        </div>
+
+        <button id="mobile-intake-btn" data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="w-full inline-flex items-center justify-center gap-gutter-sm px-gutter-lg py-3.5 rounded-full bg-primary text-on-primary font-label text-label-lg">
+          <span data-th="บันทึกความสนใจ ✓" data-en="Save Interests ✓" data-design-text-token="label-lg">บันทึกความสนใจ ✓</span>
+        </button>
+
+        <div id="mobile-intake-saved" class="hidden p-gutter-sm rounded-lg bg-secondary-container text-on-secondary-container text-center font-label text-label-sm">
+          <span data-th="บันทึกแล้ว! พร้อมจับคู่ 3 อันดับคณะที่ใช่" data-en="Saved! Ready to match your Top 3 Majors">บันทึกแล้ว! พร้อมจับคู่ 3 อันดับคณะที่ใช่</span>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Accuracy Footer -->
+    <footer class="w-full border-t border-outline-variant bg-surface px-gutter-md py-gutter-md">
+      <p data-th="โปรดตรวจสอบเกณฑ์ค่าน้ำหนัก TCAS อย่างเป็นทางการที่ mytcas.com" data-en="Verify official yearly TCAS weightings on mytcas.com" class="font-label text-label-sm text-on-surface-variant text-center" data-design-text-token="label-sm">
+        โปรดตรวจสอบเกณฑ์ค่าน้ำหนัก TCAS อย่างเป็นทางการที่ mytcas.com
+      </p>
+    </footer>
+
+  </div>
+
+  <script>
+    (function () {
+      document.querySelectorAll('[data-interest-chip]').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var pressed = chip.getAttribute('aria-pressed') === 'true';
+          chip.setAttribute('aria-pressed', pressed ? 'false' : 'true');
+          chip.classList.toggle('bg-primary', !pressed);
+          chip.classList.toggle('text-on-primary', !pressed);
+          chip.classList.toggle('border-primary', !pressed);
+          chip.classList.toggle('bg-surface', pressed);
+          chip.classList.toggle('text-on-surface', pressed);
+          chip.classList.toggle('border-outline-variant', pressed);
+        });
+      });
+
+      var btn = document.getElementById('mobile-intake-btn');
+      var saved = document.getElementById('mobile-intake-saved');
+      if (btn && saved) {
+        btn.addEventListener('click', function () {
+          saved.classList.remove('hidden');
+        });
+      }
+
+      function setLang(lang) {
+        document.documentElement.lang = lang;
+        document.querySelectorAll('[data-th][data-en]').forEach(function (el) {
+          el.textContent = el.getAttribute('data-' + lang);
+        });
+        document.querySelectorAll('[data-lang-btn]').forEach(function (b) {
+          var active = b.getAttribute('data-lang-btn') === lang;
+          b.classList.toggle('bg-primary', active);
+          b.classList.toggle('text-on-primary', active);
+          b.classList.toggle('text-on-surface-variant', !active);
+        });
+      }
+      document.querySelectorAll('[data-lang-btn]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          setLang(b.getAttribute('data-lang-btn'));
+        });
+      });
+    })();
+  </script>
+
+
+</body></html>

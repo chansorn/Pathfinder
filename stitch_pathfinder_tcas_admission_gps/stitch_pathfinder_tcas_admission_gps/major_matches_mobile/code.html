@@ -1,0 +1,402 @@
+<!DOCTYPE html><html lang="th"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PathFinder Mobile — คณะที่เหมาะกับคุณ</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'warm-alabaster': '#FAF9F6',
+        'deep-sage': '#1F3A3D',
+        'eucalyptus-green': '#6B9080',
+        'warm-sand': '#EAE4D7',
+        'muted-terracotta': '#D98A4E',
+        'primary': '#1F3A3D',
+        'on-primary': '#FFFFFF',
+        'primary-container': '#D9F6FA',
+        'on-primary-container': '#021F22',
+        'secondary': '#6B9080',
+        'on-secondary': '#002116',
+        'secondary-container': '#D2FAE7',
+        'on-secondary-container': '#12372A',
+        'secondary-text': '#2A4D40',
+        'tertiary': '#D98A4E',
+        'on-tertiary': '#301400',
+        'tertiary-container': '#FFEDE4',
+        'on-tertiary-container': '#4F2500',
+        'tertiary-text': '#713700',
+        'surface': '#FAF9F6',
+        'on-surface': '#1F3A3D',
+        'surface-container-lowest': '#FDFCF9',
+        'surface-container-low': '#EAE4D7',
+        'surface-container': '#E3E2E0',
+        'on-surface-variant': '#464745',
+        'outline': '#777775',
+        'outline-variant': '#C7C6C4',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+      },
+      borderRadius: {
+        'sm': '8px',
+        'DEFAULT': '12px',
+        'md': '14px',
+        'lg': '20px',
+        'xl': '28px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '24px',
+      },
+      fontFamily: {
+        'display': ['"Google Sans"', 'sans-serif'],
+        'headline': ['"Google Sans"', 'sans-serif'],
+        'title': ['"Google Sans"', 'sans-serif'],
+        'body': ['"Google Sans"', 'sans-serif'],
+        'label': ['"Google Sans"', 'sans-serif'],
+        'metric': ['"JetBrains Mono"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '54px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'display-lg-mobile': ['30px', { lineHeight: '38px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'headline-lg-mobile': ['24px', { lineHeight: '32px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-md': ['22px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '700' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-lg': ['17px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['15px', { lineHeight: '24px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['15px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0.1px', fontWeight: '600' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.2px', fontWeight: '600' }],
+        'metric-md': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '240ms',
+        'surface-exit': '160ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+        'surface-exit': 'cubic-bezier(0.3, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&amp;family=Noto+Sans+Thai+Looped:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons { display: inline-block; width: 1em; height: 1em; line-height: 1 !important; box-sizing: content-box; overflow: hidden; white-space: nowrap; direction: ltr; vertical-align: middle; }
+    button, article[data-destination-card] {
+      transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), background-color 220ms ease, border-color 220ms ease, color 180ms ease, box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    button:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -8px rgba(31, 58, 61, 0.2);
+    }
+    button:not(:disabled):active {
+      transform: translateY(0) scale(0.97);
+      transition-duration: 90ms;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      button, article[data-destination-card] { transition: none !important; transform: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+  <div class="min-h-[884px] flex flex-col justify-between" data-stitch-vh="min-h-[884px]===min-h-screen">
+
+    <!-- Mobile Top Header -->
+    <header class="w-full border-b border-outline-variant bg-surface">
+      <div class="px-gutter-md py-gutter-sm flex items-center justify-between gap-gutter-sm">
+        <span class="font-headline text-title-md text-on-surface" data-design-text-token="title-md">PathFinder</span>
+
+        <div class="flex items-center gap-gutter-xs">
+          <div role="group" aria-label="Language" class="inline-flex items-center p-0.5 rounded-full bg-surface-container-low border border-outline-variant">
+            <button type="button" data-lang-btn="th" class="px-2 py-0.5 rounded-full bg-primary text-on-primary font-label text-label-sm">TH</button>
+            <button type="button" data-lang-btn="en" class="px-2 py-0.5 rounded-full text-on-surface-variant font-label text-label-sm">EN</button>
+          </div>
+          <span data-th="3 อันดับ" data-en="3 Matches" class="inline-flex items-center px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label text-label-sm" data-design-text-token="label-sm">
+            3 อันดับ
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Main Content -->
+    <main class="flex-1 px-gutter-md py-gutter-lg flex flex-col gap-gutter-lg">
+
+      <section class="flex flex-col gap-gutter-xs">
+        <span data-th="วิเคราะห์จากโปรไฟล์ของคุณ" data-en="Based on Your Profile" class="font-label text-label-sm text-secondary-text uppercase tracking-wider" data-design-text-token="label-sm">วิเคราะห์จากโปรไฟล์ของคุณ</span>
+        <h1 data-th="3 เส้นทางคณะและอาชีพที่ใช่สำหรับคุณ" data-en="Your Top 3 Major &amp; Career Paths" class="font-headline text-headline-lg-mobile text-on-surface text-balance" data-design-text-token="headline-lg-mobile">
+          3 เส้นทางคณะและอาชีพที่ใช่สำหรับคุณ
+        </h1>
+        <div class="flex flex-wrap gap-gutter-xs pt-gutter-xs">
+          <span data-th="ม.5 • 3.75" data-en="M.5 • 3.75" class="px-gutter-sm py-0.5 rounded-full bg-surface-container-low border border-outline-variant font-metric text-label-sm text-on-surface tabular-nums" data-design-text-token="label-sm">ม.5 • 3.75</span>
+          <span data-th="Beyond 4.00 เปิดอยู่" data-en="Beyond 4.00 On" class="px-gutter-sm py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container font-label text-label-sm" data-design-text-token="label-sm">Beyond 4.00 เปิดอยู่</span>
+        </div>
+      </section>
+
+      <!-- Destination Card 1 -->
+      <article data-component-id="card-action" data-component-type="card" data-component-variant="action" data-destination-card="1" class="flex flex-col gap-gutter-md p-gutter-md rounded-xl bg-surface-container-lowest border-2 border-primary">
+        <header class="flex items-center justify-between gap-gutter-sm">
+          <span data-th="ตรงกัน 94%" data-en="94% Match" class="inline-flex items-center px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums" data-design-text-token="metric-md">
+            ตรงกัน 94%
+          </span>
+          <span data-th="เหมาะที่สุด" data-en="Top Fit" class="inline-flex items-center gap-gutter-xs px-gutter-sm py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container font-label text-label-sm" data-design-text-token="label-sm">
+            เหมาะที่สุด
+          </span>
+        </header>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <h2 data-th="วิศวกรรมคอมพิวเตอร์ &amp; ออกแบบผลิตภัณฑ์" data-en="Computer Engineering &amp; Product Design" class="font-headline text-title-lg text-on-surface" data-design-text-token="title-lg">
+            วิศวกรรมคอมพิวเตอร์ &amp; ออกแบบผลิตภัณฑ์
+          </h2>
+          <span data-th="จุฬาฯ / มจธ. • TCAS 1 &amp; 3" data-en="Chulalongkorn / KMUTT • TCAS 1 &amp; 3" class="font-label text-label-sm text-secondary-text" data-design-text-token="label-sm">จุฬาฯ / มจธ. • TCAS 1 &amp; 3</span>
+        </div>
+
+        <p data-th="รวมการสร้างต้นแบบและระบบภาพเข้ากับพื้นฐานวิศวกรรม เหมาะกับรอบ 1 Portfolio" data-en="Blends building prototypes and visual systems with engineering—ideal for Round 1 Portfolio." class="font-body text-body-md text-on-surface-variant p-gutter-sm rounded-lg bg-surface-container-low text-pretty" data-design-text-token="body-md">
+          รวมการสร้างต้นแบบและระบบภาพเข้ากับพื้นฐานวิศวกรรม เหมาะกับรอบ 1 Portfolio
+        </p>
+
+        <div class="flex flex-wrap gap-gutter-xs">
+          <span class="px-gutter-sm py-0.5 rounded-full bg-surface border border-outline-variant font-label text-label-sm text-on-surface" data-design-text-token="label-sm">Product Engineer</span>
+          <span class="px-gutter-sm py-0.5 rounded-full bg-surface border border-outline-variant font-label text-label-sm text-on-surface" data-design-text-token="label-sm">UX Technologist</span>
+        </div>
+
+        <button type="button" data-lock-btn="1" class="w-full inline-flex items-center justify-center px-gutter-lg py-3 rounded-full bg-primary text-on-primary font-label text-label-lg">
+          <span data-th="✓ ล็อกเส้นทางแล้ว" data-en="✓ Destination Locked" data-design-text-token="label-lg">✓ ล็อกเส้นทางแล้ว</span>
+        </button>
+      </article>
+
+      <!-- Destination Card 2 -->
+      <article data-component-id="card-action" data-component-type="card" data-component-variant="action" data-destination-card="2" class="flex flex-col gap-gutter-md p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant">
+        <header class="flex items-center justify-between gap-gutter-sm">
+          <span data-th="ตรงกัน 89%" data-en="89% Match" class="inline-flex items-center px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums" data-design-text-token="metric-md">
+            ตรงกัน 89%
+          </span>
+          <span data-th="สหวิทยาการ" data-en="Interdisciplinary" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">สหวิทยาการ</span>
+        </header>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <h2 data-th="เทคโนโลยีสร้างสรรค์ &amp; นวัตกรรม" data-en="Creative Technology &amp; Innovation" class="font-headline text-title-lg text-on-surface" data-design-text-token="title-lg">
+            เทคโนโลยีสร้างสรรค์ &amp; นวัตกรรม
+          </h2>
+          <span data-th="ธรรมศาสตร์ • TCAS 1–3" data-en="Thammasat • TCAS 1–3" class="font-label text-label-sm text-secondary-text" data-design-text-token="label-sm">ธรรมศาสตร์ • TCAS 1–3</span>
+        </div>
+
+        <p data-th="เน้นซอฟต์แวร์เพื่อผู้ใช้และต้นแบบสตาร์ทอัป ด้วยแผน 6 ชม./สัปดาห์" data-en="Focuses on human-centered software and startup prototyping at a 6 hr/week pace." class="font-body text-body-md text-on-surface-variant p-gutter-sm rounded-lg bg-surface-container-low text-pretty" data-design-text-token="body-md">
+          เน้นซอฟต์แวร์เพื่อผู้ใช้และต้นแบบสตาร์ทอัป ด้วยแผน 6 ชม./สัปดาห์
+        </p>
+
+        <button type="button" data-lock-btn="2" class="w-full inline-flex items-center justify-center px-gutter-lg py-3 rounded-full bg-surface-container-low text-on-surface border border-outline-variant font-label text-label-lg">
+          <span data-th="ล็อกเส้นทางนี้ →" data-en="Lock In Destination →" data-design-text-token="label-lg">ล็อกเส้นทางนี้ →</span>
+        </button>
+      </article>
+
+      <!-- Destination Card 3 -->
+      <article data-component-id="card-action" data-component-type="card" data-component-variant="action" data-destination-card="3" class="flex flex-col gap-gutter-md p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant">
+        <header class="flex items-center justify-between gap-gutter-sm">
+          <span data-th="ตรงกัน 84%" data-en="84% Match" class="inline-flex items-center px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums" data-design-text-token="metric-md">
+            ตรงกัน 84%
+          </span>
+          <span data-th="สายดีไซน์" data-en="Design-First" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">สายดีไซน์</span>
+        </header>
+
+        <div class="flex flex-col gap-gutter-xs">
+          <h2 data-th="ออกแบบอุตสาหกรรม &amp; UX" data-en="Industrial &amp; Interaction Design" class="font-headline text-title-lg text-on-surface" data-design-text-token="title-lg">
+            ออกแบบอุตสาหกรรม &amp; UX
+          </h2>
+          <span data-th="มจธ. / จุฬาฯ • TCAS 1 &amp; 2" data-en="KMUTT / Chulalongkorn • TCAS 1 &amp; 2" class="font-label text-label-sm text-secondary-text" data-design-text-token="label-sm">มจธ. / จุฬาฯ • TCAS 1 &amp; 2</span>
+        </div>
+
+        <p data-th="เน้นงานคราฟต์และระบบผลิตภัณฑ์กายภาพ-ดิจิทัล ลดน้ำหนักสอบคณิต" data-en="Prioritizes visual craft and physical-digital product systems with lighter math weightings." class="font-body text-body-md text-on-surface-variant p-gutter-sm rounded-lg bg-surface-container-low text-pretty" data-design-text-token="body-md">
+          เน้นงานคราฟต์และระบบผลิตภัณฑ์กายภาพ-ดิจิทัล ลดน้ำหนักสอบคณิต
+        </p>
+
+        <button type="button" data-lock-btn="3" class="w-full inline-flex items-center justify-center px-gutter-lg py-3 rounded-full bg-surface-container-low text-on-surface border border-outline-variant font-label text-label-lg">
+          <span data-th="ล็อกเส้นทางนี้ →" data-en="Lock In Destination →" data-design-text-token="label-lg">ล็อกเส้นทางนี้ →</span>
+        </button>
+      </article>
+
+      <!-- Other Options Worth Exploring -->
+      <section class="flex flex-col gap-gutter-md pt-gutter-md border-t border-outline-variant">
+        <div class="flex flex-col gap-gutter-xs">
+          <span data-th="ตัวเลือกข้างเคียงและแผนสำรอง" data-en="Adjacent &amp; Backup Options" class="font-label text-label-sm text-secondary-text uppercase tracking-wider" data-design-text-token="label-sm">ตัวเลือกข้างเคียงและแผนสำรอง</span>
+          <h2 data-th="เส้นทางอื่น ๆ ที่น่าสนใจ" data-en="Other Paths to Explore" class="font-headline text-title-lg text-on-surface" data-design-text-token="title-lg">
+            เส้นทางอื่น ๆ ที่น่าสนใจ
+          </h2>
+          <p data-th="สาขาทางเลือกที่ยังเข้ากับโปรไฟล์ของคุณ" data-en="Broader or specialized alternatives that still fit your profile." class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+            สาขาทางเลือกที่ยังเข้ากับโปรไฟล์ของคุณ
+          </p>
+        </div>
+
+        <!-- Destination Card 4 -->
+        <article data-component-id="card-action" data-component-type="card" data-component-variant="action" data-destination-card="4" class="flex flex-col gap-gutter-md p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant">
+          <header class="flex items-center justify-between gap-gutter-sm">
+            <span data-th="ตรงกัน 79%" data-en="79% Match" class="inline-flex items-center px-gutter-sm py-0.5 rounded-full bg-surface-container-low text-on-surface font-metric text-metric-md tabular-nums" data-design-text-token="metric-md">
+              ตรงกัน 79%
+            </span>
+            <span data-th="โอกาสติดสูง" data-en="High Acceptance" class="inline-flex items-center px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label text-label-sm" data-design-text-token="label-sm">
+              โอกาสติดสูง
+            </span>
+          </header>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <h3 data-th="ธุรกิจดิจิทัล &amp; วิเคราะห์ข้อมูล" data-en="Digital Business &amp; Analytics" class="font-headline text-title-lg text-on-surface" data-design-text-token="title-lg">
+              ธุรกิจดิจิทัล &amp; วิเคราะห์ข้อมูล
+            </h3>
+            <span data-th="ธรรมศาสตร์ / เกษตรฯ • TCAS 2 &amp; 3" data-en="Thammasat / Kasetsart • TCAS 2 &amp; 3" class="font-label text-label-sm text-secondary-text" data-design-text-token="label-sm">ธรรมศาสตร์ / เกษตรฯ • TCAS 2 &amp; 3</span>
+          </div>
+
+          <p data-th="ผสานกลยุทธ์ผลิตภัณฑ์กับการวิเคราะห์ข้อมูล และรับรอบ 3 กว้าง" data-en="Combines product strategy with data storytelling and broader TCAS 3 admission seats." class="font-body text-body-md text-on-surface-variant p-gutter-sm rounded-lg bg-surface-container-low text-pretty" data-design-text-token="body-md">
+            ผสานกลยุทธ์ผลิตภัณฑ์กับการวิเคราะห์ข้อมูล และรับรอบ 3 กว้าง
+          </p>
+
+          <button type="button" data-lock-btn="4" class="w-full inline-flex items-center justify-center px-gutter-lg py-3 rounded-full bg-surface-container-low text-on-surface border border-outline-variant font-label text-label-lg">
+            <span data-th="ล็อกเส้นทางนี้ →" data-en="Lock In Destination →" data-design-text-token="label-lg">ล็อกเส้นทางนี้ →</span>
+          </button>
+        </article>
+
+        <!-- Destination Card 5 -->
+        <article data-component-id="card-action" data-component-type="card" data-component-variant="action" data-destination-card="5" class="flex flex-col gap-gutter-md p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant">
+          <header class="flex items-center justify-between gap-gutter-sm">
+            <span data-th="ตรงกัน 76%" data-en="76% Match" class="inline-flex items-center px-gutter-sm py-0.5 rounded-full bg-surface-container-low text-on-surface font-metric text-metric-md tabular-nums" data-design-text-token="metric-md">
+              ตรงกัน 76%
+            </span>
+            <span data-th="นานาชาติ" data-en="International" class="inline-flex items-center px-gutter-sm py-0.5 rounded-full bg-tertiary-container text-on-tertiary-container font-label text-label-sm" data-design-text-token="label-sm">
+              นานาชาติ
+            </span>
+          </header>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <h3 data-th="วิศวกรรมสารสนเทศ (ISE)" data-en="Info &amp; Communication Eng." class="font-headline text-title-lg text-on-surface" data-design-text-token="title-lg">
+              วิศวกรรมสารสนเทศ (ISE)
+            </h3>
+            <span data-th="จุฬาฯ (นานาชาติ) • TCAS 1" data-en="Chulalongkorn (ISE) • TCAS 1" class="font-label text-label-sm text-secondary-text" data-design-text-token="label-sm">จุฬาฯ (นานาชาติ) • TCAS 1</span>
+          </div>
+
+          <p data-th="หลักสูตรภาษาอังกฤษ ใช้ Portfolio + SAT/IELTS แทนการสอบ A-Level" data-en="English-taught engineering track using portfolio and SAT/IELTS instead of A-Levels." class="font-body text-body-md text-on-surface-variant p-gutter-sm rounded-lg bg-surface-container-low text-pretty" data-design-text-token="body-md">
+            หลักสูตรภาษาอังกฤษ ใช้ Portfolio + SAT/IELTS แทนการสอบ A-Level
+          </p>
+
+          <button type="button" data-lock-btn="5" class="w-full inline-flex items-center justify-center px-gutter-lg py-3 rounded-full bg-surface-container-low text-on-surface border border-outline-variant font-label text-label-lg">
+            <span data-th="ล็อกเส้นทางนี้ →" data-en="Lock In Destination →" data-design-text-token="label-lg">ล็อกเส้นทางนี้ →</span>
+          </button>
+        </article>
+
+        <!-- Destination Card 6 -->
+        <article data-component-id="card-action" data-component-type="card" data-component-variant="action" data-destination-card="6" class="flex flex-col gap-gutter-md p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant">
+          <header class="flex items-center justify-between gap-gutter-sm">
+            <span data-th="ตรงกัน 72%" data-en="72% Match" class="inline-flex items-center px-gutter-sm py-0.5 rounded-full bg-surface-container-low text-on-surface font-metric text-metric-md tabular-nums" data-design-text-token="metric-md">
+              ตรงกัน 72%
+            </span>
+            <span data-th="สายสร้างสรรค์" data-en="Creative Wildcard" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">สายสร้างสรรค์</span>
+          </header>
+
+          <div class="flex flex-col gap-gutter-xs">
+            <h3 data-th="สื่ออินเทอร์แอกทีฟ &amp; เกม" data-en="Interactive Media &amp; Game Design" class="font-headline text-title-lg text-on-surface" data-design-text-token="title-lg">
+              สื่ออินเทอร์แอกทีฟ &amp; เกม
+            </h3>
+            <span data-th="มจธ. / มหิดล • TCAS 1 &amp; 2" data-en="KMUTT / Mahidol • TCAS 1 &amp; 2" class="font-label text-label-sm text-secondary-text" data-design-text-token="label-sm">มจธ. / มหิดล • TCAS 1 &amp; 2</span>
+          </div>
+
+          <p data-th="ต่อยอดทักษะต้นแบบสู่งานภาพ Motion และการเล่าเรื่องแบบโต้ตอบ" data-en="Channels your prototyping energy into visual experiences and interactive storytelling." class="font-body text-body-md text-on-surface-variant p-gutter-sm rounded-lg bg-surface-container-low text-pretty" data-design-text-token="body-md">
+            ต่อยอดทักษะต้นแบบสู่งานภาพ Motion และการเล่าเรื่องแบบโต้ตอบ
+          </p>
+
+          <button type="button" data-lock-btn="6" class="w-full inline-flex items-center justify-center px-gutter-lg py-3 rounded-full bg-surface-container-low text-on-surface border border-outline-variant font-label text-label-lg">
+            <span data-th="ล็อกเส้นทางนี้ →" data-en="Lock In Destination →" data-design-text-token="label-lg">ล็อกเส้นทางนี้ →</span>
+          </button>
+        </article>
+      </section>
+
+    </main>
+
+    <!-- Accuracy Footer -->
+    <footer class="w-full border-t border-outline-variant bg-surface px-gutter-md py-gutter-md">
+      <p data-th="โปรดตรวจสอบเกณฑ์ค่าน้ำหนัก TCAS อย่างเป็นทางการที่ mytcas.com" data-en="Verify official yearly TCAS weightings on mytcas.com" class="font-label text-label-sm text-on-surface-variant text-center" data-design-text-token="label-sm">
+        โปรดตรวจสอบเกณฑ์ค่าน้ำหนัก TCAS อย่างเป็นทางการที่ mytcas.com
+      </p>
+    </footer>
+
+  </div>
+
+  <script>
+    (function () {
+      var currentLang = 'th';
+      var selectedId = '1';
+      var cards = document.querySelectorAll('[data-destination-card]');
+      var buttons = document.querySelectorAll('[data-lock-btn]');
+
+      function renderLockLabels() {
+        buttons.forEach(function (b) {
+          var isSelected = b.getAttribute('data-lock-btn') === selectedId;
+          b.querySelector('span').textContent = isSelected
+            ? (currentLang === 'th' ? '✓ ล็อกเส้นทางแล้ว' : '✓ Destination Locked')
+            : (currentLang === 'th' ? 'ล็อกเส้นทางนี้ →' : 'Lock In Destination →');
+        });
+      }
+
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          selectedId = btn.getAttribute('data-lock-btn');
+          cards.forEach(function (c) {
+            var isSelected = c.getAttribute('data-destination-card') === selectedId;
+            c.classList.toggle('border-2', isSelected);
+            c.classList.toggle('border-primary', isSelected);
+            c.classList.toggle('border', !isSelected);
+            c.classList.toggle('border-outline-variant', !isSelected);
+          });
+          buttons.forEach(function (b) {
+            var isSelected = b.getAttribute('data-lock-btn') === selectedId;
+            b.classList.toggle('bg-primary', isSelected);
+            b.classList.toggle('text-on-primary', isSelected);
+            b.classList.toggle('bg-surface-container-low', !isSelected);
+            b.classList.toggle('text-on-surface', !isSelected);
+          });
+          renderLockLabels();
+        });
+      });
+
+      function setLang(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang;
+        document.querySelectorAll('[data-th][data-en]').forEach(function (el) {
+          el.textContent = el.getAttribute('data-' + lang);
+        });
+        document.querySelectorAll('[data-lang-btn]').forEach(function (b) {
+          var active = b.getAttribute('data-lang-btn') === lang;
+          b.classList.toggle('bg-primary', active);
+          b.classList.toggle('text-on-primary', active);
+          b.classList.toggle('text-on-surface-variant', !active);
+        });
+        renderLockLabels();
+      }
+      document.querySelectorAll('[data-lang-btn]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          setLang(b.getAttribute('data-lang-btn'));
+        });
+      });
+    })();
+  </script>
+
+
+</body></html>
