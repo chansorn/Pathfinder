@@ -1,0 +1,21 @@
+/* =========================================================================
+ * PathFinder — 1. Base Typography & Material Symbols
+ * Section 2.1 of the original stylesheet.
+ * Load order: base.css > transitions.css > components.css > visualizers.css
+ * ========================================================================= */
+
+/* [CSS 2.1] Base Typography & Material Symbols */
+html, body { font-family: 'Google Sans', sans-serif; }
+.material-symbols-outlined {
+  display: inline-block; width: 1em; height: 1em; line-height: 1 !important;
+  box-sizing: content-box; overflow: hidden; white-space: nowrap; direction: ltr; vertical-align: middle;
+}
+
+/* [CSS 2.1b] Static styles moved out of inline style="" attributes (values unchanged) */
+.material-symbols-outlined.pf-icon-fill { font-variation-settings: 'FILL' 1; }
+.pf-swatch-terracotta { background: #D98A4E; }
+.pf-conic-rainbow { background: conic-gradient(#ef4444, #eab308, #22c55e, #06b6d4, #3b82f6, #a855f7, #ef4444); }
+/* Initial bar widths; JS overwrites them later via element.style.width */
+#desktop-progress-fill { width: 33%; }
+#readiness-bar { width: 50%; }
+#sim-chance-bar { width: 75%; }

@@ -1,0 +1,2024 @@
+<!DOCTYPE html>
+<!-- =========================================================================
+     PATHFINDER — TCAS ADMISSION GPS (Modular Clean Edition, multi-file)
+     =========================================================================
+     index.html               HTML structure only (this file)
+     tailwind.config.js       Tailwind CDN theme (colors, spacing, type scale)
+     css/base.css             1. Base typography & Material Symbols
+     css/transitions.css      2. Blur-free hover, ripple, TH/EN bubble, page/modal motion
+     css/components.css       3. Curved dropdowns, liquid tab bar & icon pills
+     css/visualizers.css      4. University river, offer swipe deck & card themes
+     data/uni-logos.js        Inline (base64) preloaded university logos
+     data/catalog.js          Static catalogs: majors, TCAS70 calendar, round work
+     js/state-i18n.js         PF_STATE, curved dropdowns, SPA router, TH/EN i18n
+     js/discovery-matches.js  Hero tabs, 3-step wizard, AI matcher, GPAX, scoring
+     js/roadmap.js            TCAS roadmap, /api/my-plan + local fallback, drawers
+     js/visualizers.js        Liquid tab pill, swipe deck, uni river, pixel badges
+     js/sim-coach.js          State persistence, score simulator, AI coach
+     js/auth-analytics-profile.js  PF_STORAGE, PF_ANALYTICS, PF_AUTH, PF_PROFILE_UI, init
+
+     All scripts are classic scripts sharing one global scope; keep the order.
+     Relative asset fallbacks (../../images/unis/, ../../images/badges/) are
+     resolved against this file, so index.html must stay in this folder.
+     ========================================================================= -->
+<html lang="th">
+<head>
+  <!-- ==================== [1] HEAD: META, TAILWIND, FONTS, CSS ==================== -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PathFinder — Modular &amp; Clean Edition</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script src="tailwind.config.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/transitions.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/visualizers.css">
+</head>
+<body class="pf-vibrant-bg text-on-surface antialiased">
+  <!-- Preloaded university logos: recreates the hidden #pf-uni-preload <div> right here -->
+  <script src="data/uni-logos.js"></script>
+  <div id="uni-river-bg" class="uni-river-bg" aria-hidden="true"></div>
+  <aside id="uni-hover-card" role="tooltip" aria-hidden="true" class="p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant shadow-xl flex flex-col gap-gutter-xs"></aside>
+  <div id="uni-link-toast" role="dialog" aria-hidden="true" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[min(92vw,460px)] p-gutter-md rounded-xl bg-surface-container-lowest border border-primary shadow-xl flex flex-col gap-gutter-xs"></div>
+  <div class="pf-shell min-h-[1024px] flex flex-col justify-between relative z-10" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+  <!-- #region [HTML 3.1] Top Sticky Header & User Account Menu -->
+    <!-- Persistent Prototype Header -->
+    <header class="w-full border-b border-outline-variant bg-surface sticky top-0 z-40">
+      <div class="max-w-[1200px] mx-auto px-gutter-md md:px-gutter-xl py-3 md:py-gutter-md flex items-center justify-between gap-2 sm:gap-gutter-md">
+        <!-- Logo -->
+        <button type="button" data-go-page="1" class="flex items-center gap-1.5 sm:gap-gutter-sm shrink-0 rounded-sm px-1 py-0.5">
+          <svg width="28" height="28" viewBox="0 0 34 34" fill="none" aria-hidden="true" class="shrink-0 sm:w-8 sm:h-8">
+            <path d="M7 5C7 3.89543 7.89543 3 9 3H25C26.1046 3 27 3.89543 27 5V30L17 24.5L7 30V5Z" fill="#1F3A3D"></path>
+            <circle cx="17" cy="14" r="5.5" stroke="#FAF9F6" stroke-width="1.5"></circle>
+            <path d="M19.5 11.5L17.9 15.6L14.5 16.5L16.1 12.4L19.5 11.5Z" fill="#D98A4E"></path>
+          </svg>
+          <span class="font-headline text-title-md sm:text-title-lg text-on-surface tracking-tight" data-design-text-token="title-lg">PathFinder</span>
+        </button>
+
+        <!-- Prototype Flow Icon Tabs (Icon-only until hover or chosen) -->
+        <nav aria-label="Prototype pages" class="hidden lg:flex items-center gap-1 p-1 rounded-full bg-surface-container-low border border-outline-variant">
+          <button type="button" data-page-pill="1" data-go-page="1" class="icon-collapse-tab inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-primary text-on-primary font-label text-label-sm">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">home</span>
+            <span class="tab-label" data-th="หน้าแรก" data-en="Home">หน้าแรก</span>
+          </button>
+          <button type="button" data-page-pill="2" data-go-page="2" class="icon-collapse-tab inline-flex items-center justify-center px-3 py-1.5 rounded-full text-on-surface-variant font-label text-label-sm">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">explore</span>
+            <span class="tab-label" data-th="ค้นหาตัวตน" data-en="Discovery">ค้นหาตัวตน</span>
+          </button>
+          <button type="button" data-page-pill="3" data-go-page="3" class="icon-collapse-tab inline-flex items-center justify-center px-3 py-1.5 rounded-full text-on-surface-variant font-label text-label-sm">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">school</span>
+            <span class="tab-label" data-th="คณะที่ใช่" data-en="Matches">คณะที่ใช่</span>
+          </button>
+          <button type="button" data-page-pill="4" data-go-page="4" class="icon-collapse-tab inline-flex items-center justify-center px-3 py-1.5 rounded-full text-on-surface-variant font-label text-label-sm">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">alt_route</span>
+            <span class="tab-label" data-th="แผน TCAS" data-en="Roadmap">แผน TCAS</span>
+          </button>
+          <button type="button" data-page-pill="7" data-go-page="7" class="icon-collapse-tab inline-flex items-center justify-center px-3 py-1.5 rounded-full text-on-surface-variant font-label text-label-sm">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">insights</span>
+            <span class="tab-label" data-th="วิเคราะห์ผล" data-en="Analytics">วิเคราะห์ผล</span>
+          </button>
+        </nav>
+
+        <!-- Right Controls: Sliding TH/EN Bubble + Auth/Profile + Primary Action -->
+        <div class="flex items-center gap-1.5 sm:gap-gutter-sm shrink-0">
+          <div id="lang-switch" data-active-lang="th" role="group" aria-label="Language" class="lang-switch">
+            <span class="lang-thumb" aria-hidden="true"></span>
+            <button type="button" data-lang-btn="th" class="inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1 rounded-full text-on-primary font-label text-label-sm">
+              <svg width="14" height="10" viewBox="0 0 18 12" fill="none" aria-hidden="true" class="shrink-0 rounded-sm">
+                <rect width="18" height="12" fill="#A51931"></rect>
+                <rect y="2" width="18" height="8" fill="#F4F5F8"></rect>
+                <rect y="4" width="18" height="4" fill="#2D2A4A"></rect>
+              </svg>
+              <span>TH</span>
+            </button>
+            <button type="button" data-lang-btn="en" class="inline-flex items-center justify-center gap-1 px-2 sm:px-3 py-1 rounded-full text-on-surface-variant font-label text-label-sm">
+              <svg width="14" height="10" viewBox="0 0 18 12" fill="none" aria-hidden="true" class="shrink-0 rounded-sm">
+                <rect width="18" height="12" fill="#012169"></rect>
+                <path d="M0 0L18 12M18 0L0 12" stroke="#FFFFFF" stroke-width="2.2"></path>
+                <path d="M0 0L18 12M18 0L0 12" stroke="#C8102E" stroke-width="1.1"></path>
+                <path d="M9 0V12M0 6H18" stroke="#FFFFFF" stroke-width="3.2"></path>
+                <path d="M9 0V12M0 6H18" stroke="#C8102E" stroke-width="1.8"></path>
+              </svg>
+              <span>EN</span>
+            </button>
+          </div>
+
+          <!-- Guest Login Button -->
+          <button id="open-auth-btn" type="button" class="inline-flex items-center justify-center gap-1 sm:gap-1.5 px-3 sm:px-gutter-md py-1.5 sm:py-2 rounded-full bg-primary text-on-primary font-label text-label-sm sm:text-label-md whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px] sm:text-[17px]" aria-hidden="true">person</span>
+            <span data-th="เข้าสู่ระบบ" data-en="Login">เข้าสู่ระบบ</span>
+          </button>
+
+          <!-- Logged-In User Profile Pill + Dropdown -->
+          <div id="user-profile-wrap" class="hidden relative">
+            <button id="user-profile-trigger" type="button" aria-expanded="false" aria-haspopup="menu" class="inline-flex items-center gap-1.5 sm:gap-2 pl-1.5 pr-2.5 sm:pr-3 py-1 rounded-full bg-surface-container-low border border-outline-variant text-on-surface font-label text-label-sm sm:text-label-md hover:bg-surface-container">
+              <span id="header-avatar-badge" class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0"></span>
+              <span id="header-user-label" class="font-label text-label-sm sm:text-label-md text-on-surface whitespace-nowrap">Namo • ม.5</span>
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant" aria-hidden="true">expand_more</span>
+            </button>
+
+            <div id="user-menu-dropdown" role="menu" class="hidden absolute right-0 top-full mt-2 w-60 rounded-2xl bg-surface-container-lowest border border-outline-variant shadow-xl p-1.5 z-50 flex flex-col gap-0.5">
+              <div class="px-3 py-2 border-b border-outline-variant mb-1">
+                <p id="dropdown-user-name" class="font-title text-title-md text-on-surface truncate">Namo</p>
+                <p id="dropdown-user-email" class="font-label text-label-sm text-on-surface-variant truncate">demo@pathfinder.ac.th</p>
+              </div>
+              <button id="menu-open-profile" type="button" role="menuitem" class="w-full px-3 py-2 rounded-xl text-left hover:bg-surface-container-low flex items-center gap-2 font-label text-label-md text-on-surface">
+                <span class="material-symbols-outlined text-[18px] text-primary" aria-hidden="true">manage_accounts</span>
+                <span data-th="โปรไฟล์ของฉัน" data-en="My Profile">โปรไฟล์ของฉัน</span>
+              </button>
+              <button id="menu-open-analytics" type="button" role="menuitem" data-go-page="7" class="w-full px-3 py-2 rounded-xl text-left hover:bg-surface-container-low flex items-center gap-2 font-label text-label-md text-on-surface">
+                <span class="material-symbols-outlined text-[18px] text-secondary-text" aria-hidden="true">insights</span>
+                <span data-th="วิเคราะห์พัฒนาการ" data-en="Analytics Dashboard">วิเคราะห์พัฒนาการ</span>
+              </button>
+              <button id="menu-save-snapshot" type="button" role="menuitem" class="w-full px-3 py-2 rounded-xl text-left hover:bg-surface-container-low flex items-center gap-2 font-label text-label-md text-on-surface">
+                <span class="material-symbols-outlined text-[18px] text-primary" aria-hidden="true">bookmark_add</span>
+                <span data-th="บันทึกข้อมูลตอนนี้" data-en="Save Snapshot">บันทึกข้อมูลตอนนี้</span>
+              </button>
+              <div class="my-1 border-t border-outline-variant"></div>
+              <button id="menu-logout" type="button" role="menuitem" class="w-full px-3 py-2 rounded-xl text-left hover:bg-tertiary-container/50 flex items-center gap-2 font-label text-label-md text-on-surface">
+                <span class="material-symbols-outlined text-[18px] text-on-surface-variant" aria-hidden="true">logout</span>
+                <span data-th="ออกจากระบบ" data-en="Logout">ออกจากระบบ</span>
+              </button>
+            </div>
+          </div>
+
+          <button type="button" data-go-page="2" class="hidden sm:inline-flex items-center justify-center gap-1.5 px-gutter-lg py-2 rounded-full bg-surface-container-low text-on-surface border border-outline-variant font-label text-label-md hover:bg-surface-container">
+            <span class="material-symbols-outlined text-[17px]" aria-hidden="true">rocket_launch</span>
+            <span data-th="เริ่มวางแผน" data-en="Start Planning" data-design-text-token="label-md">เริ่มวางแผน</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile/Tablet Compact Quick Nav Bar (375px–1023px) -->
+      <div class="lg:hidden border-t border-outline-variant bg-surface-container-low/80 px-gutter-md py-1.5 flex items-center justify-start md:justify-center gap-1.5 overflow-x-auto">
+        <button type="button" data-page-pill="1" data-go-page="1" class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary text-on-primary font-label text-label-sm whitespace-nowrap shrink-0">
+          <span class="material-symbols-outlined text-[15px]" aria-hidden="true">home</span>
+          <span data-th="หน้าแรก" data-en="Home">หน้าแรก</span>
+        </button>
+        <button type="button" data-page-pill="2" data-go-page="2" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-on-surface-variant font-label text-label-sm whitespace-nowrap shrink-0">
+          <span class="material-symbols-outlined text-[15px]" aria-hidden="true">explore</span>
+          <span data-th="ค้นหาตัวตน" data-en="Discovery">ค้นหาตัวตน</span>
+        </button>
+        <button type="button" data-page-pill="3" data-go-page="3" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-on-surface-variant font-label text-label-sm whitespace-nowrap shrink-0">
+          <span class="material-symbols-outlined text-[15px]" aria-hidden="true">school</span>
+          <span data-th="คณะที่ใช่" data-en="Matches">คณะที่ใช่</span>
+        </button>
+        <button type="button" data-page-pill="4" data-go-page="4" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-on-surface-variant font-label text-label-sm whitespace-nowrap shrink-0">
+          <span class="material-symbols-outlined text-[15px]" aria-hidden="true">alt_route</span>
+          <span data-th="แผน TCAS" data-en="Roadmap">แผน TCAS</span>
+        </button>
+        <button type="button" data-page-pill="7" data-go-page="7" class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-on-surface-variant font-label text-label-sm whitespace-nowrap shrink-0">
+          <span class="material-symbols-outlined text-[15px]" aria-hidden="true">insights</span>
+          <span data-th="วิเคราะห์ผล" data-en="Analytics">วิเคราะห์ผล</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Non-intrusive Guest Save Banner -->
+    <div id="guest-save-banner" class="w-full bg-secondary-container/60 border-b border-outline-variant">
+      <div class="max-w-[1200px] mx-auto px-gutter-md md:px-gutter-xl py-2 flex flex-wrap items-center justify-between gap-gutter-sm">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] text-secondary-text shrink-0" aria-hidden="true">cloud_sync</span>
+          <span data-th="โหมดผู้เยี่ยมชม: เข้าสู่ระบบเพื่อบันทึกแผนและติดตามกราฟพัฒนาการ TCAS" data-en="Guest Mode: Sign in to save your roadmap &amp; track longitudinal TCAS analytics" class="font-label text-label-sm text-on-surface">โหมดผู้เยี่ยมชม: เข้าสู่ระบบเพื่อบันทึกแผนและติดตามกราฟพัฒนาการ TCAS</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="banner-open-auth-btn" type="button" class="px-3 py-1 rounded-full bg-primary text-on-primary font-label text-label-sm" data-th="เข้าสู่ระบบ / ทดลองบัญชีตัวอย่าง" data-en="Login / Try Demo">เข้าสู่ระบบ / ทดลองบัญชีตัวอย่าง</button>
+          <button id="dismiss-guest-banner-btn" type="button" aria-label="Dismiss banner" class="w-6 h-6 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">close</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  <!-- #endregion -->
+
+  <!-- #region [HTML 3.2] Page 1: Hero Landing -->
+    <!-- ==================== [HTML 3.2] PAGE 1: HERO LANDING ==================== -->
+    <main data-page-view="1" class="flex-1 w-full max-w-[1200px] mx-auto px-gutter-xl py-section flex items-center page-enter">
+      <section class="w-full grid grid-cols-1 lg:grid-cols-12 gap-gutter-xl items-center">
+
+        <div class="lg:col-span-6 flex flex-col items-start gap-gutter-lg pr-0 lg:pr-gutter-lg">
+          <span class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-container-low border border-outline-variant text-on-surface font-label text-label-md">
+            <span class="w-2 h-2 rounded-full bg-secondary" aria-hidden="true"></span>
+            <span data-th="แผนเส้นทางคณะและอาชีพ • TCAS 1–4" data-en="University &amp; Career Roadmap • TCAS 1–4" data-design-text-token="label-md">แผนเส้นทางคณะและอาชีพ • TCAS 1–4</span>
+          </span>
+
+          <div class="flex flex-col gap-gutter-md">
+            <h1 data-th="ค้นหาเส้นทางมหาวิทยาลัยที่เหมาะกับตัวคุณจริง ๆ" data-en="Find the university path that actually fits you." class="font-headline text-display-lg text-on-surface text-balance" data-design-text-token="display-lg">
+              ค้นหาเส้นทางมหาวิทยาลัยที่เหมาะกับตัวคุณจริง ๆ
+            </h1>
+            <p data-th="สำรวจคณะและสายอาชีพที่ตรงกับความถนัดของคุณ พร้อมสร้าง Portfolio ที่โดดเด่นเกินกว่าเกรด 4.00 และจัดตารางเตรียมตัวครบทั้ง 4 รอบ TCAS ตั้งแต่ม.4–ม.6 แบบไม่กดดัน" data-en="Discover the majors and careers aligned with your natural strengths, and build a portfolio that stands out beyond a 4.00 GPA. Organize every TCAS round from M.4 to M.6 at a steady, stress-free pace." class="font-body text-body-lg text-on-surface-variant text-pretty max-w-prose" data-design-text-token="body-lg">
+              สำรวจคณะและสายอาชีพที่ตรงกับความถนัดของคุณ พร้อมสร้าง Portfolio ที่โดดเด่นเกินกว่าเกรด 4.00 และจัดตารางเตรียมตัวครบทั้ง 4 รอบ TCAS ตั้งแต่ม.4–ม.6 แบบไม่กดดัน
+            </p>
+          </div>
+
+          <!-- Flowing Lime Pill Tab Bar (3 states + trailing droplet + label fade) -->
+          <div class="flex flex-wrap items-center gap-gutter-md">
+            <div id="hero-flow-bar" role="tablist" aria-label="Quick start destinations" class="flow-tab-bar">
+              <span id="hero-flow-pill" class="flow-pill" aria-hidden="true"></span>
+              <span id="hero-flow-droplet" class="flow-droplet" aria-hidden="true"></span>
+
+              <button type="button" role="tab" aria-selected="true" data-flow-idx="0" data-flow-page="2" class="flow-tab-btn icon-collapse-tab inline-flex items-center justify-center px-4 py-2.5 rounded-full text-on-surface font-label text-label-md">
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">explore</span>
+                <span class="flow-label tab-label" data-th="ค้นหาตัวตน" data-en="Discover" data-design-text-token="label-md">ค้นหาตัวตน</span>
+              </button>
+
+              <button type="button" role="tab" aria-selected="false" data-flow-idx="1" data-flow-page="3" class="flow-tab-btn icon-collapse-tab inline-flex items-center justify-center px-3.5 py-2.5 rounded-full text-on-primary font-label text-label-md">
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">school</span>
+                <span class="flow-label tab-label" data-th="คณะแนะนำ" data-en="Majors" data-design-text-token="label-md">คณะแนะนำ</span>
+              </button>
+
+              <button type="button" role="tab" aria-selected="false" data-flow-idx="2" data-flow-page="4" class="flow-tab-btn icon-collapse-tab inline-flex items-center justify-center px-3.5 py-2.5 rounded-full text-on-primary font-label text-label-md">
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">alt_route</span>
+                <span class="flow-label tab-label" data-th="แผน TCAS" data-en="Roadmap" data-design-text-token="label-md">แผน TCAS</span>
+              </button>
+            </div>
+
+            <button id="hero-flow-launch" type="button" data-go-page="2" class="inline-flex items-center gap-1.5 px-gutter-md py-2.5 rounded-full bg-surface-container-low border border-outline-variant text-on-surface font-label text-label-md hover:bg-surface-container">
+              <span data-th="ไปหน้านี้" data-en="Open View" data-design-text-token="label-md">ไปหน้านี้</span>
+              <span class="material-symbols-outlined text-[17px]" aria-hidden="true">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6">
+          <article class="flex flex-col gap-gutter-lg p-gutter-xl rounded-xl bg-surface-container-low border border-outline-variant">
+            <header class="flex items-start justify-between gap-gutter-md pb-gutter-md border-b border-outline-variant">
+              <div class="flex flex-col gap-gutter-xs">
+                <span data-th="เป้าหมายหลัก" data-en="Destination" class="font-label text-label-sm text-secondary-text uppercase tracking-wider" data-design-text-token="label-sm">เป้าหมายหลัก</span>
+                <h2 data-th="วิศวกรรมคอมพิวเตอร์ &amp; ออกแบบผลิตภัณฑ์" data-en="Computer Engineering &amp; Product Design" class="font-headline text-headline-md text-on-surface" data-design-text-token="headline-md">
+                  วิศวกรรมคอมพิวเตอร์ &amp; ออกแบบผลิตภัณฑ์
+                </h2>
+              </div>
+              <span class="inline-flex items-center gap-1 px-gutter-md py-gutter-xs rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums shrink-0" data-design-text-token="metric-md">
+                <span class="material-symbols-outlined text-[15px] text-secondary-text pf-icon-fill" aria-hidden="true">check_circle</span>
+                <span data-th="ตรงกัน 94%" data-en="94% Match">ตรงกัน 94%</span>
+              </span>
+            </header>
+
+            <div class="grid grid-cols-3 gap-gutter-xs">
+              <div class="p-gutter-sm rounded-lg bg-surface-container-lowest border border-outline-variant flex flex-col gap-0.5">
+                <span data-th="เกณฑ์ GPAX" data-en="Min GPAX" class="font-label text-label-sm text-on-surface-variant">เกณฑ์ GPAX</span>
+                <span class="font-metric text-metric-md text-on-surface tabular-nums">3.25+</span>
+              </div>
+              <div class="p-gutter-sm rounded-lg bg-surface-container-lowest border border-outline-variant flex flex-col gap-0.5">
+                <span data-th="ค่าน้ำหนักหลัก" data-en="Key Weight" class="font-label text-label-sm text-on-surface-variant">ค่าน้ำหนักหลัก</span>
+                <span class="font-metric text-metric-md text-on-surface tabular-nums">TGAT + TPAT3</span>
+              </div>
+              <div class="p-gutter-sm rounded-lg bg-surface-container-lowest border border-outline-variant flex flex-col gap-0.5">
+                <span data-th="เอกสารรอบ 1" data-en="Round 1" class="font-label text-label-sm text-on-surface-variant">เอกสารรอบ 1</span>
+                <span data-th="Portfolio 10 หน้า" data-en="10-Page Port" class="font-metric text-metric-md text-on-surface tabular-nums">Portfolio 10 หน้า</span>
+              </div>
+            </div>
+
+            <div role="tablist" aria-label="TCAS Rounds Preview" class="flex items-center justify-between gap-gutter-xs p-1 rounded-lg bg-surface-container-lowest border border-outline-variant">
+              <button type="button" role="tab" aria-selected="true" data-hero-tab="hr1" class="icon-collapse-tab inline-flex items-center justify-center px-gutter-sm py-2 rounded-sm bg-primary text-on-primary font-label text-label-sm">
+                <span class="material-symbols-outlined text-[15px]" aria-hidden="true">folder_special</span>
+                <span class="tab-label" data-th="รอบ 1 Portfolio" data-en="Round 1">รอบ 1 Portfolio</span>
+              </button>
+              <button type="button" role="tab" aria-selected="false" data-hero-tab="hr2" class="icon-collapse-tab inline-flex items-center justify-center px-gutter-sm py-2 rounded-sm text-on-surface-variant font-label text-label-sm">
+                <span class="material-symbols-outlined text-[15px]" aria-hidden="true">verified</span>
+                <span class="tab-label" data-th="รอบ 2 Quota" data-en="Round 2">รอบ 2 Quota</span>
+              </button>
+              <button type="button" role="tab" aria-selected="false" data-hero-tab="hr3" class="icon-collapse-tab inline-flex items-center justify-center px-gutter-sm py-2 rounded-sm text-on-surface-variant font-label text-label-sm">
+                <span class="material-symbols-outlined text-[15px]" aria-hidden="true">quiz</span>
+                <span class="tab-label" data-th="รอบ 3 Admission" data-en="Round 3">รอบ 3 Admission</span>
+              </button>
+              <button type="button" role="tab" aria-selected="false" data-hero-tab="hr4" class="icon-collapse-tab inline-flex items-center justify-center px-gutter-sm py-2 rounded-sm text-on-surface-variant font-label text-label-sm">
+                <span class="material-symbols-outlined text-[15px]" aria-hidden="true">event_available</span>
+                <span class="tab-label" data-th="รอบ 4 รับตรง" data-en="Round 4">รอบ 4 รับตรง</span>
+              </button>
+            </div>
+
+            <div data-round-panel="hr1" class="flex flex-col gap-gutter-sm">
+              <div class="flex items-start justify-between gap-gutter-md p-gutter-md rounded-lg bg-surface-container-lowest border border-outline-variant">
+                <div class="flex items-start gap-gutter-sm">
+                  <span class="material-symbols-outlined text-[20px] text-secondary-text mt-0.5 pf-icon-fill" aria-hidden="true">check_circle</span>
+                  <div class="flex flex-col gap-0.5">
+                    <span data-th="รวบรวม 3 โปรเจกต์ต้นแบบ (Case Studies)" data-en="Curate 3 Interactive Prototype Case Studies" class="font-title text-title-md text-on-surface">รวบรวม 3 โปรเจกต์ต้นแบบ (Case Studies)</span>
+                    <span data-th="สรุปโจทย์ปัญหา ภาพร่าง และผลทดสอบจากผู้ใช้จริง" data-en="Document problem framing, sketches, and user feedback" class="font-body text-body-md text-on-surface-variant">สรุปโจทย์ปัญหา ภาพร่าง และผลทดสอบจากผู้ใช้จริง</span>
+                  </div>
+                </div>
+                <span data-th="เสร็จแล้ว" data-en="Done" class="font-metric text-metric-md text-secondary-text shrink-0">เสร็จแล้ว</span>
+              </div>
+              <div class="flex items-start justify-between gap-gutter-md p-gutter-md rounded-lg bg-tertiary-container border border-outline-variant">
+                <div class="flex items-start gap-gutter-sm">
+                  <span class="material-symbols-outlined text-[20px] text-tertiary-text mt-0.5" aria-hidden="true">radio_button_unchecked</span>
+                  <div class="flex flex-col gap-0.5">
+                    <span data-th="ร่าง Statement of Purpose และ Portfolio 10 หน้า" data-en="Draft 10-Page Statement of Purpose" class="font-title text-title-md text-on-tertiary-container">ร่าง Statement of Purpose และ Portfolio 10 หน้า</span>
+                    <span data-th="เชื่อมโยงผลงานสายดีไซน์และวิศวกรรมให้เห็นชัด" data-en="Highlight interdisciplinary design &amp; engineering bridge" class="font-body text-body-md text-on-tertiary-container">เชื่อมโยงผลงานสายดีไซน์และวิศวกรรมให้เห็นชัด</span>
+                  </div>
+                </div>
+                <span data-th="ถัดไป" data-en="Next up" class="font-label text-label-sm text-tertiary-text shrink-0">ถัดไป</span>
+              </div>
+            </div>
+
+            <div data-round-panel="hr2" class="hidden flex flex-col gap-gutter-sm">
+              <div class="flex items-start justify-between gap-gutter-md p-gutter-md rounded-lg bg-surface-container-lowest border border-outline-variant">
+                <div class="flex items-start gap-gutter-sm">
+                  <span class="material-symbols-outlined text-[20px] text-secondary-text mt-0.5 pf-icon-fill" aria-hidden="true">check_circle</span>
+                  <div class="flex flex-col gap-0.5">
+                    <span data-th="เช็กสิทธิ์โควตาพื้นที่และโควตาโรงเรียน" data-en="Verify Regional &amp; School Quota Eligibility" class="font-title text-title-md text-on-surface">เช็กสิทธิ์โควตาพื้นที่และโควตาโรงเรียน</span>
+                    <span data-th="ตรวจสอบเกณฑ์ GPAX และหน่วยกิตวิชาบังคับ" data-en="Confirm GPAX threshold and required subject credits" class="font-body text-body-md text-on-surface-variant">ตรวจสอบเกณฑ์ GPAX และหน่วยกิตวิชาบังคับ</span>
+                  </div>
+                </div>
+                <span data-th="เสร็จแล้ว" data-en="Done" class="font-metric text-metric-md text-secondary-text shrink-0">เสร็จแล้ว</span>
+              </div>
+            </div>
+
+            <div data-round-panel="hr3" class="hidden flex flex-col gap-gutter-sm">
+              <div class="flex items-start justify-between gap-gutter-md p-gutter-md rounded-lg bg-surface-container-lowest border border-outline-variant">
+                <div class="flex items-start gap-gutter-sm">
+                  <span class="material-symbols-outlined text-[20px] text-secondary-text mt-0.5 pf-icon-fill" aria-hidden="true">check_circle</span>
+                  <div class="flex flex-col gap-0.5">
+                    <span data-th="วางแผนค่าน้ำหนัก TGAT &amp; TPAT3" data-en="Map TGAT &amp; TPAT3 Weightings" class="font-title text-title-md text-on-surface">วางแผนค่าน้ำหนัก TGAT &amp; TPAT3</span>
+                    <span data-th="แบ่งเวลาอ่าน 6 ชม./สัปดาห์ ต่อเนื่อง 8 เดือน" data-en="Allocated 6 calm study hours/week across 8 months" class="font-body text-body-md text-on-surface-variant">แบ่งเวลาอ่าน 6 ชม./สัปดาห์ ต่อเนื่อง 8 เดือน</span>
+                  </div>
+                </div>
+                <span data-th="เสร็จแล้ว" data-en="Done" class="font-metric text-metric-md text-secondary-text shrink-0">เสร็จแล้ว</span>
+              </div>
+            </div>
+
+            <div data-round-panel="hr4" class="hidden flex flex-col gap-gutter-sm">
+              <div class="flex items-start justify-between gap-gutter-md p-gutter-md rounded-lg bg-surface-container-lowest border border-outline-variant">
+                <div class="flex items-start gap-gutter-sm">
+                  <span class="material-symbols-outlined text-[20px] text-tertiary-text mt-0.5" aria-hidden="true">radio_button_unchecked</span>
+                  <div class="flex flex-col gap-0.5">
+                    <span data-th="เตรียมวันรับตรงอิสระสำรองไว้" data-en="Keep Backup Direct Admission Dates Ready" class="font-title text-title-md text-on-surface">เตรียมวันรับตรงอิสระสำรองไว้</span>
+                    <span data-th="ติดตามที่นั่งว่างบน mytcas.com ช่วงปลายพฤษภาคม" data-en="Monitor mytcas.com open seats in late May" class="font-body text-body-md text-on-surface-variant">ติดตามที่นั่งว่างบน mytcas.com ช่วงปลายพฤษภาคม</span>
+                  </div>
+                </div>
+                <span data-th="สำรอง" data-en="Standby" class="font-label text-label-sm text-tertiary-text shrink-0">สำรอง</span>
+              </div>
+            </div>
+
+            <footer class="flex items-center justify-between gap-gutter-md pt-gutter-sm border-t border-outline-variant">
+              <span data-th="ทำเสร็จแล้ว 2 จาก 3 เป้าหมาย • จังหวะกำลังดี" data-en="2 of 3 milestones completed • Steady pace" class="font-label text-label-sm text-on-surface-variant">
+                ทำเสร็จแล้ว 2 จาก 3 เป้าหมาย • จังหวะกำลังดี
+              </span>
+              <button type="button" data-go-page="4" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-container-lowest border border-outline-variant text-on-surface font-label text-label-sm">
+                <span class="material-symbols-outlined text-[15px] text-tertiary-text" aria-hidden="true">alt_route</span>
+                <span data-th="เปิดแผนเต็ม" data-en="Open Roadmap">เปิดแผนเต็ม</span>
+              </button>
+            </footer>
+          </article>
+        </div>
+
+      </section>
+    </main>
+
+  <!-- #endregion -->
+
+  <!-- #region [HTML 3.3] Page 2: Discovery Intake (3-Step Wizard) -->
+    <!-- ==================== [HTML 3.3] PAGE 2: DISCOVERY INTAKE ==================== -->
+    <main data-page-view="2" class="hidden flex-1 w-full max-w-[760px] mx-auto px-gutter-xl py-section flex flex-col gap-gutter-xl">
+      <div class="flex items-center justify-between">
+        <button type="button" data-go-page="1" class="inline-flex items-center gap-gutter-xs font-label text-label-md text-on-surface-variant hover:text-on-surface px-2 py-1 rounded-full">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
+          <span data-th="กลับหน้าแรก" data-en="Back to Home">กลับหน้าแรก</span>
+        </button>
+        <span id="desktop-step-badge" class="inline-flex items-center px-gutter-md py-gutter-xs rounded-full bg-surface-container-low border border-outline-variant font-metric text-metric-md text-on-surface tabular-nums">
+          ขั้นที่ 1 / 3
+        </span>
+      </div>
+
+      <!-- Minimal Progress Tab (Icon-only until hover or chosen) -->
+      <section class="flex flex-col gap-gutter-sm">
+        <div class="flex items-center justify-center gap-1 p-1 rounded-full bg-surface-container-low border border-outline-variant self-center">
+          <button type="button" data-step-nav="1" class="icon-collapse-tab inline-flex items-center justify-center py-2 px-gutter-md rounded-full bg-primary text-on-primary font-label text-label-md">
+            <span class="material-symbols-outlined text-[17px]" aria-hidden="true">interests</span>
+            <span class="tab-label" data-th="ความสนใจ" data-en="Interests">ความสนใจ</span>
+          </button>
+          <button type="button" data-step-nav="2" class="icon-collapse-tab inline-flex items-center justify-center py-2 px-gutter-md rounded-full text-on-surface-variant font-label text-label-md">
+            <span class="material-symbols-outlined text-[17px]" aria-hidden="true">school</span>
+            <span class="tab-label" data-th="พื้นฐานการเรียน" data-en="Baseline">พื้นฐานการเรียน</span>
+          </button>
+          <button type="button" data-step-nav="3" class="icon-collapse-tab inline-flex items-center justify-center py-2 px-gutter-md rounded-full text-on-surface-variant font-label text-label-md">
+            <span class="material-symbols-outlined text-[17px]" aria-hidden="true">flag</span>
+            <span class="tab-label" data-th="เป้าหมายและเวลา" data-en="Target &amp; Pace">เป้าหมายและเวลา</span>
+          </button>
+        </div>
+
+        <div class="w-full h-1 rounded-full bg-surface-container overflow-hidden">
+          <div id="desktop-progress-fill" class="h-full rounded-full bg-secondary transition-[width] duration-500 ease-out"></div>
+        </div>
+      </section>
+
+      <section class="p-gutter-xl rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-xl">
+        <!-- Step 1 -->
+        <div data-step-panel="1" class="flex flex-col gap-gutter-lg">
+          <header class="flex flex-col gap-gutter-xs">
+            <span data-th="ขั้นที่ 1 • ความสนใจและความถนัด" data-en="Step 1 • Curiosity &amp; Strengths" class="font-label text-label-sm text-secondary-text uppercase tracking-wider">ขั้นที่ 1 • ความสนใจและความถนัด</span>
+            <h1 data-th="เรื่องไหนหรือโจทย์แบบใดที่ทำให้คุณสนุกเวลาทำ?" data-en="What subjects or problems energize you?" class="font-headline text-headline-lg text-on-surface text-balance">
+              เรื่องไหนหรือโจทย์แบบใดที่ทำให้คุณสนุกเวลาทำ?
+            </h1>
+            <p data-th="คลิกเลือก Bubble ความสนใจ 2–4 ด้านที่คุณชอบ PathFinder จะนำไปจับคู่กับคณะที่ตรงกับคุณ" data-en="Tap 2–4 interest bubbles you naturally enjoy exploring. PathFinder matches these with your best-fit majors." class="font-body text-body-md text-on-surface-variant text-pretty">
+              คลิกเลือก Bubble ความสนใจ 2–4 ด้านที่คุณชอบ PathFinder จะนำไปจับคู่กับคณะที่ตรงกับคุณ
+            </p>
+          </header>
+
+          <div class="flex flex-wrap gap-gutter-sm" role="group" aria-label="Student interests">
+            <button type="button" data-interest-chip data-interest-key="tech-ai" aria-pressed="true" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-primary text-on-primary border border-primary font-label text-label-md">
+              <span class="material-symbols-outlined text-[16px]" aria-hidden="true">check_circle</span>
+              <span data-th="เทคโนโลยี &amp; AI" data-en="Technology &amp; AI">เทคโนโลยี &amp; AI</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="product-ux" aria-pressed="true" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-primary text-on-primary border border-primary font-label text-label-md">
+              <span class="material-symbols-outlined text-[16px]" aria-hidden="true">check_circle</span>
+              <span data-th="ออกแบบผลิตภัณฑ์ &amp; UX" data-en="Product &amp; UX Design">ออกแบบผลิตภัณฑ์ &amp; UX</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="healthcare" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="สุขภาพและการแพทย์" data-en="Healthcare &amp; Medicine">สุขภาพและการแพทย์</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="business" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="ธุรกิจและเศรษฐศาสตร์" data-en="Business &amp; Economics">ธุรกิจและเศรษฐศาสตร์</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="robotics" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="วิศวกรรมและหุ่นยนต์" data-en="Engineering &amp; Robotics">วิศวกรรมและหุ่นยนต์</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="media" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="สื่อ ภาพยนตร์ &amp; เล่าเรื่อง" data-en="Media, Film &amp; Storytelling">สื่อ ภาพยนตร์ &amp; เล่าเรื่อง</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="data-research" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="ข้อมูลและงานวิจัย" data-en="Data &amp; Quant Research">ข้อมูลและงานวิจัย</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="law-policy" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="กฎหมายและนโยบาย" data-en="Law &amp; Public Policy">กฎหมายและนโยบาย</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="arch-design" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="สถาปัตยกรรมและเมือง" data-en="Architecture &amp; Urban Design">สถาปัตยกรรมและเมือง</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="bio-env" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="ชีววิทยาและสิ่งแวดล้อม" data-en="Bio &amp; Sustainability">ชีววิทยาและสิ่งแวดล้อม</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="psych-edtech" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="จิตวิทยาและการศึกษา" data-en="Psychology &amp; EdTech">จิตวิทยาและการศึกษา</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="global-lang" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="ภาษาและกิจการระหว่างประเทศ" data-en="Global &amp; Languages">ภาษาและกิจการระหว่างประเทศ</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="game-interactive" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="เกมและอินเทอร์แอคทีฟ" data-en="Game &amp; Interactive Media">เกมและอินเทอร์แอคทีฟ</span>
+            </button>
+            <button type="button" data-interest-chip data-interest-key="finance-quant" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md">
+              <span data-th="การเงินและการลงทุน" data-en="Finance &amp; Investing">การเงินและการลงทุน</span>
+            </button>
+          </div>
+
+          <!-- Custom Interest Search Bar + AI Summary & Smart Matcher -->
+          <div class="flex flex-col gap-gutter-sm p-gutter-md rounded-xl bg-surface-container-low border border-outline-variant">
+            <div class="flex items-center gap-gutter-xs">
+              <span class="material-symbols-outlined text-[18px] text-secondary-text" aria-hidden="true">search</span>
+              <label for="custom-interest-input" data-th="ไม่เจอวิชาหรือด้านที่ชอบ? พิมพ์สิ่งที่คุณสนใจ ให้ AI ช่วยสรุปและจับคู่คณะให้" data-en="Don&#39;t see your interest? Type what you enjoy and let AI summarize &amp; match majors" class="font-label text-label-md text-on-surface">
+                ไม่เจอวิชาหรือด้านที่ชอบ? พิมพ์สิ่งที่คุณสนใจ ให้ AI ช่วยสรุปและจับคู่คณะให้
+              </label>
+            </div>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-gutter-xs">
+              <input id="custom-interest-input" type="text" data-th-placeholder="เช่น ชอบตัดต่อวิดีโอ ทำเกม ลงทุนหุ้น จิตวิทยา หรือช่วยรักษาคน..." data-en-placeholder="e.g. video editing, game dev, stock investing, psychology, medicine..." placeholder="เช่น ชอบตัดต่อวิดีโอ ทำเกม ลงทุนหุ้น จิตวิทยา หรือช่วยรักษาคน..." class="flex-1 px-gutter-md py-2.5 rounded-full bg-surface-container-lowest border border-outline-variant font-body text-body-md text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+              <button id="custom-interest-analyze-btn" type="button" class="inline-flex items-center justify-center gap-1.5 px-gutter-lg py-2.5 rounded-full bg-primary text-on-primary font-label text-label-md shrink-0">
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true">auto_awesome</span>
+                <span data-th="AI วิเคราะห์ความสนใจ" data-en="AI Analyze &amp; Match">AI วิเคราะห์ความสนใจ</span>
+              </button>
+            </div>
+            <div id="ai-interest-summary" class="p-gutter-sm rounded-lg bg-surface-container-lowest border border-outline-variant flex items-start gap-gutter-xs">
+              <span class="material-symbols-outlined text-[18px] text-secondary-text shrink-0 mt-0.5 pf-icon-fill" aria-hidden="true">psychology</span>
+              <div class="flex flex-col gap-0.5">
+                <span class="font-label text-label-sm text-secondary-text" data-th="สรุปความสนใจโดย AI" data-en="AI Interest Summary">สรุปความสนใจโดย AI</span>
+                <p id="ai-interest-summary-text" class="font-body text-label-md text-on-surface-variant" data-th="กำลังจับคู่จากความสนใจ: เทคโนโลยี &amp; AI, ออกแบบผลิตภัณฑ์ &amp; UX — เหมาะกับสายวิศวกรรมคอมพิวเตอร์และนวัตกรรมดิจิทัล" data-en="Matched from your interests: Technology &amp; AI, Product &amp; UX Design — strong fit for Computer Engineering &amp; Digital Innovation.">
+                  กำลังจับคู่จากความสนใจ: เทคโนโลยี &amp; AI, ออกแบบผลิตภัณฑ์ &amp; UX — เหมาะกับสายวิศวกรรมคอมพิวเตอร์และนวัตกรรมดิจิทัล
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div data-step-panel="2" class="hidden flex flex-col gap-gutter-lg">
+          <header class="flex flex-col gap-gutter-xs">
+            <span data-th="ขั้นที่ 2 • พื้นฐานการเรียน" data-en="Step 2 • Academic Baseline" class="font-label text-label-sm text-secondary-text uppercase tracking-wider">ขั้นที่ 2 • พื้นฐานการเรียน</span>
+            <h1 data-th="ตอนนี้คุณกำลังเรียนอยู่ระดับชั้นไหน?" data-en="Where are you in your high school journey?" class="font-headline text-headline-lg text-on-surface text-balance">
+              ตอนนี้คุณกำลังเรียนอยู่ระดับชั้นไหน?
+            </h1>
+          </header>
+
+          <div class="grid grid-cols-3 gap-gutter-sm">
+            <button type="button" data-grade-pill data-grade-key="M.4" class="py-3 px-gutter-md rounded-lg border border-outline-variant bg-surface font-label text-label-lg text-on-surface"><span data-th="ม.4 (Grade 10)" data-en="M.4 (Grade 10)">ม.4 (Grade 10)</span></button>
+            <button type="button" data-grade-pill data-grade-key="M.5" class="py-3 px-gutter-md rounded-lg border border-primary bg-primary text-on-primary font-label text-label-lg"><span data-th="ม.5 (Grade 11)" data-en="M.5 (Grade 11)">ม.5 (Grade 11)</span></button>
+            <button type="button" data-grade-pill data-grade-key="M.6" class="py-3 px-gutter-md rounded-lg border border-outline-variant bg-surface font-label text-label-lg text-on-surface"><span data-th="ม.6 (Grade 12)" data-en="M.6 (Grade 12)">ม.6 (Grade 12)</span></button>
+          </div>
+
+          <div class="flex flex-col gap-gutter-sm p-gutter-md rounded-lg bg-surface-container-low">
+            <div class="flex items-center justify-between gap-gutter-sm">
+              <label for="gpax-slider" data-th="เกรดเฉลี่ยสะสม (GPAX)" data-en="Current Cumulative GPAX" class="font-label text-label-md text-on-surface">เกรดเฉลี่ยสะสม (GPAX)</label>
+              <span id="gpax-value" class="px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums">3.75</span>
+            </div>
+            <input id="gpax-slider" type="range" min="2.00" max="4.00" step="0.05" value="3.75" class="w-full accent-primary cursor-pointer">
+          </div>
+
+          <!-- Beyond 4.00 Mode Toggle Card (Warm Sand / Muted Terracotta) -->
+          <div id="beyond-mode-card" class="flex items-start justify-between gap-gutter-md p-gutter-md rounded-lg bg-tertiary-container border border-outline-variant">
+            <div class="flex flex-col gap-1">
+              <div class="flex flex-wrap items-center gap-gutter-xs">
+                <span class="material-symbols-outlined text-[18px] text-tertiary-text pf-icon-fill" aria-hidden="true">auto_awesome</span>
+                <span data-th="โหมด Beyond 4.00" data-en="Beyond 4.00 Mode" class="font-title text-title-md text-on-tertiary-container">โหมด Beyond 4.00</span>
+                <span id="beyond-auto-badge" class="hidden px-2 py-0.5 rounded-full bg-surface-container-lowest border border-outline-variant font-label text-label-sm text-tertiary-text" data-th="เปิดอัตโนมัติ (GPAX ≥ 3.80)" data-en="Auto-enabled (GPAX ≥ 3.80)">เปิดอัตโนมัติ (GPAX ≥ 3.80)</span>
+              </div>
+              <p data-th="เพิ่มโปรเจกต์สร้างความแตกต่างและผลงานเชิงลึกสำหรับผู้ยื่นคะแนนสูงหรือรอบ Portfolio ที่เกรดอย่างเดียวไม่พอ" data-en="Adds standout differentiation projects for high-GPAX &amp; Portfolio applicants where grades alone aren’t enough." class="font-body text-label-md text-on-tertiary-container/90">
+                เพิ่มโปรเจกต์สร้างความแตกต่างและผลงานเชิงลึกสำหรับผู้ยื่นคะแนนสูงหรือรอบ Portfolio ที่เกรดอย่างเดียวไม่พอ
+              </p>
+            </div>
+            <button id="beyond-toggle" type="button" role="switch" aria-checked="true" class="shrink-0 inline-flex items-center gap-1.5 px-gutter-md py-1.5 rounded-full bg-primary text-on-primary font-label text-label-sm">
+              <span class="material-symbols-outlined text-[15px]" aria-hidden="true">check_circle</span>
+              <span id="beyond-toggle-label" data-th="เปิดอยู่" data-en="On">เปิดอยู่</span>
+            </button>
+          </div>
+
+          <!-- Baseline View Option: University Alone vs Card Shuffle (Swipe Up = Accept, Swipe Down = Ignore) -->
+          <div class="flex flex-col gap-gutter-md pt-gutter-sm border-t border-outline-variant">
+            <div class="flex flex-wrap items-center justify-between gap-gutter-sm">
+              <span data-th="รูปแบบการแสดงผลลัพธ์เบื้องต้น" data-en="Baseline Preview Mode" class="font-label text-label-md text-on-surface">รูปแบบการแสดงผลลัพธ์เบื้องต้น</span>
+              <div class="inline-flex items-center gap-1 p-1 rounded-full bg-surface-container-low border border-outline-variant">
+                <button type="button" data-baseline-mode="university" class="icon-collapse-tab inline-flex items-center justify-center px-gutter-md py-1.5 rounded-full bg-primary text-on-primary font-label text-label-sm">
+                  <span class="material-symbols-outlined text-[15px]" aria-hidden="true">account_balance</span>
+                  <span class="tab-label" data-th="เฉพาะมหาวิทยาลัย" data-en="University Only">เฉพาะมหาวิทยาลัย</span>
+                </button>
+                <button type="button" data-baseline-mode="shuffle" class="icon-collapse-tab inline-flex items-center justify-center px-gutter-md py-1.5 rounded-full text-on-surface-variant font-label text-label-sm">
+                  <span class="material-symbols-outlined text-[15px]" aria-hidden="true">style</span>
+                  <span class="tab-label" data-th="Card Shuffle (ปัดขึ้น/ลง)" data-en="Card Shuffle (Swipe ↑/↓)">Card Shuffle (ปัดขึ้น/ลง)</span>
+                </button>
+              </div>
+            </div>
+
+            <div id="baseline-preview-deck"></div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div data-step-panel="3" class="hidden flex flex-col gap-gutter-lg">
+          <header class="flex flex-col gap-gutter-xs">
+            <span data-th="ขั้นที่ 3 • เป้าหมายและจังหวะเวลา" data-en="Step 3 • Destination &amp; Pace" class="font-label text-label-sm text-secondary-text uppercase tracking-wider">ขั้นที่ 3 • เป้าหมายและจังหวะเวลา</span>
+            <h1 data-th="เลือกมหาวิทยาลัยเป้าหมายและชั่วโมงอ่านหนังสือต่อสัปดาห์" data-en="Set your target campus &amp; weekly study pace" class="font-headline text-headline-lg text-on-surface text-balance">
+              เลือกมหาวิทยาลัยเป้าหมายและชั่วโมงอ่านหนังสือต่อสัปดาห์
+            </h1>
+          </header>
+
+          <div class="flex flex-wrap gap-gutter-sm" role="group" aria-label="Target universities">
+            <button type="button" data-interest-chip data-uni-key="cu" aria-pressed="true" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary border border-primary font-label text-label-md"><span class="material-symbols-outlined text-[16px]" aria-hidden="true">check_circle</span><span data-th="จุฬาลงกรณ์มหาวิทยาลัย (CU)" data-en="Chulalongkorn (CU)">จุฬาลงกรณ์มหาวิทยาลัย (CU)</span></button>
+            <button type="button" data-interest-chip data-uni-key="kmutt" aria-pressed="true" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary border border-primary font-label text-label-md"><span class="material-symbols-outlined text-[16px]" aria-hidden="true">check_circle</span><span data-th="มจธ. บางมด (KMUTT)" data-en="KMUTT">มจธ. บางมด (KMUTT)</span></button>
+            <button type="button" data-interest-chip data-uni-key="tu" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface border border-outline-variant text-on-surface font-label text-label-md"><span data-th="ธรรมศาสตร์ (TU)" data-en="Thammasat (TU)">ธรรมศาสตร์ (TU)</span></button>
+            <button type="button" data-interest-chip data-uni-key="mu" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface border border-outline-variant text-on-surface font-label text-label-md"><span data-th="มหิดล (MU)" data-en="Mahidol (MU)">มหิดล (MU)</span></button>
+            <button type="button" data-interest-chip data-uni-key="ku" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface border border-outline-variant text-on-surface font-label text-label-md"><span data-th="เกษตรศาสตร์ (KU)" data-en="Kasetsart (KU)">เกษตรศาสตร์ (KU)</span></button>
+            <button type="button" data-interest-chip data-uni-key="kmitl" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface border border-outline-variant text-on-surface font-label text-label-md"><span data-th="สจล. ลาดกระบัง (KMITL)" data-en="KMITL">สจล. ลาดกระบัง (KMITL)</span></button>
+            <button type="button" data-interest-chip data-uni-key="cmu" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface border border-outline-variant text-on-surface font-label text-label-md"><span data-th="เชียงใหม่ (CMU)" data-en="Chiang Mai (CMU)">เชียงใหม่ (CMU)</span></button>
+            <button type="button" data-interest-chip data-uni-key="kku" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface border border-outline-variant text-on-surface font-label text-label-md"><span data-th="ขอนแก่น (KKU)" data-en="Khon Kaen (KKU)">ขอนแก่น (KKU)</span></button>
+            <button type="button" data-interest-chip data-uni-key="su" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface border border-outline-variant text-on-surface font-label text-label-md"><span data-th="ศิลปากร (SU)" data-en="Silpakorn (SU)">ศิลปากร (SU)</span></button>
+            <button type="button" data-interest-chip data-uni-key="swu" aria-pressed="false" class="pf-bubble inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface border border-outline-variant text-on-surface font-label text-label-md"><span data-th="มศว ประสานมิตร (SWU)" data-en="SWU">มศว ประสานมิตร (SWU)</span></button>
+          </div>
+
+          <div class="flex flex-col gap-gutter-sm p-gutter-md rounded-lg bg-surface-container-low">
+            <div class="flex flex-wrap items-center justify-between gap-gutter-sm">
+              <label for="hours-slider" data-th="เวลาเตรียมตัว &amp; ทำโปรเจกต์ต่อสัปดาห์" data-en="Weekly Study &amp; Project Pace" class="font-label text-label-md text-on-surface">เวลาเตรียมตัว &amp; ทำโปรเจกต์ต่อสัปดาห์</label>
+              <span id="hours-value" class="px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums">6 ชม./สัปดาห์ • จังหวะกำลังดี</span>
+            </div>
+            <input id="hours-slider" type="range" min="2" max="25" step="1" value="6" class="w-full accent-primary cursor-pointer">
+          </div>
+
+          <div id="journey-summary-strip" class="p-gutter-md rounded-lg bg-surface-container-low border border-outline-variant flex flex-wrap items-center justify-between gap-gutter-sm"></div>
+        </div>
+
+        <footer class="pt-gutter-md border-t border-outline-variant flex items-center justify-between gap-gutter-md">
+          <button id="desktop-prev-btn" type="button" disabled class="inline-flex items-center justify-center gap-gutter-xs px-gutter-lg py-3 rounded-full border border-outline-variant bg-surface-container text-on-surface-variant font-label text-label-lg cursor-not-allowed">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
+            <span data-th="ย้อนกลับ" data-en="Previous">ย้อนกลับ</span>
+          </button>
+
+          <button id="desktop-next-btn" type="button" class="inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-3 rounded-full bg-primary text-on-primary font-label text-label-lg hover:bg-on-primary-container">
+            <span id="desktop-next-label">ถัดไป: พื้นฐานการเรียน →</span>
+          </button>
+        </footer>
+      </section>
+    </main>
+
+  <!-- #endregion -->
+
+  <!-- #region [HTML 3.4] Page 3: Major Matches -->
+    <!-- ==================== [HTML 3.4] PAGE 3: MAJOR MATCHES ==================== -->
+    <main data-page-view="3" class="hidden flex-1 w-full max-w-[1200px] mx-auto px-gutter-xl py-section flex flex-col gap-gutter-xl">
+      <section class="flex flex-col md:flex-row md:items-end justify-between gap-gutter-lg pb-gutter-lg border-b border-outline-variant">
+        <div class="flex flex-col gap-gutter-sm max-w-2xl">
+          <button type="button" data-go-page="2" class="self-start inline-flex items-center gap-gutter-xs font-label text-label-md text-on-surface-variant hover:text-on-surface px-2 py-1 rounded-full">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
+            <span data-th="แก้ไขข้อมูลพื้นฐาน" data-en="Edit Baseline">แก้ไขข้อมูลพื้นฐาน</span>
+          </button>
+          <h1 data-th="3 เส้นทางคณะและอาชีพที่ใช่ที่สุดสำหรับคุณ" data-en="Your Top 3 University &amp; Career Paths" class="font-headline text-headline-lg text-on-surface text-balance">
+            3 เส้นทางคณะและอาชีพที่ใช่ที่สุดสำหรับคุณ
+          </h1>
+          <p data-th="เลือกเส้นทางที่ชอบเพื่อเข้าสู่แผน TCAS 1–4 และจุดเด่น Beyond 4.00 ของสาขานั้นทันที" data-en="Lock in any destination below to jump straight into its TCAS 1–4 and Beyond 4.00 roadmap." class="font-body text-body-md text-on-surface-variant text-pretty">
+            เลือกเส้นทางที่ชอบเพื่อเข้าสู่แผน TCAS 1–4 และจุดเด่น Beyond 4.00 ของสาขานั้นทันที
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-gutter-xs shrink-0">
+          <span id="matches-profile-pill" class="px-gutter-sm py-1 rounded-full bg-surface-container-low border border-outline-variant font-metric text-label-sm text-on-surface tabular-nums">ม.5 • GPAX 3.75 • 6 ชม./สัปดาห์</span>
+          <span id="matches-beyond-pill" data-th="Beyond 4.00 เปิดอยู่" data-en="Beyond 4.00 On" class="px-gutter-sm py-1 rounded-full bg-tertiary-container text-on-tertiary-container font-label text-label-sm">Beyond 4.00 เปิดอยู่</span>
+        </div>
+      </section>
+
+      <!-- TCAS68 Filter & Quick Score Bar -->
+      <section class="p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-wrap items-center justify-between gap-gutter-md">
+        <div class="flex flex-wrap items-center gap-gutter-xs">
+          <button type="button" data-match-filter="all" aria-pressed="true" class="px-gutter-md py-1.5 rounded-full bg-primary text-on-primary font-label text-label-sm">
+            <span data-th="ทั้งหมด" data-en="All Zones">ทั้งหมด</span>
+          </button>
+          <button type="button" data-match-filter="safe" aria-pressed="false" class="px-gutter-md py-1.5 rounded-full bg-surface-container-low text-on-surface font-label text-label-sm">
+            <span data-th="โซนปลอดภัย (Safe)" data-en="Safe Zone">โซนปลอดภัย (Safe)</span>
+          </button>
+          <button type="button" data-match-filter="portfolio" aria-pressed="false" class="px-gutter-md py-1.5 rounded-full bg-surface-container-low text-on-surface font-label text-label-sm">
+            <span data-th="เด่นรอบ 1 Portfolio" data-en="Round 1 Portfolio">เด่นรอบ 1 Portfolio</span>
+          </button>
+        </div>
+        <div class="flex items-center gap-gutter-sm">
+          <span class="font-metric text-label-sm text-secondary-text tabular-nums" data-th="คะแนนจำลองล่าสุด: 74.50 / 100" data-en="Simulated Score: 74.50 / 100" id="matches-sim-badge">คะแนนจำลองล่าสุด: 74.50 / 100</span>
+          <button type="button" data-go-page="5" class="inline-flex items-center gap-1 px-gutter-md py-1.5 rounded-full bg-secondary-container text-on-secondary-container font-label text-label-sm">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">tune</span>
+            <span data-th="จำลองคะแนน TCAS" data-en="Simulate Score">จำลองคะแนน TCAS</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Top 3 -->
+      <section id="matches-top3-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-gutter-lg items-stretch">
+        <article data-destination-card="1" data-uni-theme="cu-eng" class="h-full flex flex-col justify-between gap-gutter-lg p-gutter-lg rounded-xl bg-surface-container-lowest border-2 border-primary">
+          <div class="flex flex-col gap-gutter-md">
+            <header class="flex items-start justify-between gap-gutter-sm">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums">
+                  <span class="material-symbols-outlined text-[15px] text-secondary-text pf-icon-fill" aria-hidden="true">check_circle</span>
+                  <span data-th="ตรงกัน 94%" data-en="94% Match">ตรงกัน 94%</span>
+                </span>
+                <span data-th="เหมาะกับ Portfolio" data-en="Top Portfolio Fit" class="px-gutter-sm py-1 rounded-full bg-tertiary-container text-on-tertiary-container font-label text-label-sm">เหมาะกับ Portfolio</span>
+              </div>
+              <a href="https://www.chula.ac.th/" target="_blank" rel="noopener noreferrer" data-uni-link="cu" title="Chulalongkorn University" aria-label="Chulalongkorn University" class="w-10 h-10 rounded-xl bg-surface-container-lowest border border-outline-variant p-1 flex items-center justify-center shadow-sm shrink-0 hover:border-primary transition-colors">
+                <img data-uni-logo="cu" alt="Chulalongkorn University" class="w-full h-full object-contain">
+              </a>
+            </header>
+            <div class="flex flex-col gap-gutter-xs">
+              <h2 data-th="วิศวกรรมคอมพิวเตอร์ &amp; ออกแบบผลิตภัณฑ์" data-en="Computer Engineering &amp; Product Design" class="font-headline text-headline-md text-on-surface">วิศวกรรมคอมพิวเตอร์ &amp; ออกแบบผลิตภัณฑ์</h2>
+              <span data-th="จุฬาฯ / มจธ. (KMUTT) • TCAS 1 &amp; 3" data-en="Chulalongkorn / KMUTT • TCAS 1 &amp; 3" class="font-label text-label-md text-secondary-text">จุฬาฯ / มจธ. (KMUTT) • TCAS 1 &amp; 3</span>
+            </div>
+            <div class="grid grid-cols-2 gap-gutter-xs">
+              <div class="p-gutter-sm rounded-lg bg-surface-container-low flex flex-col gap-0.5">
+                <span data-th="เกณฑ์รอบ 1 / GPAX" data-en="Round 1 / GPAX" class="font-label text-label-sm text-on-surface-variant">เกณฑ์รอบ 1 / GPAX</span>
+                <span class="font-metric text-label-md text-on-surface tabular-nums">Portfolio • 3.25+</span>
+              </div>
+              <div class="p-gutter-sm rounded-lg bg-surface-container-low flex flex-col gap-0.5">
+                <span data-th="ค่าน้ำหนักรอบ 3" data-en="Round 3 Weight" class="font-label text-label-sm text-on-surface-variant">ค่าน้ำหนักรอบ 3</span>
+                <span class="font-metric text-label-md text-on-surface tabular-nums">TGAT 20 • TPAT3 40</span>
+              </div>
+            </div>
+            <p data-th="รวมความชอบด้านการสร้างต้นแบบและระบบภาพเข้ากับพื้นฐานวิศวกรรมที่แข็งแรง โดดเด่นมากในรอบ 1 Portfolio" data-en="Blends prototype building and visual systems with engineering fundamentals—ideal for Round 1 Portfolio." class="p-gutter-md rounded-lg bg-surface-container-low font-body text-body-md text-on-surface-variant">รวมความชอบด้านการสร้างต้นแบบและระบบภาพเข้ากับพื้นฐานวิศวกรรมที่แข็งแรง โดดเด่นมากในรอบ 1 Portfolio</p>
+            <div class="flex flex-col gap-1 pt-gutter-xs border-t border-outline-variant">
+              <span data-th="จุดเด่น Beyond 4.00: 3 โปรเจกต์ต้นแบบ + ผลทดสอบผู้ใช้จริง" data-en="Beyond 4.00 Edge: 3 interactive prototypes + usability notes" class="font-label text-label-sm text-tertiary-text">จุดเด่น Beyond 4.00: 3 โปรเจกต์ต้นแบบ + ผลทดสอบผู้ใช้จริง</span>
+              <span data-th="สายอาชีพ: Product Engineer • UX Architect • Tech Lead" data-en="Careers: Product Engineer • UX Architect • Tech Lead" class="font-label text-label-sm text-on-surface-variant">สายอาชีพ: Product Engineer • UX Architect • Tech Lead</span>
+            </div>
+          </div>
+          <button type="button" data-lock-btn="1" data-major-th="วิศวกรรมคอมพิวเตอร์ &amp; ออกแบบผลิตภัณฑ์" data-major-en="Computer Engineering &amp; Product Design" data-match="94%" class="w-full py-3 rounded-full bg-primary text-on-primary font-label text-label-lg">
+            <span data-th="ล็อกเส้นทางนี้ →" data-en="Lock In Destination →">ล็อกเส้นทางนี้ →</span>
+          </button>
+        </article>
+
+        <article data-destination-card="2" data-uni-theme="tu-tech" class="h-full flex flex-col justify-between gap-gutter-lg p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant">
+          <div class="flex flex-col gap-gutter-md">
+            <header class="flex items-start justify-between gap-gutter-sm">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums">
+                  <span class="material-symbols-outlined text-[15px] text-secondary-text pf-icon-fill" aria-hidden="true">check_circle</span>
+                  <span data-th="ตรงกัน 89%" data-en="89% Match">ตรงกัน 89%</span>
+                </span>
+                <span data-th="สหวิทยาการ" data-en="Interdisciplinary" class="font-label text-label-sm text-on-surface-variant">สหวิทยาการ</span>
+              </div>
+              <a href="https://tu.ac.th/" target="_blank" rel="noopener noreferrer" data-uni-link="tu" title="Thammasat University" aria-label="Thammasat University" class="w-10 h-10 rounded-xl bg-surface-container-lowest border border-outline-variant p-1 flex items-center justify-center shadow-sm shrink-0 hover:border-primary transition-colors">
+                <img data-uni-logo="tu" alt="Thammasat University" class="w-full h-full object-contain">
+              </a>
+            </header>
+            <div class="flex flex-col gap-gutter-xs">
+              <h2 data-th="เทคโนโลยีสร้างสรรค์ &amp; นวัตกรรมดิจิทัล" data-en="Creative Technology &amp; Innovation" class="font-headline text-headline-md text-on-surface">เทคโนโลยีสร้างสรรค์ &amp; นวัตกรรมดิจิทัล</h2>
+              <span data-th="ธรรมศาสตร์ (SIIT / Design) • TCAS 1–3" data-en="Thammasat (SIIT / Design) • TCAS 1–3" class="font-label text-label-md text-secondary-text">ธรรมศาสตร์ (SIIT / Design) • TCAS 1–3</span>
+            </div>
+            <div class="grid grid-cols-2 gap-gutter-xs">
+              <div class="p-gutter-sm rounded-lg bg-surface-container-low flex flex-col gap-0.5">
+                <span data-th="เกณฑ์รอบ 1 / GPAX" data-en="Round 1 / GPAX" class="font-label text-label-sm text-on-surface-variant">เกณฑ์รอบ 1 / GPAX</span>
+                <span data-th="Port + สัมภาษณ์ • 3.00+" data-en="Port + Interview • 3.00+" class="font-metric text-label-md text-on-surface tabular-nums">Port + สัมภาษณ์ • 3.00+</span>
+              </div>
+              <div class="p-gutter-sm rounded-lg bg-surface-container-low flex flex-col gap-0.5">
+                <span data-th="ค่าน้ำหนักรอบ 3" data-en="Round 3 Weight" class="font-label text-label-sm text-on-surface-variant">ค่าน้ำหนักรอบ 3</span>
+                <span data-th="TGAT 40 • คณิต1 30" data-en="TGAT 40 • Math1 30" class="font-metric text-label-md text-on-surface tabular-nums">TGAT 40 • คณิต1 30</span>
+              </div>
+            </div>
+            <p data-th="เน้นซอฟต์แวร์เพื่อผู้ใช้ สื่ออินเทอร์แอกทีฟ และการปั้นต้นแบบสตาร์ทอัป เหมาะกับแผน 6 ชม./สัปดาห์" data-en="Human-centered software, interactive media, and startup prototyping at a steady 6 hr/week pace." class="p-gutter-md rounded-lg bg-surface-container-low font-body text-body-md text-on-surface-variant">เน้นซอฟต์แวร์เพื่อผู้ใช้ สื่ออินเทอร์แอกทีฟ และการปั้นต้นแบบสตาร์ทอัป เหมาะกับแผน 6 ชม./สัปดาห์</p>
+            <div class="flex flex-col gap-1 pt-gutter-xs border-t border-outline-variant">
+              <span data-th="จุดเด่น Beyond 4.00: Hackathon MVP + Pitch Deck" data-en="Beyond 4.00 Edge: Hackathon MVP + Pitch Deck" class="font-label text-label-sm text-tertiary-text">จุดเด่น Beyond 4.00: Hackathon MVP + Pitch Deck</span>
+              <span data-th="สายอาชีพ: Creative Technologist • Product Manager" data-en="Careers: Creative Technologist • Product Manager" class="font-label text-label-sm text-on-surface-variant">สายอาชีพ: Creative Technologist • Product Manager</span>
+            </div>
+          </div>
+          <button type="button" data-lock-btn="2" data-major-th="เทคโนโลยีสร้างสรรค์ &amp; นวัตกรรมดิจิทัล" data-major-en="Creative Technology &amp; Innovation" data-match="89%" class="w-full py-3 rounded-full bg-surface-container-low text-on-surface border border-outline-variant font-label text-label-lg">
+            <span data-th="ล็อกเส้นทางนี้ →" data-en="Lock In Destination →">ล็อกเส้นทางนี้ →</span>
+          </button>
+        </article>
+
+        <article data-destination-card="3" data-uni-theme="kmutt-design" class="h-full flex flex-col justify-between gap-gutter-lg p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant">
+          <div class="flex flex-col gap-gutter-md">
+            <header class="flex items-start justify-between gap-gutter-sm">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums">
+                  <span class="material-symbols-outlined text-[15px] text-secondary-text pf-icon-fill" aria-hidden="true">check_circle</span>
+                  <span data-th="ตรงกัน 84%" data-en="84% Match">ตรงกัน 84%</span>
+                </span>
+                <span data-th="สายดีไซน์" data-en="Design-First" class="font-label text-label-sm text-on-surface-variant">สายดีไซน์</span>
+              </div>
+              <a href="https://www.kmutt.ac.th/" target="_blank" rel="noopener noreferrer" data-uni-link="kmutt" title="KMUTT" aria-label="KMUTT" class="w-10 h-10 rounded-xl bg-surface-container-lowest border border-outline-variant p-1 flex items-center justify-center shadow-sm shrink-0 hover:border-primary transition-colors">
+                <img data-uni-logo="kmutt" alt="KMUTT" class="w-full h-full object-contain">
+              </a>
+            </header>
+            <div class="flex flex-col gap-gutter-xs">
+              <h2 data-th="ออกแบบอุตสาหกรรม &amp; UX" data-en="Industrial Design &amp; UX" class="font-headline text-headline-md text-on-surface">ออกแบบอุตสาหกรรม &amp; UX</h2>
+              <span data-th="มจธ. / จุฬาฯ • TCAS 1 &amp; 2" data-en="KMUTT / Chulalongkorn • TCAS 1 &amp; 2" class="font-label text-label-md text-secondary-text">มจธ. / จุฬาฯ • TCAS 1 &amp; 2</span>
+            </div>
+            <div class="grid grid-cols-2 gap-gutter-xs">
+              <div class="p-gutter-sm rounded-lg bg-surface-container-low flex flex-col gap-0.5">
+                <span data-th="เกณฑ์รอบ 1 / GPAX" data-en="Round 1 / GPAX" class="font-label text-label-sm text-on-surface-variant">เกณฑ์รอบ 1 / GPAX</span>
+                <span class="font-metric text-label-md text-on-surface tabular-nums">Sketch + Port • 3.00+</span>
+              </div>
+              <div class="p-gutter-sm rounded-lg bg-surface-container-low flex flex-col gap-0.5">
+                <span data-th="ค่าน้ำหนักรอบ 3" data-en="Round 3 Weight" class="font-label text-label-sm text-on-surface-variant">ค่าน้ำหนักรอบ 3</span>
+                <span class="font-metric text-label-md text-on-surface tabular-nums">TGAT 50 • TPAT4 50</span>
+              </div>
+            </div>
+            <p data-th="เน้นงานคราฟต์ การออกแบบผลิตภัณฑ์กายภาพ-ดิจิทัล และการเล่าเรื่องผ่าน Portfolio" data-en="Visual craft, physical-digital product systems, and portfolio storytelling with lighter math weightings." class="p-gutter-md rounded-lg bg-surface-container-low font-body text-body-md text-on-surface-variant">เน้นงานคราฟต์ การออกแบบผลิตภัณฑ์กายภาพ-ดิจิทัล และการเล่าเรื่องผ่าน Portfolio</p>
+            <div class="flex flex-col gap-1 pt-gutter-xs border-t border-outline-variant">
+              <span data-th="จุดเด่น Beyond 4.00: สมุดภาพร่าง + ต้นแบบ 3D/Figma" data-en="Beyond 4.00 Edge: Sketchbook + 3D/Figma mockups" class="font-label text-label-sm text-tertiary-text">จุดเด่น Beyond 4.00: สมุดภาพร่าง + ต้นแบบ 3D/Figma</span>
+              <span data-th="สายอาชีพ: UX/UI Designer • Industrial Designer" data-en="Careers: UX/UI Designer • Industrial Designer" class="font-label text-label-sm text-on-surface-variant">สายอาชีพ: UX/UI Designer • Industrial Designer</span>
+            </div>
+          </div>
+          <button type="button" data-lock-btn="3" data-major-th="ออกแบบอุตสาหกรรม &amp; UX" data-major-en="Industrial Design &amp; UX" data-match="84%" class="w-full py-3 rounded-full bg-surface-container-low text-on-surface border border-outline-variant font-label text-label-lg">
+            <span data-th="ล็อกเส้นทางนี้ →" data-en="Lock In Destination →">ล็อกเส้นทางนี้ →</span>
+          </button>
+        </article>
+      </section>
+
+      <!-- Other Options -->
+      <section class="flex flex-col gap-gutter-lg pt-gutter-lg border-t border-outline-variant">
+        <div class="flex items-end justify-between gap-gutter-sm">
+          <div>
+            <span data-th="ตัวเลือกข้างเคียงและแผนสำรอง" data-en="Adjacent &amp; Backup Options" class="font-label text-label-sm text-secondary-text uppercase tracking-wider">ตัวเลือกข้างเคียงและแผนสำรอง</span>
+            <h2 data-th="เส้นทางอื่น ๆ ที่คุณอาจสนใจ" data-en="Other Paths You Might Want to Explore" class="font-headline text-headline-md text-on-surface">เส้นทางอื่น ๆ ที่คุณอาจสนใจ</h2>
+          </div>
+          <span data-th="อีก 3 ตัวเลือก" data-en="3 Additional Options" class="px-gutter-sm py-1 rounded-full bg-surface-container-low border border-outline-variant font-label text-label-sm text-on-surface-variant">อีก 3 ตัวเลือก</span>
+        </div>
+
+        <div id="matches-other-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-gutter-lg items-stretch">
+          <article data-destination-card="4" data-uni-theme="cu-biz" class="h-full flex flex-col justify-between gap-gutter-md p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant">
+            <div class="flex flex-col gap-gutter-sm">
+              <div class="flex items-start justify-between gap-gutter-sm">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-full bg-surface-container-low font-metric text-metric-md">
+                    <span class="material-symbols-outlined text-[15px] text-secondary-text pf-icon-fill" aria-hidden="true">check_circle</span>
+                    <span data-th="ตรงกัน 79%" data-en="79% Match">ตรงกัน 79%</span>
+                  </span>
+                  <span data-th="โอกาสติดสูง" data-en="High Acceptance" class="px-gutter-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-label text-label-sm">โอกาสติดสูง</span>
+                </div>
+                <a href="https://www.chula.ac.th/" target="_blank" rel="noopener noreferrer" data-uni-link="cu" title="Chulalongkorn University" aria-label="Chulalongkorn University" class="w-9 h-9 rounded-xl bg-surface-container-lowest border border-outline-variant p-1 flex items-center justify-center shadow-sm shrink-0 hover:border-primary transition-colors">
+                  <img data-uni-logo="cu" alt="Chulalongkorn University" class="w-full h-full object-contain">
+                </a>
+              </div>
+              <h3 data-th="ธุรกิจดิจิทัล &amp; Data" data-en="Digital Business &amp; Data" class="font-headline text-headline-md text-on-surface">ธุรกิจดิจิทัล &amp; Data</h3>
+              <span data-th="จุฬาฯ / ธรรมศาสตร์ • รับรอบ 3 ~80 ที่นั่ง" data-en="Chulalongkorn / Thammasat • ~80 TCAS 3 seats" class="font-label text-label-sm text-secondary-text">จุฬาฯ / ธรรมศาสตร์ • รับรอบ 3 ~80 ที่นั่ง</span>
+              <p data-th="ผสานกลยุทธ์ผลิตภัณฑ์เข้ากับการวิเคราะห์ข้อมูล รับรอบ 3 กว้าง ใช้ TGAT + คณิต2" data-en="Product strategy + data storytelling with broader TCAS 3 seats using TGAT + Math 2." class="p-gutter-sm rounded-lg bg-surface-container-low font-body text-body-md text-on-surface-variant">ผสานกลยุทธ์ผลิตภัณฑ์เข้ากับการวิเคราะห์ข้อมูล รับรอบ 3 กว้าง ใช้ TGAT + คณิต2</p>
+              <span data-th="สายอาชีพ: Business Analyst • Product Strategist" data-en="Careers: Business Analyst • Product Strategist" class="font-label text-label-sm text-on-surface-variant">สายอาชีพ: Business Analyst • Product Strategist</span>
+            </div>
+            <button type="button" data-lock-btn="4" data-major-th="ธุรกิจดิจิทัล &amp; Data" data-major-en="Digital Business &amp; Data" data-match="79%" class="w-full py-3 rounded-full bg-surface-container-low text-on-surface border border-outline-variant font-label text-label-lg">
+              <span data-th="ล็อกเส้นทางนี้ →" data-en="Lock In Destination →">ล็อกเส้นทางนี้ →</span>
+            </button>
+          </article>
+
+          <article data-destination-card="5" data-uni-theme="cu-ise" class="h-full flex flex-col justify-between gap-gutter-md p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant">
+            <div class="flex flex-col gap-gutter-sm">
+              <div class="flex items-start justify-between gap-gutter-sm">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-full bg-surface-container-low font-metric text-metric-md">
+                    <span class="material-symbols-outlined text-[15px] text-secondary-text pf-icon-fill" aria-hidden="true">check_circle</span>
+                    <span data-th="ตรงกัน 76%" data-en="76% Match">ตรงกัน 76%</span>
+                  </span>
+                  <span data-th="นานาชาติ" data-en="International" class="px-gutter-sm py-1 rounded-full bg-tertiary-container text-on-tertiary-container font-label text-label-sm">นานาชาติ</span>
+                </div>
+                <a href="https://www.chula.ac.th/" target="_blank" rel="noopener noreferrer" data-uni-link="cu" title="Chulalongkorn ISE" aria-label="Chulalongkorn ISE" class="w-9 h-9 rounded-xl bg-surface-container-lowest border border-outline-variant p-1 flex items-center justify-center shadow-sm shrink-0 hover:border-primary transition-colors">
+                  <img data-uni-logo="cu" alt="Chulalongkorn ISE" class="w-full h-full object-contain">
+                </a>
+              </div>
+              <h3 data-th="วิศวกรรมสารสนเทศ (ISE)" data-en="Information Engineering" class="font-headline text-headline-md text-on-surface">วิศวกรรมสารสนเทศ (ISE)</h3>
+              <span data-th="จุฬาฯ (ICE) / มจธ. • สอบ SAT + IELTS 6.5" data-en="CU (ICE) / KMUTT • SAT + IELTS 6.5" class="font-label text-label-sm text-secondary-text">จุฬาฯ (ICE) / มจธ. • สอบ SAT + IELTS 6.5</span>
+              <p data-th="หลักสูตรภาษาอังกฤษ ใช้ Portfolio + SAT/IELTS แทน A-Level มีโอกาสแลกเปลี่ยนต่างประเทศ" data-en="English-taught engineering using portfolio + SAT/IELTS with global exchange pathways." class="p-gutter-sm rounded-lg bg-surface-container-low font-body text-body-md text-on-surface-variant">หลักสูตรภาษาอังกฤษ ใช้ Portfolio + SAT/IELTS แทน A-Level มีโอกาสแลกเปลี่ยนต่างประเทศ</p>
+              <span data-th="สายอาชีพ: Software Engineer • Solutions Architect" data-en="Careers: Software Engineer • Solutions Architect" class="font-label text-label-sm text-on-surface-variant">สายอาชีพ: Software Engineer • Solutions Architect</span>
+            </div>
+            <button type="button" data-lock-btn="5" data-major-th="วิศวกรรมสารสนเทศ (ISE)" data-major-en="Information Engineering" data-match="76%" class="w-full py-3 rounded-full bg-surface-container-low text-on-surface border border-outline-variant font-label text-label-lg">
+              <span data-th="ล็อกเส้นทางนี้ →" data-en="Lock In Destination →">ล็อกเส้นทางนี้ →</span>
+            </button>
+          </article>
+
+          <article data-destination-card="6" data-uni-theme="mu-media" class="h-full flex flex-col justify-between gap-gutter-md p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant">
+            <div class="flex flex-col gap-gutter-sm">
+              <div class="flex items-start justify-between gap-gutter-sm">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 px-gutter-sm py-1 rounded-full bg-surface-container-low font-metric text-metric-md">
+                    <span class="material-symbols-outlined text-[15px] text-secondary-text pf-icon-fill" aria-hidden="true">check_circle</span>
+                    <span data-th="ตรงกัน 72%" data-en="72% Match">ตรงกัน 72%</span>
+                  </span>
+                  <span data-th="สายสร้างสรรค์" data-en="Creative Wildcard" class="font-label text-label-sm text-on-surface-variant">สายสร้างสรรค์</span>
+                </div>
+                <a href="https://mahidol.ac.th/" target="_blank" rel="noopener noreferrer" data-uni-link="mu" title="Mahidol University" aria-label="Mahidol University" class="w-9 h-9 rounded-xl bg-surface-container-lowest border border-outline-variant p-1 flex items-center justify-center shadow-sm shrink-0 hover:border-primary transition-colors">
+                  <img data-uni-logo="mu" alt="Mahidol University" class="w-full h-full object-contain">
+                </a>
+              </div>
+              <h3 data-th="สื่ออินเทอร์แอกทีฟ &amp; เกม" data-en="Interactive &amp; Game Design" class="font-headline text-headline-md text-on-surface">สื่ออินเทอร์แอกทีฟ &amp; เกม</h3>
+              <span data-th="มหิดล / มจธ. • รอบ 1 Demo + Storyboard" data-en="Mahidol / KMUTT • Round 1 Demo + Storyboard" class="font-label text-label-sm text-secondary-text">มหิดล / มจธ. • รอบ 1 Demo + Storyboard</span>
+              <p data-th="ต่อยอดพลังต้นแบบสู่ Motion และการเล่าเรื่องแบบโต้ตอบ เน้นผลงาน Demo เล่นได้จริง" data-en="Visual experiences, motion systems, and interactive storytelling with playable demo portfolios." class="p-gutter-sm rounded-lg bg-surface-container-low font-body text-body-md text-on-surface-variant">ต่อยอดพลังต้นแบบสู่ Motion และการเล่าเรื่องแบบโต้ตอบ เน้นผลงาน Demo เล่นได้จริง</p>
+              <span data-th="สายอาชีพ: Game Designer • Interactive Media Dev" data-en="Careers: Game Designer • Interactive Media Dev" class="font-label text-label-sm text-on-surface-variant">สายอาชีพ: Game Designer • Interactive Media Dev</span>
+            </div>
+            <button type="button" data-lock-btn="6" data-major-th="สื่ออินเทอร์แอกทีฟ &amp; เกม" data-major-en="Interactive &amp; Game Design" data-match="72%" class="w-full py-3 rounded-full bg-surface-container-low text-on-surface border border-outline-variant font-label text-label-lg">
+              <span data-th="ล็อกเส้นทางนี้ →" data-en="Lock In Destination →">ล็อกเส้นทางนี้ →</span>
+            </button>
+          </article>
+        </div>
+      </section>
+    </main>
+
+  <!-- #endregion -->
+
+  <!-- #region [HTML 3.5] Page 4: TCAS Roadmap -->
+    <!-- ==================== [HTML 3.5] PAGE 4: TCAS ROADMAP ==================== -->
+    <main data-page-view="4" class="hidden flex-1 w-full max-w-[1200px] mx-auto px-gutter-md md:px-gutter-xl py-gutter-xl flex flex-col gap-gutter-lg">
+      <!-- Top Action Bar & View Toggle -->
+      <div class="flex flex-wrap items-center justify-between gap-gutter-sm">
+        <div class="flex items-center gap-gutter-sm flex-wrap">
+          <button type="button" data-go-page="3" class="inline-flex items-center gap-gutter-xs font-label text-label-md text-on-surface-variant hover:text-on-surface px-2 py-1 rounded-full">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
+            <span data-th="เปลี่ยนคณะเป้าหมาย" data-en="Change Major">เปลี่ยนคณะเป้าหมาย</span>
+          </button>
+          <div id="rm-view-toggle" class="hidden inline-flex items-center p-1 rounded-full bg-surface-container-low border border-outline-variant" role="tablist" aria-label="Roadmap View Mode">
+            <button type="button" data-rm-view="personal" aria-selected="true" class="px-3 py-1 rounded-full bg-primary text-on-primary font-label text-label-sm" data-th="Roadmap ของฉัน" data-en="My Roadmap">Roadmap ของฉัน</button>
+            <button type="button" data-rm-view="calendar" aria-selected="false" class="px-3 py-1 rounded-full text-on-surface-variant font-label text-label-sm" data-th="ปฏิทินกลาง TCAS" data-en="TCAS Calendar">ปฏิทินกลาง TCAS</button>
+          </div>
+        </div>
+        <div class="flex items-center gap-gutter-xs flex-wrap">
+          <button id="open-full-plan-btn" type="button" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-md">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">view_agenda</span>
+            <span data-th="เปิดแผนเต็ม" data-en="Open Full Plan">เปิดแผนเต็ม</span>
+          </button>
+          <button id="copy-summary-btn" type="button" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-container-lowest border border-outline-variant text-on-surface font-label text-label-md">
+            <span class="material-symbols-outlined text-[16px] text-secondary-text" aria-hidden="true">content_copy</span>
+            <span data-th="คัดลอกสรุปแผน" data-en="Copy Summary">คัดลอกสรุปแผน</span>
+          </button>
+          <button id="open-reroute-btn" type="button" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-container-low border border-outline-variant text-on-surface font-label text-label-md">
+            <span class="material-symbols-outlined text-[16px] text-tertiary-text" aria-hidden="true">alt_route</span>
+            <span data-th="ปรับเส้นทางใหม่" data-en="Reroute Plan">ปรับเส้นทางใหม่</span>
+          </button>
+          <button id="reset-state-btn" type="button" aria-label="Reset progress" title="Reset saved progress" class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-surface-container-lowest border border-outline-variant text-on-surface-variant hover:text-on-surface">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">restart_alt</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading Skeleton (Matching Card Shapes while GET /api/my-plan loads) -->
+      <div id="rm-skeleton" class="hidden flex flex-col gap-gutter-lg animate-pulse" aria-hidden="true">
+        <div class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+          <div class="h-5 w-40 rounded-full bg-surface-container"></div>
+          <div class="h-8 w-2/3 rounded-lg bg-surface-container"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-gutter-sm">
+            <div class="h-16 rounded-lg bg-surface-container-low"></div>
+            <div class="h-16 rounded-lg bg-surface-container-low"></div>
+            <div class="h-16 rounded-lg bg-surface-container-low"></div>
+          </div>
+        </div>
+        <div class="h-12 rounded-lg bg-surface-container-low"></div>
+        <div class="h-24 rounded-xl bg-surface-container-lowest border border-outline-variant"></div>
+        <div class="h-24 rounded-xl bg-surface-container-lowest border border-outline-variant"></div>
+      </div>
+
+      <!-- Empty State: No Major Selected Yet -->
+      <div id="rm-empty-cta" class="hidden p-gutter-lg rounded-xl bg-tertiary-container/60 border border-outline-variant flex flex-col sm:flex-row sm:items-center justify-between gap-gutter-md">
+        <div class="flex flex-col gap-1">
+          <span class="font-label text-label-sm text-tertiary-text font-semibold" data-th="ยังไม่มีแผนส่วนตัว" data-en="No Personal Roadmap Yet">ยังไม่มีแผนส่วนตัว</span>
+          <h2 class="font-headline text-title-lg text-on-surface" data-th="เลือกคณะเป้าหมายเพื่อสร้าง Roadmap ของคุณ" data-en="Choose a target faculty to generate your Roadmap">เลือกคณะเป้าหมายเพื่อสร้าง Roadmap ของคุณ</h2>
+          <p class="font-body text-body-sm text-on-surface-variant" data-th="ตอบคำถามสั้นๆ 3 ขั้นตอน แล้วระบบจะสร้างเช็กลิสต์เฉพาะคณะและรอบที่เหมาะกับคุณ" data-en="Complete 3 quick steps and we will build a tailored checklist and timeline for your faculty.">ตอบคำถามสั้นๆ 3 ขั้นตอน แล้วระบบจะสร้างเช็กลิสต์เฉพาะคณะและรอบที่เหมาะกับคุณ</p>
+        </div>
+        <button type="button" data-go-page="2" class="shrink-0 inline-flex items-center gap-2 px-gutter-lg py-3 rounded-full bg-primary text-on-primary font-label text-label-md">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">explore</span>
+          <span data-th="ไปทำแบบฟอร์มค้นหาคณะ" data-en="Start Discovery Form">ไปทำแบบฟอร์มค้นหาคณะ</span>
+        </button>
+      </div>
+
+      <!-- Central TCAS70 Calendar View (Shown when no major selected OR toggled) -->
+      <section id="rm-central-calendar" class="hidden flex flex-col gap-gutter-md">
+        <div class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+          <header class="flex items-center justify-between gap-gutter-sm flex-wrap">
+            <div>
+              <span class="px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label text-label-sm" data-th="ปฏิทินกลาง TCAS70" data-en="TCAS70 Central Calendar">ปฏิทินกลาง TCAS70</span>
+              <h2 class="font-headline text-headline-md text-on-surface mt-1" data-th="กำหนดการรับสมัครทั้ง 4 รอบ (ทปอ.)" data-en="Official 4-Round Admission Schedule">กำหนดการรับสมัครทั้ง 4 รอบ (ทปอ.)</h2>
+            </div>
+            <span class="font-label text-label-sm text-on-surface-variant" data-th="อัปเดตสำหรับ TCAS70" data-en="Updated for TCAS70">อัปเดตสำหรับ TCAS70</span>
+          </header>
+          <div id="rm-central-calendar-grid" class="grid grid-cols-1 md:grid-cols-2 gap-gutter-md"></div>
+        </div>
+      </section>
+
+      <!-- Personal Roadmap View (Shown when at least 1 target faculty is selected) -->
+      <div id="rm-personal-view" class="flex flex-col gap-gutter-lg">
+        <!-- 1. Primary Target Card (Existing Beige/Surface Card) -->
+        <section class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+          <div class="flex flex-col md:flex-row md:items-start justify-between gap-gutter-md">
+            <div class="flex flex-col gap-gutter-xs flex-1 min-w-0">
+              <!-- Rank Switcher Chips (1 | 2 | 3) -->
+              <div id="rm-rank-switcher" class="hidden flex flex-wrap items-center gap-1.5 mb-1"></div>
+              <div class="flex flex-wrap items-center gap-gutter-sm">
+                <span id="roadmap-match-badge" class="inline-flex items-center px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums">ตรงกัน 94%</span>
+                <span id="rm-uni-name" class="font-label text-label-sm text-on-surface-variant font-medium">จุฬาลงกรณ์มหาวิทยาลัย</span>
+                <span id="roadmap-pace-subtitle" data-th="แผน 6 ชม./สัปดาห์ • เตรียมตัวแบบไม่กดดัน" data-en="Steady 6 hrs/week • Low-stress pace" class="font-label text-label-sm text-secondary-text">แผน 6 ชม./สัปดาห์ • เตรียมตัวแบบไม่กดดัน</span>
+              </div>
+              <h1 id="roadmap-major-title" data-th="วิศวกรรมคอมพิวเตอร์ &amp; ออกแบบผลิตภัณฑ์" data-en="Computer Engineering &amp; Product Design" class="font-headline text-headline-lg text-on-surface">
+                วิศวกรรมคอมพิวเตอร์ &amp; ออกแบบผลิตภัณฑ์
+              </h1>
+            </div>
+            <div class="flex items-center gap-gutter-lg shrink-0">
+              <div class="flex flex-col items-end gap-0.5">
+                <span data-th="เวลาที่เหลือก่อนยื่น" data-en="Time to Admission" class="font-label text-label-sm text-on-surface-variant">เวลาที่เหลือก่อนยื่น</span>
+                <span id="countdown-readout" data-th="8 เดือน" data-en="8 Months" class="font-metric text-title-lg text-on-surface tabular-nums">8 เดือน</span>
+              </div>
+              <div class="w-40 flex flex-col gap-gutter-xs">
+                <div class="flex items-center justify-between">
+                  <span data-th="ความพร้อม" data-en="Readiness" class="font-label text-label-sm text-on-surface-variant">ความพร้อม</span>
+                  <span id="readiness-pct" class="font-metric text-metric-md text-secondary-text tabular-nums">50%</span>
+                </div>
+                <div class="w-full h-2.5 rounded-full bg-surface-container overflow-hidden">
+                  <div id="readiness-bar" class="h-full rounded-full bg-secondary transition-all duration-300"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Sub-cards pulling real target data -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-gutter-sm pt-2 border-t border-outline-variant/60">
+            <div class="p-gutter-sm rounded-lg bg-surface-container-low border border-outline-variant/70 flex flex-col gap-0.5 min-w-0">
+              <span class="font-label text-label-sm text-on-surface-variant" data-th="เกณฑ์ GPAX" data-en="GPAX Criteria">เกณฑ์ GPAX</span>
+              <span id="rm-sub-gpax" class="font-title text-title-md text-on-surface tabular-nums break-words">GPAX ≥ 3.50</span>
+            </div>
+            <div class="p-gutter-sm rounded-lg bg-surface-container-low border border-outline-variant/70 flex flex-col gap-0.5 min-w-0">
+              <span class="font-label text-label-sm text-on-surface-variant" data-th="ค่าน้ำหนักหลัก" data-en="Core Weights">ค่าน้ำหนักหลัก</span>
+              <span id="rm-sub-weights" class="font-title text-title-md text-on-surface break-words">TGAT 20% • TPAT3 40%</span>
+            </div>
+            <div class="p-gutter-sm rounded-lg bg-surface-container-low border border-outline-variant/70 flex flex-col gap-0.5 min-w-0">
+              <span class="font-label text-label-sm text-on-surface-variant" data-th="เอกสารรอบที่แนะนำ" data-en="Recommended Docs">เอกสารรอบที่แนะนำ</span>
+              <span id="rm-sub-docs" class="font-title text-title-md text-on-surface break-words">Portfolio 10 หน้า + โครงงาน</span>
+            </div>
+          </div>
+
+          <!-- 6. Card Footer (Dynamic Progress & Pace) -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-outline-variant/60">
+            <span id="rm-progress-footer" class="font-label text-label-md text-on-surface-variant">ทำเสร็จแล้ว 2 จาก 5 เป้าหมาย • จังหวะกำลังดี</span>
+            <button type="button" data-open-full-plan class="font-label text-label-sm font-semibold text-primary hover:underline" data-th="ดูทุกรายการ →" data-en="View all items →">ดูทุกรายการ →</button>
+          </div>
+        </section>
+
+        <!-- Personalization Context Strip (Interests + Website Behavior) -->
+        <section id="rm-personalization-strip" class="p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-wrap items-center justify-between gap-gutter-sm">
+          <div class="flex flex-col gap-1.5 min-w-0 flex-1">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] text-primary shrink-0" aria-hidden="true">auto_awesome</span>
+              <span class="font-label text-label-sm font-semibold text-on-surface" data-th="ชุดงานรายรอบที่จัดตามความสนใจและพฤติกรรมของคุณ" data-en="Round Worklist Tailored to Your Interests &amp; Activity">ชุดงานรายรอบที่จัดตามความสนใจและพฤติกรรมของคุณ</span>
+            </div>
+            <div id="rm-personalization-chips" class="flex flex-wrap items-center gap-1.5"></div>
+          </div>
+          <button type="button" data-go-page="2" class="inline-flex items-center gap-1 px-gutter-sm py-1.5 rounded-full bg-surface-container-low border border-outline-variant font-label text-label-sm text-on-surface shrink-0">
+            <span class="material-symbols-outlined text-[15px]" aria-hidden="true">tune</span>
+            <span data-th="ปรับความสนใจ" data-en="Edit Interests">ปรับความสนใจ</span>
+          </button>
+        </section>
+
+        <!-- Reroute Banner -->
+        <div id="roadmap-reroute-banner" class="hidden p-gutter-md rounded-xl bg-tertiary-container border border-outline-variant flex items-center justify-between gap-gutter-md">
+          <div class="flex items-center gap-gutter-sm min-w-0">
+            <span class="material-symbols-outlined text-[20px] text-tertiary-text shrink-0" aria-hidden="true">alt_route</span>
+            <span id="roadmap-reroute-text" class="font-body text-body-md text-on-tertiary-container"></span>
+          </div>
+          <button id="dismiss-reroute-banner" type="button" aria-label="Dismiss banner" class="w-8 h-8 rounded-full bg-surface-container-lowest flex items-center justify-center text-on-surface shrink-0">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">close</span>
+          </button>
+        </div>
+
+        <!-- 5. Mini Timeline (Horizontal Month Bar + Today Marker + Faculty Deadlines) -->
+        <section id="rm-mini-timeline" class="p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-xs">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-label text-label-sm font-semibold text-on-surface" data-th="ไทม์ไลน์ย่อ TCAS70" data-en="TCAS70 Mini Timeline">ไทม์ไลน์ย่อ TCAS70</span>
+            <span class="font-label text-label-sm text-tertiary-text" data-th="เส้นสีส้ม = วันนี้" data-en="Marker = Today">เส้นสีส้ม = วันนี้</span>
+          </div>
+          <div id="rm-timeline-track" class="relative pt-8 pb-2 overflow-x-auto"></div>
+        </section>
+
+        <!-- 4. Required Exams Strip (Horizontal Scrollable Exam Cards) -->
+        <section class="flex flex-col gap-gutter-xs">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-label text-label-md font-semibold text-on-surface" data-th="วิชาสอบที่ต้องเก็บ" data-en="Required Exams">วิชาสอบที่ต้องเก็บ</span>
+            <button type="button" data-go-page="5" class="font-label text-label-sm text-primary hover:underline" data-th="อัปเดตคะแนนจำลอง →" data-en="Update Target Scores →">อัปเดตคะแนนจำลอง →</button>
+          </div>
+          <div id="rm-exams-strip" class="flex gap-gutter-sm overflow-x-auto pb-1"></div>
+        </section>
+
+        <!-- Main 8/4 Split: Round Tabs + Checklist | Beyond 4.00 Edge -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-xl items-start">
+          <div class="lg:col-span-8 flex flex-col gap-gutter-md min-w-0">
+            <!-- 2. Pill Round Tabs -->
+            <div role="tablist" aria-label="TCAS 1 to 4 Rounds" class="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-between gap-gutter-xs p-1.5 rounded-lg bg-surface-container-low border border-outline-variant">
+              <button type="button" role="tab" aria-selected="true" data-rm-tab="r1" class="icon-collapse-tab inline-flex items-center justify-center gap-1.5 px-gutter-md py-2.5 rounded-sm bg-primary text-on-primary font-label text-label-md text-center">
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true">folder_special</span>
+                <span class="tab-label" data-th="รอบ 1 Portfolio" data-en="Round 1 Portfolio">รอบ 1 Portfolio</span>
+                <span data-rm-rec-dot="r1" class="hidden w-2 h-2 rounded-full bg-lime-400 shrink-0" title="AI แนะนำ"></span>
+                <span data-rm-count="r1" class="ml-0.5 font-metric text-label-sm opacity-80 tabular-nums">1/2</span>
+              </button>
+              <button type="button" role="tab" aria-selected="false" data-rm-tab="r2" class="icon-collapse-tab inline-flex items-center justify-center gap-1.5 px-gutter-md py-2.5 rounded-sm text-on-surface-variant font-label text-label-md text-center">
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true">verified</span>
+                <span class="tab-label" data-th="รอบ 2 Quota" data-en="Round 2 Quota">รอบ 2 Quota</span>
+                <span data-rm-rec-dot="r2" class="hidden w-2 h-2 rounded-full bg-lime-400 shrink-0" title="AI แนะนำ"></span>
+                <span data-rm-count="r2" class="ml-0.5 font-metric text-label-sm opacity-80 tabular-nums">1/1</span>
+              </button>
+              <button type="button" role="tab" aria-selected="false" data-rm-tab="r3" class="icon-collapse-tab inline-flex items-center justify-center gap-1.5 px-gutter-md py-2.5 rounded-sm text-on-surface-variant font-label text-label-md text-center">
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true">quiz</span>
+                <span class="tab-label" data-th="รอบ 3 Admission" data-en="Round 3 Admission">รอบ 3 Admission</span>
+                <span data-rm-rec-dot="r3" class="hidden w-2 h-2 rounded-full bg-lime-400 shrink-0" title="AI แนะนำ"></span>
+                <span data-rm-count="r3" class="ml-0.5 font-metric text-label-sm opacity-80 tabular-nums">0/1</span>
+              </button>
+              <button type="button" role="tab" aria-selected="false" data-rm-tab="r4" class="icon-collapse-tab inline-flex items-center justify-center gap-1.5 px-gutter-md py-2.5 rounded-sm text-on-surface-variant font-label text-label-md text-center">
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true">event_available</span>
+                <span class="tab-label" data-th="รอบ 4 Direct" data-en="Round 4 Direct">รอบ 4 Direct</span>
+                <span data-rm-rec-dot="r4" class="hidden w-2 h-2 rounded-full bg-lime-400 shrink-0" title="AI แนะนำ"></span>
+                <span data-rm-count="r4" class="ml-0.5 font-metric text-label-sm opacity-80 tabular-nums">0/1</span>
+              </button>
+            </div>
+
+            <!-- Round Dates & Source Bar -->
+            <div id="rm-round-dates-bar" class="p-gutter-sm rounded-xl bg-surface-container-low border border-outline-variant flex flex-wrap items-center justify-between gap-2"></div>
+
+            <!-- 8. Warnings Box (Peach Surface) -->
+            <div id="rm-warnings-box" class="hidden p-gutter-md rounded-xl bg-tertiary-container border border-outline-variant flex flex-col gap-1.5"></div>
+
+            <!-- 3. Checklist Panels (Required / Recommended / Collapsible Optional) -->
+            <div data-rm-panel="r1" class="flex flex-col gap-gutter-md"></div>
+            <div data-rm-panel="r2" class="hidden flex flex-col gap-gutter-md"></div>
+            <div data-rm-panel="r3" class="hidden flex flex-col gap-gutter-md"></div>
+            <div data-rm-panel="r4" class="hidden flex flex-col gap-gutter-md"></div>
+          </div>
+
+          <aside class="lg:col-span-4">
+            <div class="p-gutter-lg rounded-xl bg-tertiary-container border border-outline-variant flex flex-col gap-gutter-md">
+              <header class="flex items-center justify-between gap-gutter-sm">
+                <span class="inline-flex items-center gap-gutter-xs font-label text-label-md text-on-tertiary-container">
+                  <span class="material-symbols-outlined text-[20px] text-tertiary-text" aria-hidden="true">workspace_premium</span>
+                  <span data-th="จุดเด่น Beyond 4.00" data-en="Beyond 4.00 Edge">จุดเด่น Beyond 4.00</span>
+                </span>
+                <span data-th="สร้างความต่าง" data-en="Differentiator" class="px-gutter-sm py-0.5 rounded-full bg-surface-container-lowest font-label text-label-sm text-tertiary-text">สร้างความต่าง</span>
+              </header>
+              <ul id="beyond-edge-list" class="flex flex-col gap-gutter-sm"></ul>
+            </div>
+          </aside>
+        </section>
+      </div>
+    </main>
+
+  <!-- #endregion -->
+
+  <!-- #region [HTML 3.6] Page 5: Score Simulator -->
+    <!-- ==================== [HTML 3.6] PAGE 5: SCORE SIMULATOR & ADMISSION CHANCE ==================== -->
+    <main data-page-view="5" class="hidden flex-1 w-full max-w-[1200px] mx-auto px-gutter-xl py-gutter-xl flex flex-col gap-gutter-xl">
+      <div class="flex flex-wrap items-center justify-between gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <div class="flex items-center gap-gutter-xs">
+            <span class="px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label text-label-sm" data-th="จำลองผลสอบ TCAS70" data-en="TCAS70 Score Simulation">จำลองผลสอบ TCAS70</span>
+            <span id="sim-major-eyebrow" class="font-label text-label-sm text-on-surface-variant" data-th="วิศวกรรมคอมพิวเตอร์ • รอบ 3 Admission" data-en="Computer Engineering • Round 3 Admission">วิศวกรรมคอมพิวเตอร์ • รอบ 3 Admission</span>
+          </div>
+          <h1 class="font-headline text-headline-lg text-on-surface" data-th="แผนคะแนน &amp; จำลองโอกาสสอบติด" data-en="Score Plan &amp; Admission Simulator">แผนคะแนน &amp; จำลองโอกาสสอบติด</h1>
+          <p class="font-body text-body-md text-on-surface-variant" data-th="พิมพ์คะแนนหรือเลื่อนแถบเป้าหมายเพื่อดูโอกาสสอบติดคณะในฝันแบบ Real-time" data-en="Type your target scores or drag sliders to simulate your real-time admission chance.">พิมพ์คะแนนหรือเลื่อนแถบเป้าหมายเพื่อดูโอกาสสอบติดคณะในฝันแบบ Real-time</p>
+        </div>
+        <div class="flex items-center gap-gutter-xs">
+          <button id="sim-reset-btn" type="button" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-container-lowest border border-outline-variant text-on-surface font-label text-label-md">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">restart_alt</span>
+            <span data-th="รีเซ็ตคะแนนเริ่มต้น" data-en="Reset Scores">รีเซ็ตคะแนนเริ่มต้น</span>
+          </button>
+          <button type="button" data-go-page="6" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-md">
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">psychology</span>
+            <span data-th="ปรึกษา AI โค้ช →" data-en="Ask AI Coach →">ปรึกษา AI โค้ช →</span>
+          </button>
+        </div>
+      </div>
+
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-xl items-start">
+        <div class="lg:col-span-8 flex flex-col gap-gutter-md">
+          <div class="p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-wrap items-center justify-between gap-gutter-md">
+            <div class="flex items-center gap-gutter-sm">
+              <span class="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[20px]" aria-hidden="true">school</span>
+              </span>
+              <div class="flex flex-col">
+                <span id="sim-faculty-title" class="font-title text-title-md text-on-surface" data-th="วิศวกรรมศาสตร์ สาขาวิศวกรรมคอมพิวเตอร์" data-en="Faculty of Engineering • Computer Engineering">วิศวกรรมศาสตร์ สาขาวิศวกรรมคอมพิวเตอร์</span>
+                <span id="sim-faculty-sub" class="font-body text-label-sm text-on-surface-variant" data-th="เกณฑ์รอบ 3 Admission TCAS70 • ค่าน้ำหนักรวม 100%" data-en="Round 3 Admission TCAS70 • Total Weight 100%">เกณฑ์รอบ 3 Admission TCAS70 • ค่าน้ำหนักรวม 100%</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-gutter-xs">
+              <label for="sim-faculty-select" class="sr-only" data-th="เลือกคณะเป้าหมาย" data-en="Select Target Faculty">เลือกคณะเป้าหมาย</label>
+              <select id="sim-faculty-select" data-pf-dropdown="pill" class="px-gutter-md py-1.5 rounded-full bg-surface-container-low border border-outline-variant font-label text-label-md text-on-surface cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                <option value="comp-eng" data-th="วิศวกรรมคอมพิวเตอร์ (CU/KMUTT)" data-en="Computer Engineering (CU/KMUTT)">วิศวกรรมคอมพิวเตอร์ (CU/KMUTT)</option>
+                <option value="med" data-th="แพทยศาสตร์ กสพท (CU/MU)" data-en="Medicine • Cotmes (CU/MU)">แพทยศาสตร์ กสพท (CU/MU)</option>
+                <option value="bba" data-th="พาณิชยศาสตร์และการบัญชี (CU/TU)" data-en="Business &amp; FinTech BBA (CU/TU)">พาณิชยศาสตร์และการบัญชี (CU/TU)</option>
+                <option value="arch-ux" data-th="สถาปัตยกรรม &amp; ออกแบบฯ (CU/KMUTT)" data-en="Architecture &amp; Design (CU/KMUTT)">สถาปัตยกรรม &amp; ออกแบบฯ (CU/KMUTT)</option>
+                <option value="comm-arts" data-th="นิเทศศาสตร์ &amp; สื่อดิจิทัล (CU/TU)" data-en="Communication Arts (CU/TU)">นิเทศศาสตร์ &amp; สื่อดิจิทัล (CU/TU)</option>
+                <option value="law" data-th="นิติศาสตร์ (CU/TU)" data-en="Faculty of Law (CU/TU)">นิติศาสตร์ (CU/TU)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="sim-subjects-list" class="flex flex-col gap-gutter-sm"></div>
+        </div>
+
+        <aside class="lg:col-span-4 flex flex-col gap-gutter-md">
+          <div class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+            <header class="flex items-center justify-between gap-gutter-sm">
+              <span class="font-label text-label-md text-on-surface-variant" data-th="ผลการประเมินจำลอง" data-en="Simulation Result">ผลการประเมินจำลอง</span>
+              <span id="sim-zone-badge" class="px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label text-label-sm">โซนปลอดภัย (Safe Zone)</span>
+            </header>
+
+            <div class="flex flex-col gap-1">
+              <span class="font-label text-label-sm text-on-surface-variant" data-th="คะแนนรวมจำลอง (ถ่วงน้ำหนักแล้ว)" data-en="Weighted Total Score">คะแนนรวมจำลอง (ถ่วงน้ำหนักแล้ว)</span>
+              <div class="flex items-baseline gap-1.5">
+                <span id="sim-total-score" class="font-display text-display-lg text-secondary-text tabular-nums">74.50</span>
+                <span class="font-metric text-title-md text-on-surface-variant">/ 100</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-gutter-xs">
+              <div class="p-gutter-sm rounded-lg bg-surface-container-low flex flex-col gap-0.5">
+                <span class="font-label text-label-sm text-on-surface-variant" data-th="เกณฑ์ขั้นต่ำปี 69" data-en="TCAS69 Cutoff">เกณฑ์ขั้นต่ำปี 69</span>
+                <span id="sim-cutoff-67" class="font-metric text-title-md text-on-surface tabular-nums">72.15</span>
+              </div>
+              <div class="p-gutter-sm rounded-lg bg-surface-container-low flex flex-col gap-0.5">
+                <span class="font-label text-label-sm text-on-surface-variant" data-th="ส่วนต่าง (Buffer)" data-en="Score Buffer">ส่วนต่าง (Buffer)</span>
+                <span id="sim-buffer-val" class="font-metric text-title-md text-secondary-text tabular-nums">+2.35</span>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-gutter-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-label text-label-sm text-on-surface" data-th="โอกาสสอบติดประเมินผล" data-en="Estimated Admission Chance">โอกาสสอบติดประเมินผล</span>
+                <span id="sim-chance-pct" class="font-metric text-title-md text-secondary-text tabular-nums">75%</span>
+              </div>
+              <div class="w-full h-2.5 rounded-full bg-surface-container overflow-hidden">
+                <div id="sim-chance-bar" class="h-full rounded-full bg-secondary transition-all duration-300"></div>
+              </div>
+              <div class="flex justify-between font-label text-label-sm text-on-surface-variant">
+                <span data-th="0% ลุ้นเสี่ยง" data-en="0% Reach">0% ลุ้นเสี่ยง</span>
+                <span data-th="50% โซนกลาง" data-en="50% Target">50% โซนกลาง</span>
+                <span data-th="100% ปลอดภัย" data-en="100% Safe">100% ปลอดภัย</span>
+              </div>
+            </div>
+
+            <div class="p-gutter-md rounded-xl bg-tertiary-container border border-outline-variant flex items-start gap-gutter-xs">
+              <span class="material-symbols-outlined text-[18px] text-tertiary-text shrink-0 mt-0.5" aria-hidden="true">tips_and_updates</span>
+              <p id="sim-strategy-tip" class="font-body text-label-md text-on-tertiary-container"></p>
+            </div>
+
+            <button type="button" data-go-page="4" class="w-full py-3 rounded-full bg-primary text-on-primary font-label text-label-md">
+              <span data-th="นำคะแนนเป้าหมายไปใช้ในแผน TCAS" data-en="Apply Target to TCAS Roadmap">นำคะแนนเป้าหมายไปใช้ในแผน TCAS</span>
+            </button>
+          </div>
+
+          <div class="p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-xs">
+            <span class="font-label text-label-md text-on-surface" data-th="สถิติคัดเลือกย้อนหลัง 3 ปี" data-en="3-Year Historical Cutoff">สถิติคัดเลือกย้อนหลัง 3 ปี</span>
+            <div class="grid grid-cols-3 gap-gutter-xs text-center">
+              <div class="p-gutter-sm rounded-lg bg-surface-container-low flex flex-col">
+                <span class="font-label text-label-sm text-on-surface-variant">TCAS69</span>
+                <span id="sim-hist-69" class="font-metric text-title-md text-on-surface tabular-nums">72.15</span>
+              </div>
+              <div class="p-gutter-sm rounded-lg bg-surface-container-low flex flex-col">
+                <span class="font-label text-label-sm text-on-surface-variant">TCAS68</span>
+                <span id="sim-hist-68" class="font-metric text-title-md text-on-surface tabular-nums">71.60</span>
+              </div>
+              <div class="p-gutter-sm rounded-lg bg-surface-container-low flex flex-col">
+                <span class="font-label text-label-sm text-on-surface-variant">TCAS67</span>
+                <span id="sim-hist-67" class="font-metric text-title-md text-on-surface tabular-nums">71.20</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+  <!-- #endregion -->
+
+  <!-- #region [HTML 3.7] Page 6: AI Academic Coach -->
+    <!-- ==================== [HTML 3.7] PAGE 6: AI ACADEMIC COACH ==================== -->
+    <main data-page-view="6" class="hidden flex-1 w-full max-w-[1200px] mx-auto px-gutter-xl py-gutter-xl flex flex-col gap-gutter-xl">
+      <div class="flex flex-wrap items-center justify-between gap-gutter-md">
+        <div class="flex flex-col gap-gutter-xs">
+          <span class="self-start px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label text-label-sm" data-th="AI โค้ชกลยุทธ์ TCAS70" data-en="TCAS70 Strategy Coach">AI โค้ชกลยุทธ์ TCAS70</span>
+          <h1 class="font-headline text-headline-lg text-on-surface" data-th="AI โค้ชแนะแนว &amp; บททำคะแนนคุ้มค่า" data-en="AI Academic Coach &amp; High-Yield Focus">AI โค้ชแนะแนว &amp; บททำคะแนนคุ้มค่า</h1>
+          <p class="font-body text-body-md text-on-surface-variant" data-th="คำแนะนำกลยุทธ์เฉพาะบุคคล วิเคราะห์จากจุดแข็งและจุดที่ต้องเร่งเก็บคะแนน" data-en="Personalized strategy based on your current strengths, mock scores, and target major.">คำแนะนำกลยุทธ์เฉพาะบุคคล วิเคราะห์จากจุดแข็งและจุดที่ต้องเร่งเก็บคะแนน</p>
+        </div>
+        <button type="button" data-go-page="5" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface-container-low border border-outline-variant text-on-surface font-label text-label-md">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">tune</span>
+          <span data-th="ปรับคะแนนจำลอง" data-en="Adjust Score Sim">ปรับคะแนนจำลอง</span>
+        </button>
+      </div>
+
+      <!-- Coach Readiness Summary -->
+      <section class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+        <div class="flex flex-wrap items-center justify-between gap-gutter-md">
+          <div class="flex flex-col gap-gutter-xs max-w-2xl">
+            <span class="font-label text-label-sm text-secondary-text" data-th="บทวิเคราะห์ความพร้อมล่าสุด" data-en="Latest Readiness Diagnosis">บทวิเคราะห์ความพร้อมล่าสุด</span>
+            <h2 id="coach-summary-headline" class="font-headline text-headline-md text-on-surface" data-th="สถานะโดยรวมของคุณอยู่ในโซนปลอดภัย (83%) สำหรับเป้าหมายปัจจุบัน" data-en="Your overall status is in the Safe Zone (83%) for your target major">สถานะโดยรวมของคุณอยู่ในโซนปลอดภัย (83%) สำหรับเป้าหมายปัจจุบัน</h2>
+          </div>
+          <div class="p-gutter-md rounded-xl bg-secondary-container flex flex-col items-center justify-center min-w-[120px]">
+            <span class="font-label text-label-sm text-on-secondary-container" data-th="โอกาสสอบติด" data-en="Chance">โอกาสสอบติด</span>
+            <span id="coach-chance-badge" class="font-display text-headline-lg text-on-secondary-container tabular-nums">83%</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter-md">
+          <div class="p-gutter-md rounded-xl bg-surface-container-low flex flex-col gap-1">
+            <span class="font-label text-label-sm text-on-surface-variant" data-th="คะแนนรวมจำลองปัจจุบัน" data-en="Current Simulated Score">คะแนนรวมจำลองปัจจุบัน</span>
+            <span id="coach-sim-score" class="font-metric text-headline-md text-on-surface tabular-nums">74.50 / 100</span>
+          </div>
+          <div class="p-gutter-md rounded-xl bg-surface-container-low flex flex-col gap-1">
+            <span class="font-label text-label-sm text-on-surface-variant" data-th="เป้าหมาย Safe Zone" data-en="Safe Zone Target">เป้าหมาย Safe Zone</span>
+            <span id="coach-safe-target" class="font-metric text-headline-md text-on-surface tabular-nums">73.00 / 100</span>
+          </div>
+          <div class="p-gutter-md rounded-xl bg-tertiary-container flex flex-col gap-1">
+            <span class="font-label text-label-sm text-on-tertiary-container" data-th="จุดโฟกัสเร่งด่วน" data-en="Priority Boost">จุดโฟกัสเร่งด่วน</span>
+            <span id="coach-priority-gap" class="font-metric text-title-lg text-on-tertiary-container tabular-nums" data-th="+4 คะแนน A-Level คณิต 1" data-en="+4 points A-Level Math 1">+4 คะแนน A-Level คณิต 1</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 High-Yield Focus Topics -->
+      <section class="flex flex-col gap-gutter-md">
+        <div class="flex items-center justify-between gap-gutter-sm">
+          <h2 class="font-headline text-headline-md text-on-surface" data-th="3 บททำคะแนนคุ้มค่าที่สุด (High-Yield Focus)" data-en="Top 3 High-Yield Focus Chapters">3 บททำคะแนนคุ้มค่าที่สุด (High-Yield Focus)</h2>
+          <span class="font-label text-label-sm text-on-surface-variant" data-th="คัดกรองจากคะแนนต่อเวลาอ่าน" data-en="Ranked by Score Yield per Hour">คัดกรองจากคะแนนต่อเวลาอ่าน</span>
+        </div>
+        <div id="coach-yield-grid" class="grid grid-cols-1 md:grid-cols-3 gap-gutter-md"></div>
+      </section>
+
+      <!-- Interactive AI Coach Q&A -->
+      <section class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+        <header class="flex flex-col gap-0.5">
+          <h2 class="font-headline text-headline-md text-on-surface" data-th="ถาม-ตอบกับ AI โค้ชส่วนตัว (Interactive Q&amp;A)" data-en="Interactive AI Coach Q&amp;A">ถาม-ตอบกับ AI โค้ชส่วนตัว (Interactive Q&amp;A)</h2>
+          <p class="font-body text-body-md text-on-surface-variant" data-th="ปรึกษาข้อสงสัยเชิงกลยุทธ์ การเก็งคะแนน หรือเทคนิคเตรียมตัวเฉพาะทาง" data-en="Ask about exam strategy, score buffers, or Portfolio vs. Round 3 trade-offs.">ปรึกษาข้อสงสัยเชิงกลยุทธ์ การเก็งคะแนน หรือเทคนิคเตรียมตัวเฉพาะทาง</p>
+        </header>
+
+        <div id="coach-chat-log" class="flex flex-col gap-gutter-sm p-gutter-md rounded-xl bg-surface-container-low max-h-[340px] overflow-y-auto">
+          <div class="p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-1 max-w-2xl">
+            <span class="font-label text-label-sm text-secondary-text">AI Academic Coach</span>
+            <p class="font-body text-body-md text-on-surface" data-th="สวัสดี! จากคะแนนจำลองและโปรไฟล์ของคุณ ตอนนี้มีโอกาสติดในโซนปลอดภัยแล้ว หากเพิ่ม A-Level คณิตประยุกต์ 1 อีก +4 คะแนน โอกาสติดจะขยับเกิน 90% ทันที อยากให้ช่วยวางแผนเรื่องไหนเพิ่มเติมไหม?" data-en="Hi! Based on your current simulated score and profile, you are already in the Safe Zone. Adding +4 points in A-Level Math 1 pushes your chance past 90%. What would you like to strategize next?">สวัสดี! จากคะแนนจำลองและโปรไฟล์ของคุณ ตอนนี้มีโอกาสติดในโซนปลอดภัยแล้ว หากเพิ่ม A-Level คณิตประยุกต์ 1 อีก +4 คะแนน โอกาสติดจะขยับเกิน 90% ทันที อยากให้ช่วยวางแผนเรื่องไหนเพิ่มเติมไหม?</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-gutter-xs">
+          <button type="button" data-coach-prompt-th="ขอเทคนิคบริหารเวลาในห้องสอบคณิต 1 (90 นาที 30 ข้อ)" data-coach-prompt-en="How should I pace 90 mins for 30 A-Level Math 1 questions?" class="px-gutter-sm py-1.5 rounded-full bg-surface-container-low border border-outline-variant font-label text-label-sm text-on-surface">
+            <span data-th="เทคนิคบริหารเวลาสอบคณิต 1" data-en="Math 1 time pacing">เทคนิคบริหารเวลาสอบคณิต 1</span>
+          </button>
+          <button type="button" data-coach-prompt-th="ถ้าเน้นรอบ 1 Portfolio ควรเตรียมคะแนนรอบ 3 แค่ไหน?" data-coach-prompt-en="If I focus on Round 1 Portfolio, how much Round 3 prep do I need?" class="px-gutter-sm py-1.5 rounded-full bg-surface-container-low border border-outline-variant font-label text-label-sm text-on-surface">
+            <span data-th="สมดุลรอบ 1 Portfolio กับรอบ 3" data-en="Balance Round 1 vs Round 3">สมดุลรอบ 1 Portfolio กับรอบ 3</span>
+          </button>
+          <button type="button" data-coach-prompt-th="ควรเลือกคณะสำรองยังไงให้ติดชัวร์ตามสูตร 2-4-4?" data-coach-prompt-en="How do I build a balanced 2-4-4 TCAS ranking?" class="px-gutter-sm py-1.5 rounded-full bg-surface-container-low border border-outline-variant font-label text-label-sm text-on-surface">
+            <span data-th="จัดอันดับ TCAS สูตร 2-4-4" data-en="2-4-4 TCAS ranking strategy">จัดอันดับ TCAS สูตร 2-4-4</span>
+          </button>
+        </div>
+
+        <form id="coach-chat-form" class="flex items-center gap-gutter-sm">
+          <input id="coach-chat-input" aria-label="ถามคำถาม AI โค้ช" type="text" placeholder="พิมพ์คำถามเพื่อขอคำแนะนำจาก AI โค้ช..." data-placeholder-th="พิมพ์คำถามเพื่อขอคำแนะนำจาก AI โค้ช..." data-placeholder-en="Ask the AI Coach a question..." class="flex-1 px-gutter-md py-2.5 rounded-full bg-surface-container-low border border-outline-variant font-body text-body-md text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus:border-primary">
+          <button type="submit" class="inline-flex items-center gap-1.5 px-gutter-lg py-2.5 rounded-full bg-primary text-on-primary font-label text-label-md shrink-0">
+            <span data-th="ส่งคำถาม" data-en="Send">ส่งคำถาม</span>
+            <span class="material-symbols-outlined text-[16px]" aria-hidden="true">send</span>
+          </button>
+        </form>
+      </section>
+    </main>
+
+  <!-- #endregion -->
+
+  <!-- #region [HTML 3.8] Page 7: Longitudinal Analytics -->
+    <!-- ==================== [HTML 3.8] PAGE 7: LONGITUDINAL ANALYTICS DASHBOARD ==================== -->
+    <main data-page-view="7" class="hidden flex-1 w-full max-w-[1200px] mx-auto px-gutter-xl py-gutter-xl flex flex-col gap-gutter-xl">
+      <header class="flex flex-wrap items-center justify-between gap-gutter-md">
+        <div class="flex flex-col gap-1">
+          <div class="flex items-center gap-2">
+            <span class="px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label text-label-sm" data-th="ติดตามพัฒนาการระยะยาว" data-en="Longitudinal Analytics">ติดตามพัฒนาการระยะยาว</span>
+            <span id="analytics-user-pill" class="px-gutter-sm py-0.5 rounded-full bg-surface-container-low border border-outline-variant font-label text-label-sm text-on-surface-variant">Guest Mode</span>
+          </div>
+          <h1 data-th="แดชบอร์ดวิเคราะห์พัฒนาการ TCAS" data-en="Longitudinal TCAS Progress Dashboard" class="font-headline text-headline-lg text-on-surface">แดชบอร์ดวิเคราะห์พัฒนาการ TCAS</h1>
+          <p data-th="ติดตามแนวโน้ม GPAX ความพร้อม TCAS 1–4 และประวัติการปรับแผนของคุณแบบต่อเนื่อง" data-en="Track your GPAX trajectory, TCAS 1–4 readiness, and milestone history over time." class="font-body text-body-md text-on-surface-variant">ติดตามแนวโน้ม GPAX ความพร้อม TCAS 1–4 และประวัติการปรับแผนของคุณแบบต่อเนื่อง</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-gutter-sm">
+          <button id="analytics-save-snapshot-btn" type="button" class="inline-flex items-center gap-1.5 px-gutter-md py-2 rounded-full bg-primary text-on-primary font-label text-label-md">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">bookmark_add</span>
+            <span data-th="บันทึก Snapshot ตอนนี้" data-en="Save Snapshot Now">บันทึก Snapshot ตอนนี้</span>
+          </button>
+          <button id="analytics-edit-profile-btn" type="button" class="inline-flex items-center gap-1.5 px-gutter-md py-2 rounded-full bg-surface-container-low border border-outline-variant text-on-surface font-label text-label-md hover:bg-surface-container">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">manage_accounts</span>
+            <span data-th="โปรไฟล์และอวตาร" data-en="Profile &amp; Avatar">โปรไฟล์และอวตาร</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- 4 KPI Summary Cards -->
+      <section aria-label="KPI Summary" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter-md">
+        <article class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <span data-th="ความพร้อม TCAS รวม" data-en="Overall TCAS Readiness" class="font-label text-label-sm text-on-surface-variant">ความพร้อม TCAS รวม</span>
+            <span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">verified</span>
+          </div>
+          <span id="analytics-kpi-readiness" class="font-display text-headline-lg text-on-surface tabular-nums">50%</span>
+          <span id="analytics-kpi-readiness-delta" class="font-label text-label-sm text-secondary-text">+12% this week</span>
+        </article>
+
+        <article class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <span data-th="แนวโน้ม GPAX" data-en="GPAX Trajectory" class="font-label text-label-sm text-on-surface-variant">แนวโน้ม GPAX</span>
+            <span class="material-symbols-outlined text-[20px] text-secondary-text" aria-hidden="true">trending_up</span>
+          </div>
+          <span id="analytics-kpi-gpax" class="font-display text-headline-lg text-on-surface tabular-nums">3.75</span>
+          <span id="analytics-kpi-gpax-delta" class="font-label text-label-sm text-secondary-text">+0.13 since start</span>
+        </article>
+
+        <article class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <span data-th="วินัยการอ่าน &amp; สถิติ" data-en="Study Velocity &amp; Streak" class="font-label text-label-sm text-on-surface-variant">วินัยการอ่าน &amp; สถิติ</span>
+            <span class="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">local_fire_department</span>
+          </div>
+          <span id="analytics-kpi-velocity" class="font-display text-headline-lg text-on-surface tabular-nums">6 hrs/wk</span>
+          <span id="analytics-kpi-velocity-sub" class="font-label text-label-sm text-on-surface-variant">4 / 9 waypoints</span>
+        </article>
+
+        <article class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-1.5">
+          <div class="flex items-center justify-between">
+            <span data-th="ความเหมาะสมคณะเป้าหมาย" data-en="Projected Admission Fit" class="font-label text-label-sm text-on-surface-variant">ความเหมาะสมคณะเป้าหมาย</span>
+            <span class="material-symbols-outlined text-[20px] text-secondary-text" aria-hidden="true">school</span>
+          </div>
+          <span id="analytics-kpi-fit" class="font-display text-headline-lg text-secondary-text">Strong</span>
+          <span id="analytics-kpi-fit-major" class="font-label text-label-sm text-on-surface-variant truncate">Computer Engineering</span>
+        </article>
+      </section>
+
+      <!-- Over-Time Progress Trend Chart + TCAS 1-4 Round Breakdown -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-start">
+        <!-- SVG Dual-Line Progress Trend Chart -->
+        <article class="lg:col-span-8 p-gutter-xl rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+          <div class="flex flex-wrap items-center justify-between gap-gutter-sm">
+            <div class="flex flex-col gap-0.5">
+              <h2 data-th="กราฟพัฒนาการความพร้อมและ GPAX" data-en="Over-Time Readiness &amp; GPAX Trend" class="font-headline text-headline-md text-on-surface">กราฟพัฒนาการความพร้อมและ GPAX</h2>
+              <span data-th="ชี้หรือแตะที่จุดบนกราฟเพื่อดูรายละเอียดแต่ละช่วงเวลา" data-en="Hover or tap data points to inspect timestamped snapshots" class="font-label text-label-sm text-on-surface-variant">ชี้หรือแตะที่จุดบนกราฟเพื่อดูรายละเอียดแต่ละช่วงเวลา</span>
+            </div>
+
+            <div class="inline-flex items-center gap-1 p-1 rounded-full bg-surface-container-low border border-outline-variant" role="group" aria-label="Time range">
+              <button type="button" data-analytics-range="7d" class="px-3 py-1 rounded-full font-label text-label-sm text-on-surface-variant" data-th="7 วัน" data-en="7D">7 วัน</button>
+              <button type="button" data-analytics-range="30d" class="px-3 py-1 rounded-full font-label text-label-sm text-on-surface-variant" data-th="30 วัน" data-en="30D">30 วัน</button>
+              <button type="button" data-analytics-range="all" class="px-3 py-1 rounded-full bg-primary text-on-primary font-label text-label-sm" data-th="ทั้งหมด" data-en="All Time">ทั้งหมด</button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-gutter-md font-label text-label-sm">
+            <span class="inline-flex items-center gap-1.5 text-on-surface">
+              <span class="w-3 h-1 rounded-full bg-primary inline-block"></span>
+              <span data-th="ความพร้อม TCAS (%)" data-en="TCAS Readiness (%)">ความพร้อม TCAS (%)</span>
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-on-surface">
+              <span class="w-3 h-1 rounded-full inline-block pf-swatch-terracotta"></span>
+              <span data-th="GPAX (สเกลเปรียบเทียบ)" data-en="GPAX (Scaled)">GPAX (สเกลเปรียบเทียบ)</span>
+            </span>
+          </div>
+
+          <div class="relative w-full">
+            <svg id="analytics-trend-svg" viewBox="0 0 640 240" class="w-full h-auto overflow-visible" role="img" aria-label="Longitudinal progress chart"></svg>
+            <div id="analytics-chart-tooltip" class="hidden absolute z-20 pointer-events-none px-3 py-2 rounded-xl bg-primary text-on-primary shadow-lg font-label text-label-sm max-w-[220px]"></div>
+          </div>
+        </article>
+
+        <!-- TCAS 1-4 Round Readiness Breakdown -->
+        <article class="lg:col-span-4 p-gutter-xl rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+          <div class="flex flex-col gap-0.5">
+            <h2 data-th="ความพร้อมแยกตามรอบ TCAS 1–4" data-en="TCAS 1–4 Round Readiness" class="font-headline text-headline-md text-on-surface">ความพร้อมแยกตามรอบ TCAS 1–4</h2>
+            <span data-th="เปรียบเทียบความคืบหน้าแต่ละรอบ" data-en="Spot which admission round needs focus" class="font-label text-label-sm text-on-surface-variant">เปรียบเทียบความคืบหน้าแต่ละรอบ</span>
+          </div>
+          <div id="analytics-round-bars" class="flex flex-col gap-gutter-md"></div>
+        </article>
+      </section>
+
+      <!-- AI Longitudinal Insights + Chronological Activity Log -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-lg items-start">
+        <article class="lg:col-span-5 p-gutter-xl rounded-xl bg-surface-container-low border border-outline-variant flex flex-col gap-gutter-md">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[22px] text-primary" aria-hidden="true">auto_awesome</span>
+            <h2 data-th="บทวิเคราะห์เชิงลึกจาก AI" data-en="AI Longitudinal Insights" class="font-headline text-headline-md text-on-surface">บทวิเคราะห์เชิงลึกจาก AI</h2>
+          </div>
+          <div id="analytics-ai-insights" class="flex flex-col gap-gutter-sm"></div>
+        </article>
+
+        <article class="lg:col-span-7 p-gutter-xl rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+          <div class="flex items-center justify-between gap-gutter-sm">
+            <h2 data-th="ไทม์ไลน์บันทึกพัฒนาการและการปรับแผน" data-en="Milestone &amp; Reroute Activity Log" class="font-headline text-headline-md text-on-surface">ไทม์ไลน์บันทึกพัฒนาการและการปรับแผน</h2>
+            <span id="analytics-log-count" class="px-2.5 py-0.5 rounded-full bg-surface-container-low font-metric text-label-sm text-on-surface-variant tabular-nums">0</span>
+          </div>
+          <div id="analytics-activity-log" class="flex flex-col gap-gutter-xs max-h-[300px] overflow-y-auto pr-1"></div>
+        </article>
+      </section>
+    </main>
+
+    <!-- Accuracy Footer -->
+    <footer class="w-full border-t border-outline-variant bg-surface">
+      <div class="max-w-[1200px] mx-auto px-gutter-xl py-gutter-md flex flex-wrap items-center justify-between gap-gutter-md">
+        <span data-th="PathFinder • เว็บไซต์ครบทั้ง 7 หน้า" data-en="PathFinder • Complete 7-View Website" class="font-label text-label-sm text-on-surface-variant">PathFinder • เว็บไซต์ครบทั้ง 7 หน้า</span>
+        <span class="inline-flex items-center gap-1.5 px-gutter-md py-1 rounded-full bg-secondary-container text-on-secondary-container font-label text-label-sm">
+          <span class="material-symbols-outlined text-[16px] text-secondary-text shrink-0 pf-icon-fill" aria-hidden="true">check_circle</span>
+          <span data-th="โปรดตรวจสอบเกณฑ์ค่าน้ำหนัก TCAS อย่างเป็นทางการที่ mytcas.com" data-en="Verify official yearly TCAS weightings on mytcas.com">โปรดตรวจสอบเกณฑ์ค่าน้ำหนัก TCAS อย่างเป็นทางการที่ mytcas.com</span>
+        </span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Always-Visible Floating AI Coach Button & Live Behavior Popover -->
+  <button id="floating-ai-coach-btn" type="button" aria-expanded="false" aria-controls="floating-ai-coach-panel" class="fixed bottom-5 right-5 z-40 px-4 py-3 rounded-full bg-primary text-on-primary shadow-xl border border-outline-variant/20 flex items-center gap-2 hover:shadow-2xl transition-shadow">
+    <span class="w-2.5 h-2.5 rounded-full bg-secondary-container animate-pulse shrink-0" aria-hidden="true"></span>
+    <span class="material-symbols-outlined text-[22px] shrink-0" aria-hidden="true">psychology</span>
+    <span data-th="AI โค้ช" data-en="AI Coach" class="font-label text-label-lg whitespace-nowrap">AI โค้ช</span>
+    <span id="floating-coach-badge" class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-label-sm tabular-nums">0</span>
+  </button>
+
+  <aside id="floating-ai-coach-panel" role="dialog" aria-label="AI Coach Live Behavior Analyzer" class="hidden fixed bottom-20 right-5 z-40 w-[350px] max-w-[calc(100vw-2.5rem)] rounded-2xl bg-surface-container-lowest border border-outline-variant shadow-2xl p-gutter-md flex flex-col gap-gutter-sm">
+    <header class="flex items-center justify-between gap-gutter-sm">
+      <div class="flex items-center gap-2">
+        <span class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">psychology</span>
+        </span>
+        <div class="flex flex-col">
+          <span data-th="AI โค้ชวิเคราะห์พฤติกรรม" data-en="Live Behavior AI Coach" class="font-title text-title-md text-on-surface">AI โค้ชวิเคราะห์พฤติกรรม</span>
+          <span id="floating-coach-last-action" class="font-label text-label-sm text-on-surface-variant">กำลังวิเคราะห์การใช้งาน...</span>
+        </div>
+      </div>
+      <button id="floating-coach-close" type="button" aria-label="Close AI Coach" class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface shrink-0">
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">close</span>
+      </button>
+    </header>
+
+    <div class="flex flex-wrap items-center gap-1.5">
+      <span id="floating-coach-page-pill" class="px-2 py-0.5 rounded-full bg-primary-container text-on-primary-container font-label text-label-sm">หน้า 1/6</span>
+      <span id="floating-coach-actions-pill" class="px-2 py-0.5 rounded-full bg-surface-container-low font-metric text-label-sm text-on-surface-variant tabular-nums">0 กิจกรรม</span>
+      <span id="floating-coach-target-pill" class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-label-sm tabular-nums">GPAX 3.75</span>
+    </div>
+
+    <div class="p-gutter-sm rounded-xl bg-surface-container-low border border-outline-variant flex flex-col gap-1">
+      <span data-th="ความสนใจที่ตรวจพบ:" data-en="Detected Interests:" class="font-label text-label-sm text-secondary-text">ความสนใจที่ตรวจพบ:</span>
+      <p id="floating-coach-interests-pill" class="font-label text-label-md text-on-surface">AI &amp; เทคโนโลยี, ออกแบบ UX</p>
+    </div>
+
+    <div class="p-gutter-sm rounded-xl bg-tertiary-container/60 border border-outline-variant flex flex-col gap-1">
+      <div class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px] text-primary shrink-0" aria-hidden="true">auto_awesome</span>
+        <span data-th="คำแนะนำตามพฤติกรรมปัจจุบัน" data-en="Real-Time Behavior Insight" class="font-label text-label-sm text-primary">คำแนะนำตามพฤติกรรมปัจจุบัน</span>
+      </div>
+      <p id="floating-coach-insight" class="font-body text-body-md text-on-surface"></p>
+    </div>
+
+    <button id="floating-coach-open-full" type="button" data-go-page="6" class="w-full py-2.5 px-gutter-md rounded-full bg-primary text-on-primary font-label text-label-md flex items-center justify-center gap-1.5">
+      <span class="material-symbols-outlined text-[18px]" aria-hidden="true">forum</span>
+      <span data-th="เปิดหน้าต่าง AI โค้ชแบบเต็ม →" data-en="Open Full AI Coach →">เปิดหน้าต่าง AI โค้ชแบบเต็ม →</span>
+    </button>
+  </aside>
+
+  <!-- Reroute Modal -->
+  <div id="reroute-modal" role="dialog" aria-modal="true" class="hidden fixed inset-0 z-50 bg-primary/40 flex items-center justify-center p-gutter-md">
+    <div class="w-full max-w-md p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-lg">
+      <header class="flex items-center justify-between gap-gutter-sm">
+        <h2 data-th="ปรับเส้นทางแผนใหม่" data-en="Reroute Your Plan" class="font-headline text-headline-md text-on-surface">ปรับเส้นทางแผนใหม่</h2>
+        <button id="close-reroute-btn" type="button" aria-label="Close modal" class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface">
+          <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+        </button>
+      </header>
+      <div class="flex flex-col gap-gutter-sm">
+        <p data-th="มีอะไรเปลี่ยนไปในตารางของคุณ? ระบบจะคำนวณเป้าหมายให้ใหม่แบบไม่กดดัน" data-en="What changed in your schedule? We will recalculate your milestones calmly." class="font-body text-body-md text-on-surface-variant">มีอะไรเปลี่ยนไปในตารางของคุณ? ระบบจะคำนวณเป้าหมายให้ใหม่แบบไม่กดดัน</p>
+        <button type="button" data-reroute-option data-reroute-key="missed" class="p-gutter-md rounded-lg border border-primary bg-surface-container-low text-left font-title text-title-md text-on-surface"><span data-th="หยุดอ่านไป 2 สัปดาห์ (ช่วงสอบโรงเรียน)" data-en="Missed 2 study weeks (exam season)">หยุดอ่านไป 2 สัปดาห์ (ช่วงสอบโรงเรียน)</span></button>
+        <button type="button" data-reroute-option data-reroute-key="hours" class="p-gutter-md rounded-lg border border-outline-variant bg-surface text-left font-title text-title-md text-on-surface"><span data-th="มีเวลาว่างน้อยลง (เหลือ 4 ชม./สัปดาห์)" data-en="Less free time (down to 4 hrs/week)">มีเวลาว่างน้อยลง (เหลือ 4 ชม./สัปดาห์)</span></button>
+        <button type="button" data-reroute-option data-reroute-key="switch" class="p-gutter-md rounded-lg border border-outline-variant bg-surface text-left font-title text-title-md text-on-surface"><span data-th="ต้องการเปลี่ยนคณะเป้าหมาย" data-en="Switch target major">ต้องการเปลี่ยนคณะเป้าหมาย</span></button>
+      </div>
+      <button id="apply-reroute-btn" type="button" data-th="คำนวณไทม์ไลน์ใหม่" data-en="Recalculate Timeline" class="w-full py-3 px-gutter-lg rounded-full bg-primary text-on-primary font-label text-label-lg">คำนวณไทม์ไลน์ใหม่</button>
+    </div>
+  </div>
+
+  <!-- Waypoint Deep-Dive Execution Drawer -->
+  <!-- #endregion -->
+
+  <!-- #region [HTML 3.9] Overlays: Waypoint Drawer, Auth Modal & Full-Window Profile -->
+  <!-- ==================== [HTML 3.9] OVERLAYS: WAYPOINT DRAWER, AUTH & PROFILE ==================== -->
+  <div id="waypoint-drawer" role="dialog" aria-modal="true" aria-labelledby="wp-drawer-title" class="hidden fixed inset-0 z-50">
+    <div id="wp-drawer-backdrop" class="fixed inset-0 bg-primary/40"></div>
+    <div class="fixed bottom-0 inset-x-0 sm:inset-x-auto sm:top-0 sm:right-0 sm:bottom-0 w-full sm:max-w-md max-h-[870px] sm:max-h-full overflow-y-auto bg-surface-container-lowest border-t sm:border-t-0 sm:border-l border-outline-variant rounded-t-2xl sm:rounded-t-none sm:rounded-l-2xl shadow-2xl p-gutter-lg flex flex-col justify-between gap-gutter-lg" data-stitch-vh="max-h-[870px]===max-h-[85vh]">
+      <div class="flex flex-col gap-gutter-md">
+        <header class="flex items-start justify-between gap-gutter-sm">
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span id="wp-drawer-round" class="px-gutter-sm py-0.5 rounded-full bg-primary text-on-primary font-label text-label-sm">รอบ 1 Portfolio</span>
+            <span id="wp-drawer-date" class="px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-label-sm">ต.ค.–พ.ย.</span>
+            <span id="wp-drawer-hours" class="px-gutter-sm py-0.5 rounded-full bg-surface-container-low font-metric text-label-sm text-on-surface-variant tabular-nums">~2 ชม./สัปดาห์</span>
+          </div>
+          <button id="wp-drawer-close" type="button" aria-label="Close drawer" class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface shrink-0">
+            <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+          </button>
+        </header>
+        <div class="flex flex-col gap-1">
+          <h2 id="wp-drawer-title" class="font-headline text-headline-md text-on-surface"></h2>
+          <p id="wp-drawer-desc" class="font-body text-body-md text-on-surface-variant"></p>
+        </div>
+        <div class="flex flex-col gap-gutter-xs p-gutter-md rounded-xl bg-surface-container-low border border-outline-variant">
+          <span data-th="ขั้นตอนลงมือทำทีละขั้น" data-en="Step-by-Step Execution Guide" class="font-label text-label-md text-primary">ขั้นตอนลงมือทำทีละขั้น</span>
+          <ol id="wp-drawer-steps" class="flex flex-col gap-2 font-body text-body-md text-on-surface list-decimal list-inside"></ol>
+        </div>
+        <div class="flex flex-col gap-gutter-xs p-gutter-md rounded-xl bg-tertiary-container border border-outline-variant">
+          <span data-th="เครื่องมือและแหล่งข้อมูลแนะนำ" data-en="Recommended Resources &amp; Tools" class="font-label text-label-md text-on-tertiary-container">เครื่องมือและแหล่งข้อมูลแนะนำ</span>
+          <p id="wp-drawer-tools" class="font-body text-body-md text-on-tertiary-container"></p>
+        </div>
+      </div>
+      <button id="wp-drawer-toggle-btn" type="button" class="w-full py-3 px-gutter-lg rounded-full bg-primary text-on-primary font-label text-label-lg flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[18px]" aria-hidden="true">check_circle</span>
+        <span id="wp-drawer-toggle-label"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Full Plan Drawer (All Rounds + Add Custom Item + .ics / Google Calendar) -->
+  <div id="rm-full-plan-drawer" role="dialog" aria-modal="true" aria-labelledby="full-plan-title" class="hidden fixed inset-0 z-50">
+    <div id="full-plan-backdrop" class="absolute inset-0 bg-primary/40"></div>
+    <div class="absolute right-0 top-0 bottom-0 w-full max-w-xl bg-surface-container-lowest border-l border-outline-variant shadow-2xl p-gutter-lg overflow-y-auto flex flex-col gap-gutter-md">
+      <header class="flex items-start justify-between gap-gutter-sm pb-gutter-sm border-b border-outline-variant">
+        <div class="flex flex-col gap-0.5">
+          <span class="font-label text-label-sm text-primary font-semibold" data-th="แผนการเตรียมตัวทั้งหมด" data-en="Complete TCAS70 Plan">แผนการเตรียมตัวทั้งหมด</span>
+          <h2 id="full-plan-title" class="font-headline text-title-lg text-on-surface" data-th="ทุกรายการทั้ง 4 รอบ" data-en="All Items Across 4 Rounds">ทุกรายการทั้ง 4 รอบ</h2>
+        </div>
+        <button id="close-full-plan-btn" type="button" aria-label="Close full plan" class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface shrink-0">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">close</span>
+        </button>
+      </header>
+
+      <!-- Calendar Export Actions -->
+      <div class="flex flex-wrap items-center gap-gutter-xs">
+        <button id="rm-download-ics-btn" type="button" class="inline-flex items-center gap-1.5 px-gutter-md py-2 rounded-full bg-primary text-on-primary font-label text-label-sm">
+          <span class="material-symbols-outlined text-[16px]" aria-hidden="true">download</span>
+          <span data-th="ดาวน์โหลด .ics" data-en="Download .ics">ดาวน์โหลด .ics</span>
+        </button>
+        <a id="rm-gcal-link" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-gutter-md py-2 rounded-full bg-surface-container-low border border-outline-variant text-on-surface font-label text-label-sm no-underline">
+          <span class="material-symbols-outlined text-[16px] text-secondary-text" aria-hidden="true">event</span>
+          <span data-th="เพิ่มลง Google Calendar" data-en="Add to Google Calendar">เพิ่มลง Google Calendar</span>
+        </a>
+      </div>
+
+      <!-- Add Custom Item Form -->
+      <form id="rm-add-custom-form" class="p-gutter-sm rounded-xl bg-surface-container-low border border-outline-variant flex flex-col gap-2">
+        <span class="font-label text-label-sm font-semibold text-on-surface" data-th="เพิ่มรายการของฉันเอง" data-en="Add Custom Checklist Item">เพิ่มรายการของฉันเอง</span>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <input id="rm-custom-title" aria-label="ชื่อรายการที่ต้องการเพิ่ม" type="text" required placeholder="เช่น สรุปสูตรฟิสิกส์ TPAT3..." class="flex-1 px-3 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant font-body text-body-sm text-on-surface focus:outline-none focus:border-primary">
+          <select id="rm-custom-round" aria-label="เลือกรอบ TCAS" class="px-3 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant font-label text-label-sm text-on-surface focus:outline-none focus:border-primary">
+            <option value="r1">รอบ 1 Portfolio</option>
+            <option value="r2">รอบ 2 Quota</option>
+            <option value="r3">รอบ 3 Admission</option>
+            <option value="r4">รอบ 4 Direct</option>
+          </select>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-on-primary font-label text-label-sm shrink-0" data-th="เพิ่ม" data-en="Add">เพิ่ม</button>
+        </div>
+      </form>
+
+      <!-- All Rounds Checklist Container -->
+      <div id="rm-full-plan-list" class="flex flex-col gap-gutter-md"></div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       DEVELOPER GUIDE — AUTH & PROFILE UI (Frontend & Backend Reference)
+       =====================================================================
+       FRONTEND STRUCTURE & REQUIRED HOOKS:
+       - Modal container : #auth-modal (toggle 'hidden'; keep crisp bg-primary/40, NO backdrop-blur)
+       - Mode tabs       : [role="tab"][data-auth-tab="login" | "signup"] (toggled by switchAuthTab)
+       - Forms           : #auth-login-form, #auth-signup-form, #auth-forgot-panel
+       - Login inputs    : #login-email, #login-password, #login-remember, #auth-login-submit-btn
+       - Signup inputs   : #signup-fullname, #signup-nickname, #signup-email, #signup-phone,
+                           #signup-password, #signup-grade (data-pf-dropdown="card"),
+                           #signup-school, #signup-avatar-picker, #auth-signup-submit-btn
+       - Password toggle : [data-toggle-pw="<input-id>"] (toggles input type + visibility icon)
+       - OAuth / Demo    : [data-social-auth="google"], #demo-login-btn
+       - Bilingual copy  : Use data-th="..." and data-en="..." on text nodes; setLang() syncs them.
+       - Curved dropdowns: Any <select data-pf-dropdown="card"> is enhanced by initCurvedDropdowns().
+       ===================================================================== -->
+  <!-- Auth Modal (Login / Sign Up / Demo Student / Forgot Password / Social Auth) -->
+  <div id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" class="hidden fixed inset-0 z-50 bg-primary/40 flex items-center justify-center p-gutter-md">
+    <div class="relative w-full max-w-[440px] max-h-[942px] overflow-y-auto p-6 sm:p-7 rounded-2xl bg-surface-container-lowest border border-outline-variant/80 shadow-2xl flex flex-col gap-5" data-stitch-vh="max-h-[942px]===max-h-[92vh]">
+      <!-- Top Bar: Brand + Mode Tabs + Close -->
+      <div class="flex items-center justify-between gap-2">
+        <div class="grid grid-cols-2 gap-1 p-1 rounded-full bg-surface-container-low border border-outline-variant/80" role="tablist">
+          <button type="button" role="tab" aria-selected="true" data-auth-tab="login" class="px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-label text-label-sm transition-all duration-200" data-th="เข้าสู่ระบบ" data-en="Sign in">เข้าสู่ระบบ</button>
+          <button type="button" role="tab" aria-selected="false" data-auth-tab="signup" class="px-3.5 py-1.5 rounded-full text-on-surface-variant font-label text-label-sm transition-all duration-200" data-th="สร้างบัญชี" data-en="Create account">สร้างบัญชี</button>
+        </div>
+        <button id="close-auth-btn" type="button" aria-label="Close auth modal" class="w-8 h-8 rounded-full hover:bg-surface-container-high/80 flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors shrink-0">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">close</span>
+        </button>
+      </div>
+
+      <!-- Editorial Title & Subtitle -->
+      <header class="flex flex-col gap-1">
+        <span class="font-label text-[11px] font-semibold uppercase tracking-wider text-primary/75">PathFinder</span>
+        <h2 id="auth-modal-title" data-th="เข้าสู่ระบบ" data-en="Sign in to PathFinder" class="font-headline text-2xl font-semibold tracking-tight text-on-surface">เข้าสู่ระบบ</h2>
+        <p id="auth-modal-subtitle" data-th="บันทึกแผนการเรียนและคะแนน TCAS ของคุณไว้ในที่เดียว" data-en="Save your study plan and TCAS score targets in one place." class="font-body text-body-sm text-on-surface-variant">บันทึกแผนการเรียนและคะแนน TCAS ของคุณไว้ในที่เดียว</p>
+      </header>
+
+      <!-- Inline Validation / Info Message -->
+      <div id="auth-error-msg" class="hidden px-3.5 py-2.5 rounded-2xl bg-tertiary-container text-on-tertiary-container font-label text-label-sm"></div>
+
+      <!-- Login Form -->
+      <form id="auth-login-form" class="flex flex-col gap-3.5">
+        <button type="button" data-social-auth="google" aria-label="Continue with Google" class="w-full h-11 px-4 rounded-2xl bg-white hover:bg-surface-container-low border border-outline-variant hover:border-primary/45 flex items-center justify-center gap-2.5 shadow-sm font-label text-label-md font-medium text-on-surface transition-all duration-200">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"></path>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"></path>
+            <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"></path>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"></path>
+          </svg>
+          <span data-th="ดำเนินการต่อด้วย Google" data-en="Continue with Google">ดำเนินการต่อด้วย Google</span>
+        </button>
+
+        <div class="flex items-center gap-3">
+          <span class="h-px flex-1 bg-outline-variant/80"></span>
+          <span data-th="หรือ" data-en="or" class="font-label text-xs text-on-surface-variant">หรือ</span>
+          <span class="h-px flex-1 bg-outline-variant/80"></span>
+        </div>
+
+        <label class="flex flex-col gap-1.5">
+          <span data-th="อีเมล" data-en="Email" class="font-label text-xs font-medium text-on-surface-variant">อีเมล</span>
+          <div class="flex items-center px-3.5 py-2.5 rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary/45 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all duration-200">
+            <input id="login-email" type="email" required placeholder="student@school.ac.th" class="w-full border-0 p-0 bg-transparent font-body text-body-md text-on-surface placeholder:text-on-surface-variant/55 focus:ring-0 focus:outline-none">
+          </div>
+        </label>
+
+        <div class="flex flex-col gap-1.5">
+          <div class="flex items-center justify-between gap-2">
+            <label for="login-password" data-th="รหัสผ่าน" data-en="Password" class="font-label text-xs font-medium text-on-surface-variant">รหัสผ่าน</label>
+            <button id="auth-forgot-btn" type="button" class="font-label text-xs font-medium text-primary hover:underline" data-th="ลืมรหัสผ่าน?" data-en="Forgot password?">ลืมรหัสผ่าน?</button>
+          </div>
+          <div class="flex items-center gap-2 px-3.5 py-2.5 rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary/45 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all duration-200">
+            <input id="login-password" type="password" required placeholder="••••••••" class="flex-1 min-w-0 border-0 p-0 bg-transparent font-body text-body-md text-on-surface placeholder:text-on-surface-variant/55 focus:ring-0 focus:outline-none">
+            <button type="button" data-toggle-pw="login-password" aria-label="Toggle password visibility" class="shrink-0 p-1 rounded-full hover:bg-surface-container-high/60 text-on-surface-variant flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <label class="inline-flex items-center gap-2 cursor-pointer self-start">
+          <input id="login-remember" type="checkbox" checked class="w-4 h-4 rounded-md text-primary focus:ring-primary/30">
+          <span data-th="จดจำการเข้าสู่ระบบ" data-en="Keep me signed in" class="font-label text-xs text-on-surface-variant">จดจำการเข้าสู่ระบบ</span>
+        </label>
+
+        <!-- Inline Forgot Password Recovery -->
+        <div id="auth-forgot-panel" class="hidden p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant flex flex-col gap-2">
+          <span data-th="ตั้งรหัสผ่านใหม่" data-en="Reset password" class="font-label text-xs font-medium text-on-surface">ตั้งรหัสผ่านใหม่</span>
+          <input id="forgot-email" aria-label="อีเมลสำหรับตั้งรหัสผ่านใหม่" type="email" placeholder="your@email.ac.th" class="w-full px-3.5 py-2 rounded-2xl bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all duration-200 font-body text-body-sm text-on-surface focus:outline-none">
+          <input id="forgot-new-pw" aria-label="รหัสผ่านใหม่" type="password" placeholder="New password (6+ chars)" class="w-full px-3.5 py-2 rounded-2xl bg-surface-container-lowest border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all duration-200 font-body text-body-sm text-on-surface focus:outline-none">
+          <div class="flex items-center justify-end gap-2">
+            <button id="forgot-cancel-btn" type="button" class="px-3 py-1 rounded-full font-label text-xs text-on-surface-variant hover:bg-surface-container-high/60" data-th="ยกเลิก" data-en="Cancel">ยกเลิก</button>
+            <button id="forgot-confirm-btn" type="button" class="px-3.5 py-1 rounded-full bg-primary text-on-primary font-label text-xs font-medium" data-th="บันทึกรหัสใหม่" data-en="Update password">บันทึกรหัสใหม่</button>
+          </div>
+        </div>
+
+        <button id="auth-login-submit-btn" type="button" class="w-full py-3 rounded-2xl bg-primary hover:bg-primary/90 text-on-primary font-label text-label-lg font-medium shadow-sm transition-all duration-200" data-th="เข้าสู่ระบบ" data-en="Sign in">เข้าสู่ระบบ</button>
+
+        <div class="flex items-center justify-between gap-2 pt-1 text-xs font-label text-on-surface-variant">
+          <div>
+            <span data-th="ยังไม่มีบัญชี?" data-en="New here?">ยังไม่มีบัญชี?</span>
+            <button type="button" data-auth-tab="signup" class="font-semibold text-primary hover:underline ml-1" data-th="สร้างบัญชี" data-en="Create account">สร้างบัญชี</button>
+          </div>
+          <button id="demo-login-btn" type="button" class="font-medium text-on-surface-variant hover:text-primary underline decoration-outline-variant underline-offset-2 transition-colors" data-th="ทดลองบัญชีตัวอย่าง" data-en="Try demo account">ทดลองบัญชีตัวอย่าง</button>
+        </div>
+      </form>
+
+      <!-- Sign Up Form -->
+      <form id="auth-signup-form" class="hidden flex flex-col gap-3">
+        <button type="button" data-social-auth="google" aria-label="Register with Google" class="w-full h-11 px-4 rounded-2xl bg-white hover:bg-surface-container-low border border-outline-variant hover:border-primary/45 flex items-center justify-center gap-2.5 shadow-sm font-label text-label-md font-medium text-on-surface transition-all duration-200">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"></path>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"></path>
+            <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"></path>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"></path>
+          </svg>
+          <span data-th="สมัครด้วย Google" data-en="Continue with Google">สมัครด้วย Google</span>
+        </button>
+
+        <div class="flex items-center gap-3">
+          <span class="h-px flex-1 bg-outline-variant/80"></span>
+          <span data-th="หรือ" data-en="or" class="font-label text-xs text-on-surface-variant">หรือ</span>
+          <span class="h-px flex-1 bg-outline-variant/80"></span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label class="flex flex-col gap-1">
+            <span data-th="ชื่อ-นามสกุล" data-en="Full name" class="font-label text-xs font-medium text-on-surface-variant">ชื่อ-นามสกุล</span>
+            <div class="px-3.5 py-2 rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary/45 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all duration-200">
+              <input id="signup-fullname" type="text" required placeholder="Namo Wattana" class="w-full border-0 p-0 bg-transparent font-body text-body-md text-on-surface placeholder:text-on-surface-variant/55 focus:ring-0 focus:outline-none">
+            </div>
+          </label>
+          <label class="flex flex-col gap-1">
+            <span data-th="ชื่อเล่น" data-en="Nickname" class="font-label text-xs font-medium text-on-surface-variant">ชื่อเล่น</span>
+            <div class="px-3.5 py-2 rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary/45 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all duration-200">
+              <input id="signup-nickname" type="text" required placeholder="Namo" class="w-full border-0 p-0 bg-transparent font-body text-body-md text-on-surface placeholder:text-on-surface-variant/55 focus:ring-0 focus:outline-none">
+            </div>
+          </label>
+        </div>
+
+        <label class="flex flex-col gap-1">
+          <span data-th="อีเมล" data-en="Email" class="font-label text-xs font-medium text-on-surface-variant">อีเมล</span>
+          <div class="px-3.5 py-2 rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary/45 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all duration-200">
+            <input id="signup-email" type="email" required placeholder="namo@school.ac.th" class="w-full border-0 p-0 bg-transparent font-body text-body-md text-on-surface placeholder:text-on-surface-variant/55 focus:ring-0 focus:outline-none">
+          </div>
+        </label>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label class="flex flex-col gap-1">
+            <span data-th="เบอร์โทร (ไม่บังคับ)" data-en="Phone (optional)" class="font-label text-xs font-medium text-on-surface-variant">เบอร์โทร (ไม่บังคับ)</span>
+            <div class="px-3.5 py-2 rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary/45 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all duration-200">
+              <input id="signup-phone" type="tel" placeholder="081-234-5678" class="w-full border-0 p-0 bg-transparent font-body text-body-md text-on-surface placeholder:text-on-surface-variant/55 focus:ring-0 focus:outline-none">
+            </div>
+          </label>
+          <div class="flex flex-col gap-1">
+            <label for="signup-password" data-th="รหัสผ่าน (6+ ตัว)" data-en="Password (6+ chars)" class="font-label text-xs font-medium text-on-surface-variant">รหัสผ่าน (6+ ตัว)</label>
+            <div class="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary/45 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all duration-200">
+              <input id="signup-password" type="password" required minlength="6" placeholder="••••••••" class="flex-1 min-w-0 border-0 p-0 bg-transparent font-body text-body-md text-on-surface placeholder:text-on-surface-variant/55 focus:ring-0 focus:outline-none">
+              <button type="button" data-toggle-pw="signup-password" aria-label="Toggle password visibility" class="shrink-0 p-0.5 rounded-full hover:bg-surface-container-high/60 text-on-surface-variant flex items-center justify-center">
+                <span class="material-symbols-outlined text-[18px]" aria-hidden="true">visibility</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1">
+            <span data-th="ระดับชั้น" data-en="Grade" class="font-label text-xs font-medium text-on-surface-variant">ระดับชั้น</span>
+            <div class="px-3.5 py-2 rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary/45 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all duration-200">
+              <select id="signup-grade" aria-label="ระดับชั้น" data-pf-dropdown="card" class="w-full border-0 p-0 bg-transparent font-body text-body-md text-on-surface focus:ring-0 focus:outline-none">
+                <option value="M.4">ม.4 (M.4)</option>
+                <option value="M.5" selected>ม.5 (M.5)</option>
+                <option value="M.6">ม.6 (M.6)</option>
+              </select>
+            </div>
+          </div>
+          <label class="flex flex-col gap-1">
+            <span data-th="โรงเรียน (ไม่บังคับ)" data-en="School (optional)" class="font-label text-xs font-medium text-on-surface-variant">โรงเรียน (ไม่บังคับ)</span>
+            <div class="px-3.5 py-2 rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary/45 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 transition-all duration-200">
+              <input id="signup-school" type="text" placeholder="Triam Udom" class="w-full border-0 p-0 bg-transparent font-body text-body-md text-on-surface placeholder:text-on-surface-variant/55 focus:ring-0 focus:outline-none">
+            </div>
+          </label>
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <span data-th="อวตาร" data-en="Avatar" class="font-label text-xs font-medium text-on-surface-variant">อวตาร</span>
+          <div id="signup-avatar-picker" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <button id="auth-signup-submit-btn" type="button" class="w-full py-3 rounded-2xl bg-primary hover:bg-primary/90 text-on-primary font-label text-label-lg font-medium shadow-sm transition-all duration-200" data-th="สร้างบัญชี" data-en="Create account">สร้างบัญชี</button>
+
+        <p class="text-center font-label text-xs text-on-surface-variant pt-0.5">
+          <span data-th="มีบัญชีอยู่แล้ว?" data-en="Already have an account?">มีบัญชีอยู่แล้ว?</span>
+          <button type="button" data-auth-tab="login" class="font-semibold text-primary hover:underline ml-1" data-th="เข้าสู่ระบบ" data-en="Sign in">เข้าสู่ระบบ</button>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- User Profile & Personal Information Full Window (Reference-aligned layout, zero blur, existing features only) -->
+  <div id="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title" class="hidden fixed inset-0 z-50 bg-surface overflow-y-auto">
+    <div class="min-h-[1024px] w-full flex flex-col md:flex-row" data-stitch-vh="min-h-[1024px]===min-h-screen">
+      <!-- Left Sidebar (Matches reference screenshot structure with PathFinder navigation) -->
+      <aside class="w-full md:w-64 shrink-0 bg-surface-container-lowest border-b md:border-b-0 md:border-r border-outline-variant p-gutter-lg flex flex-col justify-between gap-gutter-lg">
+        <div class="flex flex-col gap-gutter-lg">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <span class="w-9 h-9 rounded-lg bg-primary text-on-primary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[20px]" aria-hidden="true">explore</span>
+              </span>
+              <span class="font-headline text-title-lg text-on-surface">PathFinder</span>
+            </div>
+            <button id="close-profile-btn" type="button" aria-label="Close profile window" class="md:hidden w-9 h-9 rounded-lg bg-surface-container-low border border-outline-variant flex items-center justify-center text-on-surface shrink-0">
+              <span class="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
+            </button>
+          </div>
+
+          <nav aria-label="Profile Window Navigation" class="hidden md:flex flex-col gap-1">
+            <button type="button" onclick="document.getElementById('profile-modal').classList.add('hidden'); goToPage('1');" class="w-full px-3 py-2 rounded-lg text-left font-label text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">home</span>
+              <span data-th="หน้าแรก" data-en="Home">หน้าแรก</span>
+            </button>
+            <button type="button" onclick="document.getElementById('profile-modal').classList.add('hidden'); goToPage('2');" class="w-full px-3 py-2 rounded-lg text-left font-label text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">tune</span>
+              <span data-th="สำรวจความสนใจ" data-en="Discovery">สำรวจความสนใจ</span>
+            </button>
+            <button type="button" onclick="document.getElementById('profile-modal').classList.add('hidden'); goToPage('3');" class="w-full px-3 py-2 rounded-lg text-left font-label text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">school</span>
+              <span data-th="คณะที่ใช่" data-en="Major Matches">คณะที่ใช่</span>
+            </button>
+            <button type="button" onclick="document.getElementById('profile-modal').classList.add('hidden'); goToPage('4');" class="w-full px-3 py-2 rounded-lg text-left font-label text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">map</span>
+              <span data-th="แผน TCAS Roadmap" data-en="TCAS Roadmap">แผน TCAS Roadmap</span>
+            </button>
+            <button type="button" onclick="document.getElementById('profile-modal').classList.add('hidden'); goToPage('5');" class="w-full px-3 py-2 rounded-lg text-left font-label text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">calculate</span>
+              <span data-th="จำลองคะแนน" data-en="Score Simulator">จำลองคะแนน</span>
+            </button>
+            <button type="button" onclick="document.getElementById('profile-modal').classList.add('hidden'); goToPage('6');" class="w-full px-3 py-2 rounded-lg text-left font-label text-label-md text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface flex items-center gap-2.5">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">psychology</span>
+              <span data-th="AI โค้ช" data-en="AI Coach">AI โค้ช</span>
+            </button>
+          </nav>
+        </div>
+
+        <div class="hidden md:flex flex-col gap-1 pt-gutter-md border-t border-outline-variant">
+          <button type="button" onclick="document.getElementById('profile-modal').classList.add('hidden');" class="w-full px-3 py-2 rounded-lg text-left font-label text-label-md text-on-surface flex items-center gap-2.5 hover:bg-surface-container-low">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
+            <span data-th="กลับหน้าต่างเดิม" data-en="Back to Workspace">กลับหน้าต่างเดิม</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <div class="flex-1 min-w-0 px-gutter-lg md:px-gutter-xl py-gutter-xl">
+        <div class="max-w-4xl mx-auto flex flex-col gap-gutter-lg">
+          <!-- Header -->
+          <header class="flex items-start justify-between gap-gutter-md">
+            <div class="flex flex-col gap-0.5">
+              <h2 id="profile-modal-title" data-th="ข้อมูลส่วนตัวและโปรไฟล์" data-en="Personal Information" class="font-headline text-headline-lg text-on-surface">ข้อมูลส่วนตัวและโปรไฟล์</h2>
+              <p data-th="อัปเดตข้อมูลส่วนตัวและรูปโปรไฟล์ของคุณ" data-en="Update your personal and account information" class="font-body text-body-md text-on-surface-variant">อัปเดตข้อมูลส่วนตัวและรูปโปรไฟล์ของคุณ</p>
+            </div>
+            <button type="button" onclick="document.getElementById('profile-modal').classList.add('hidden');" class="hidden md:inline-flex items-center gap-1.5 px-gutter-md py-2 rounded-lg bg-surface-container-lowest border border-outline-variant font-label text-label-md text-on-surface hover:border-primary shrink-0">
+              <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
+              <span data-th="กลับ" data-en="Back">กลับ</span>
+            </button>
+          </header>
+
+          <!-- Card 1: Personal Information (Left Avatar + Right 2-Column Form Grid) -->
+          <section class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-lg">
+            <div class="grid grid-cols-1 md:grid-cols-[150px_1fr] gap-gutter-xl items-start">
+              <!-- Left Column: Avatar Preview + Change Photo -->
+              <div class="flex flex-col items-center gap-gutter-sm">
+                <span id="profile-preview-avatar" class="w-24 h-24 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0"></span>
+                <input id="prof-avatar-file-input" aria-label="อัปโหลดรูปโปรไฟล์" type="file" accept="image/*" class="hidden">
+                <button id="prof-upload-avatar-btn" type="button" class="px-gutter-md py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant font-label text-label-md text-on-surface hover:border-primary">
+                  <span data-th="เปลี่ยนรูป" data-en="Change Photo">เปลี่ยนรูป</span>
+                </button>
+                <button id="prof-remove-avatar-img-btn" type="button" class="hidden px-2.5 py-1 rounded-lg bg-tertiary-container text-on-tertiary-container font-label text-label-sm flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]" aria-hidden="true">delete</span>
+                  <span data-th="ลบรูป" data-en="Remove">ลบรูป</span>
+                </button>
+              </div>
+
+              <!-- Right Column: 2-Column Info Grid -->
+              <form id="profile-edit-form" class="flex flex-col gap-gutter-md min-w-0">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter-md">
+                  <label class="flex flex-col gap-1 min-w-0">
+                    <span data-th="ชื่อ-นามสกุล" data-en="Full Name" class="font-label text-label-md font-medium text-on-surface">ชื่อ-นามสกุล</span>
+                    <input id="prof-fullname" type="text" required class="px-gutter-md py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/50 font-body text-body-md text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                  </label>
+                  <div class="flex flex-col gap-1 min-w-0">
+                    <span data-th="อีเมล" data-en="Email" class="font-label text-label-md font-medium text-on-surface">อีเมล</span>
+                    <div id="profile-email-readout" class="px-gutter-md py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/50 font-body text-body-md text-on-surface truncate">demo@pathfinder.ac.th</div>
+                  </div>
+                  <label class="flex flex-col gap-1 min-w-0">
+                    <span data-th="ชื่อเล่น" data-en="Nickname" class="font-label text-label-md font-medium text-on-surface">ชื่อเล่น</span>
+                    <input id="prof-nickname" type="text" required class="px-gutter-md py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/50 font-body text-body-md text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                  </label>
+                  <label class="flex flex-col gap-1 min-w-0">
+                    <span data-th="โรงเรียน" data-en="School" class="font-label text-label-md font-medium text-on-surface">โรงเรียน</span>
+                    <input id="prof-school" type="text" class="px-gutter-md py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/50 font-body text-body-md text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                  </label>
+                  <div class="flex flex-col gap-1 min-w-0">
+                    <span data-th="ระดับชั้น" data-en="Grade" class="font-label text-label-md font-medium text-on-surface">ระดับชั้น</span>
+                    <select id="prof-grade" aria-label="ระดับชั้น" data-pf-dropdown="box" class="px-gutter-md py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/50 font-body text-body-md text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                      <option value="M.4">ม.4 (M.4)</option>
+                      <option value="M.5">ม.5 (M.5)</option>
+                      <option value="M.6">ม.6 (M.6)</option>
+                    </select>
+                  </div>
+                  <div class="flex flex-col gap-1 min-w-0">
+                    <span data-th="ปีเป้าหมาย TCAS" data-en="Target Year" class="font-label text-label-md font-medium text-on-surface">ปีเป้าหมาย TCAS</span>
+                    <select id="prof-target-year" aria-label="ปีเป้าหมาย TCAS" data-pf-dropdown="box" class="px-gutter-md py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/50 font-body text-body-md text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                      <option value="TCAS69">TCAS69</option>
+                      <option value="TCAS70">TCAS70</option>
+                      <option value="TCAS71">TCAS71</option>
+                    </select>
+                  </div>
+                </div>
+
+                <label class="flex flex-col gap-1 min-w-0">
+                  <span data-th="เป้าหมายส่วนตัว / คติประจำใจ" data-en="Personal Motivation / Bio" class="font-label text-label-md font-medium text-on-surface">เป้าหมายส่วนตัว / คติประจำใจ</span>
+                  <textarea id="prof-bio" rows="2" class="px-gutter-md py-2.5 rounded-lg bg-surface-container-low border border-outline-variant/50 font-body text-body-md text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"></textarea>
+                </label>
+
+                <!-- Collapsible Avatar Studio (8 Presets & Colors) -->
+                <details class="rounded-lg bg-surface-container-low border border-outline-variant/60 p-gutter-sm">
+                  <summary class="cursor-pointer font-label text-label-sm font-medium text-on-surface-variant select-none" data-th="ปรับแต่งไอคอนอวตารและสีกรอบ" data-en="Customize Avatar Icon &amp; Frame Colors">ปรับแต่งไอคอนอวตารและสีกรอบ</summary>
+                  <div class="flex flex-col gap-gutter-sm pt-gutter-sm">
+                    <div id="profile-avatar-icons" class="grid grid-cols-4 sm:grid-cols-8 gap-2"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter-sm pt-1 border-t border-outline-variant/60">
+                      <div class="flex flex-col gap-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                          <span data-th="สีพื้นหลังอวตาร" data-en="Avatar Palette Color" class="font-label text-label-sm text-on-surface-variant">สีพื้นหลังอวตาร</span>
+                          <span id="prof-bg-color-hex" class="font-metric text-label-sm text-on-surface-variant">#1F3A3D</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                          <div id="profile-avatar-colors" class="flex flex-wrap items-center gap-1.5"></div>
+                          <label class="relative w-7 h-7 rounded-full cursor-pointer border-2 border-outline-variant shrink-0 overflow-hidden" title="Color wheel">
+                            <span class="block w-full h-full rounded-full pf-conic-rainbow"></span>
+                            <input id="prof-bg-color-wheel" type="color" value="#1F3A3D" aria-label="Avatar background color wheel" class="sr-only">
+                          </label>
+                        </div>
+                      </div>
+                      <div class="flex flex-col gap-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                          <span data-th="สีกรอบวงกลมโปรไฟล์" data-en="Circle Frame Color" class="font-label text-label-sm text-on-surface-variant">สีกรอบวงกลมโปรไฟล์</span>
+                          <span id="prof-frame-color-hex" class="font-metric text-label-sm text-on-surface-variant">#6B9080</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                          <div id="profile-frame-colors" class="flex flex-wrap items-center gap-1.5"></div>
+                          <label class="relative w-7 h-7 rounded-full cursor-pointer border-2 border-outline-variant shrink-0 overflow-hidden" title="Frame color wheel">
+                            <span class="block w-full h-full rounded-full pf-conic-rainbow"></span>
+                            <input id="prof-frame-color-wheel" type="color" value="#6B9080" aria-label="Profile circle frame color wheel" class="sr-only">
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+              </form>
+            </div>
+
+            <!-- Card Footer: Divider + Right-Aligned Save Changes -->
+            <div class="pt-gutter-md border-t border-outline-variant flex justify-end">
+              <button id="prof-save-btn" type="button" class="px-gutter-xl py-2.5 rounded-lg bg-primary text-on-primary font-label text-label-md font-semibold" data-th="บันทึกการเปลี่ยนแปลง" data-en="Save Changes">บันทึกการเปลี่ยนแปลง</button>
+            </div>
+          </section>
+
+          <!-- Card 2: Account & Plan Controls -->
+          <section class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+            <div class="flex flex-col gap-0.5">
+              <h3 class="font-headline text-title-lg text-on-surface" data-th="ข้อมูลบัญชีและแผนการเรียน" data-en="Account &amp; Plan Data">ข้อมูลบัญชีและแผนการเรียน</h3>
+              <p class="font-body text-body-md text-on-surface-variant" data-th="จัดการข้อมูลสำรองบัญชีหรือรีเซ็ตแผนการเรียนของคุณ" data-en="Manage your account backup or reset your study plan">จัดการข้อมูลสำรองบัญชีหรือรีเซ็ตแผนการเรียนของคุณ</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-gutter-sm">
+              <button id="prof-export-json-btn" type="button" class="px-gutter-md py-2 rounded-lg bg-surface-container-lowest border border-outline-variant font-label text-label-md text-primary hover:border-primary flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true">data_object</span>
+                <span data-th="ดู / คัดลอกข้อมูล JSON" data-en="Export JSON Data">ดู / คัดลอกข้อมูล JSON</span>
+              </button>
+              <button id="prof-reset-plan-btn" type="button" class="px-gutter-md py-2 rounded-lg bg-surface-container-lowest border border-outline-variant font-label text-label-md text-tertiary-text hover:border-tertiary flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px]" aria-hidden="true">restart_alt</span>
+                <span data-th="รีเซ็ตแผนการเรียน" data-en="Reset Plan">รีเซ็ตแผนการเรียน</span>
+              </button>
+            </div>
+
+            <div id="prof-json-preview-wrap" class="hidden flex flex-col gap-1.5 pt-2 border-t border-outline-variant/60">
+              <div class="flex items-center justify-between">
+                <span data-th="ข้อมูลสำรองบัญชี (JSON)" data-en="Account Backup (JSON)" class="font-label text-label-sm text-on-surface-variant">ข้อมูลสำรองบัญชี (JSON)</span>
+                <button id="prof-copy-json-btn" type="button" class="px-3 py-1 rounded-lg bg-primary text-on-primary font-label text-label-sm" data-th="คัดลอก JSON" data-en="Copy JSON">คัดลอก JSON</button>
+              </div>
+              <textarea id="prof-json-textarea" aria-label="ข้อมูลสำรองบัญชี (JSON)" readonly rows="4" class="w-full p-2.5 rounded-lg bg-surface-container-low border border-outline-variant font-metric text-label-sm text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"></textarea>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="pf-toast" role="status" aria-live="polite" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full bg-primary text-on-primary shadow-xl font-label text-label-md flex items-center gap-2">
+    <span class="material-symbols-outlined text-[18px]" aria-hidden="true">check_circle</span>
+    <span id="pf-toast-text"></span>
+  </div>
+
+
+  <!-- #endregion -->
+
+  <!-- ==================== [4] JAVASCRIPT (classic scripts, dependency order) ==================== -->
+  <script src="data/catalog.js"></script>
+  <script src="js/state-i18n.js"></script>
+  <script src="js/discovery-matches.js"></script>
+  <script src="js/roadmap.js"></script>
+  <script src="js/visualizers.js"></script>
+  <script src="js/sim-coach.js"></script>
+  <script src="js/auth-analytics-profile.js"></script>
+</body>
+</html>

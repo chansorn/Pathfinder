@@ -1,0 +1,457 @@
+<!DOCTYPE html><html lang="th"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PathFinder — ค้นหาตัวตนและพื้นฐานของคุณ</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">/** @type {import('tailwindcss').Config} */
+globalThis.tailwind = globalThis.tailwind || {};
+globalThis.tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        'warm-alabaster': '#FAF9F6',
+        'deep-sage': '#1F3A3D',
+        'eucalyptus-green': '#6B9080',
+        'warm-sand': '#EAE4D7',
+        'muted-terracotta': '#D98A4E',
+        'primary': '#1F3A3D',
+        'on-primary': '#FFFFFF',
+        'primary-container': '#D9F6FA',
+        'on-primary-container': '#021F22',
+        'secondary': '#6B9080',
+        'on-secondary': '#002116',
+        'secondary-container': '#D2FAE7',
+        'on-secondary-container': '#12372A',
+        'secondary-text': '#2A4D40',
+        'tertiary': '#D98A4E',
+        'on-tertiary': '#301400',
+        'tertiary-container': '#FFEDE4',
+        'on-tertiary-container': '#4F2500',
+        'tertiary-text': '#713700',
+        'surface': '#FAF9F6',
+        'on-surface': '#1F3A3D',
+        'surface-container-lowest': '#FDFCF9',
+        'surface-container-low': '#EAE4D7',
+        'surface-container': '#E3E2E0',
+        'on-surface-variant': '#464745',
+        'outline': '#777775',
+        'outline-variant': '#C7C6C4',
+        'error': '#BA1A1A',
+        'on-error': '#FFFFFF',
+      },
+      borderRadius: {
+        'sm': '8px',
+        'DEFAULT': '12px',
+        'md': '14px',
+        'lg': '20px',
+        'xl': '28px',
+        'full': '9999px',
+      },
+      spacing: {
+        'gutter-xs': '4px',
+        'gutter-sm': '8px',
+        'gutter-md': '16px',
+        'gutter-lg': '24px',
+        'gutter-xl': '32px',
+        'section': '48px',
+        'page-margin': '24px',
+      },
+      fontFamily: {
+        'display': ['"Google Sans"', 'sans-serif'],
+        'headline': ['"Google Sans"', 'sans-serif'],
+        'title': ['"Google Sans"', 'sans-serif'],
+        'body': ['"Google Sans"', 'sans-serif'],
+        'label': ['"Google Sans"', 'sans-serif'],
+        'metric': ['"JetBrains Mono"', 'sans-serif'],
+      },
+      fontSize: {
+        'display-lg': ['44px', { lineHeight: '54px', letterSpacing: '-0.4px', fontWeight: '700' }],
+        'display-lg-mobile': ['30px', { lineHeight: '38px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'headline-lg': ['34px', { lineHeight: '42px', letterSpacing: '-0.2px', fontWeight: '700' }],
+        'headline-lg-mobile': ['24px', { lineHeight: '32px', letterSpacing: '0px', fontWeight: '700' }],
+        'headline-md': ['22px', { lineHeight: '30px', letterSpacing: '0px', fontWeight: '700' }],
+        'title-lg': ['20px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '600' }],
+        'title-md': ['16px', { lineHeight: '24px', letterSpacing: '0px', fontWeight: '600' }],
+        'body-lg': ['17px', { lineHeight: '28px', letterSpacing: '0px', fontWeight: '400' }],
+        'body-md': ['15px', { lineHeight: '24px', letterSpacing: '0px', fontWeight: '400' }],
+        'label-lg': ['15px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+        'label-md': ['13px', { lineHeight: '18px', letterSpacing: '0.1px', fontWeight: '600' }],
+        'label-sm': ['12px', { lineHeight: '16px', letterSpacing: '0.2px', fontWeight: '600' }],
+        'metric-md': ['14px', { lineHeight: '20px', letterSpacing: '0px', fontWeight: '600' }],
+      },
+      transitionDuration: {
+        'state-change': '120ms',
+        'surface-enter': '240ms',
+        'surface-exit': '160ms',
+      },
+      transitionDelay: {
+        'state-change': '0ms',
+        'surface-enter': '0ms',
+        'surface-exit': '0ms',
+      },
+      transitionTimingFunction: {
+        'state-change': 'ease-out',
+        'surface-enter': 'cubic-bezier(0.2, 0, 0, 1)',
+        'surface-exit': 'cubic-bezier(0.3, 0, 1, 1)',
+      },
+    },
+  },
+};
+if (typeof module !== 'undefined') module.exports = globalThis.tailwind.config;
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&amp;family=Noto+Sans+Thai+Looped:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet">
+  <style>
+    .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp, .material-icons { display: inline-block; width: 1em; height: 1em; line-height: 1 !important; box-sizing: content-box; overflow: hidden; white-space: nowrap; direction: ltr; vertical-align: middle; }
+    button, a[data-component-id] {
+      transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), background-color 220ms ease, border-color 220ms ease, color 180ms ease, box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    button:not(:disabled):hover, a[data-component-id]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -8px rgba(31, 58, 61, 0.2);
+    }
+    button:not(:disabled):active, a[data-component-id]:active {
+      transform: translateY(0) scale(0.97);
+      box-shadow: 0 2px 6px -2px rgba(31, 58, 61, 0.12);
+      transition-duration: 90ms;
+    }
+    [data-step-panel]:not(.hidden) {
+      animation: panelSlideIn 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes panelSlideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      button, a[data-component-id], [data-step-panel] { transition: none !important; animation: none !important; transform: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+  <div class="min-h-[1024px] flex flex-col justify-between" data-stitch-vh="min-h-[1024px]===min-h-screen">
+
+    <!-- Top Navigation Bar (Task Flow: Logo + Back + Step Counter) -->
+    <header class="w-full border-b border-outline-variant bg-surface">
+      <div class="max-w-[1200px] mx-auto px-gutter-xl py-gutter-md flex items-center justify-between gap-gutter-lg">
+        <button id="back-step1-btn" type="button" class="inline-flex items-center gap-gutter-xs font-label text-label-md text-on-surface-variant hover:text-on-surface transition-colors duration-state-change">
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
+          <span data-th="เริ่มต้นใหม่" data-en="Reset Steps" data-design-text-token="label-md">เริ่มต้นใหม่</span>
+        </button>
+
+        <div class="flex items-center gap-gutter-sm">
+          <svg width="28" height="28" viewBox="0 0 34 34" fill="none" aria-hidden="true" class="shrink-0">
+            <path d="M7 5C7 3.89543 7.89543 3 9 3H25C26.1046 3 27 3.89543 27 5V30L17 24.5L7 30V5Z" fill="#1F3A3D"></path>
+            <circle cx="17" cy="14" r="5.5" stroke="#FAF9F6" stroke-width="1.5"></circle>
+            <path d="M19.5 11.5L17.9 15.6L14.5 16.5L16.1 12.4L19.5 11.5Z" fill="#D98A4E"></path>
+          </svg>
+          <span class="font-headline text-title-lg text-on-surface" data-design-text-token="title-lg">PathFinder</span>
+        </div>
+
+        <div class="flex items-center gap-gutter-sm">
+          <div role="group" aria-label="Language" class="inline-flex items-center p-0.5 rounded-full bg-surface-container-low border border-outline-variant">
+            <button type="button" data-lang-btn="th" class="px-2.5 py-1 rounded-full bg-primary text-on-primary font-label text-label-sm transition-colors duration-state-change">TH</button>
+            <button type="button" data-lang-btn="en" class="px-2.5 py-1 rounded-full text-on-surface-variant font-label text-label-sm transition-colors duration-state-change">EN</button>
+          </div>
+          <span id="desktop-step-badge" class="inline-flex items-center px-gutter-md py-gutter-xs rounded-full bg-surface-container-low border border-outline-variant font-metric text-metric-md text-on-surface tabular-nums" data-design-text-token="metric-md">
+            ขั้นที่ 1 / 3
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Focused Single-Column Stepper -->
+    <main class="flex-1 w-full max-w-[760px] mx-auto px-gutter-xl py-section flex flex-col gap-gutter-xl">
+
+      <!-- 3-Step Progress Header -->
+      <section class="flex flex-col gap-gutter-md">
+        <div class="grid grid-cols-3 gap-gutter-sm">
+          <button type="button" data-step-nav="1" class="flex items-center gap-gutter-sm p-gutter-sm rounded-lg bg-surface-container-low border border-primary text-left transition-colors duration-state-change">
+            <span class="w-6 h-6 rounded-full bg-primary text-on-primary font-metric text-label-sm flex items-center justify-center shrink-0">1</span>
+            <span data-th="ความสนใจ" data-en="Interests" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">ความสนใจ</span>
+          </button>
+          <button type="button" data-step-nav="2" class="flex items-center gap-gutter-sm p-gutter-sm rounded-lg bg-surface-container-lowest border border-outline-variant text-left transition-colors duration-state-change">
+            <span class="w-6 h-6 rounded-full bg-surface-container text-on-surface-variant font-metric text-label-sm flex items-center justify-center shrink-0">2</span>
+            <span data-th="พื้นฐานการเรียน" data-en="Baseline" class="font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">พื้นฐานการเรียน</span>
+          </button>
+          <button type="button" data-step-nav="3" class="flex items-center gap-gutter-sm p-gutter-sm rounded-lg bg-surface-container-lowest border border-outline-variant text-left transition-colors duration-state-change">
+            <span class="w-6 h-6 rounded-full bg-surface-container text-on-surface-variant font-metric text-label-sm flex items-center justify-center shrink-0">3</span>
+            <span data-th="เป้าหมายและเวลา" data-en="Target &amp; Pace" class="font-label text-label-md text-on-surface-variant" data-design-text-token="label-md">เป้าหมายและเวลา</span>
+          </button>
+        </div>
+
+        <div role="progressbar" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100" aria-label="Discovery progress" class="w-full h-2 rounded-full bg-surface-container overflow-hidden">
+          <div id="desktop-progress-fill" class="h-full rounded-full bg-secondary transition-all duration-surface-enter" style="width: 33%;"></div>
+        </div>
+      </section>
+
+      <!-- Step Card Container -->
+      <section class="p-gutter-xl rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-xl">
+
+        <!-- STEP 1: Interests & Strengths -->
+        <div data-step-panel="1" class="flex flex-col gap-gutter-lg">
+          <header class="flex flex-col gap-gutter-xs">
+            <span data-th="ขั้นที่ 1 • ความสนใจและความถนัด" data-en="Step 1 • Curiosity &amp; Strengths" class="font-label text-label-sm text-secondary-text uppercase tracking-wider" data-design-text-token="label-sm">ขั้นที่ 1 • ความสนใจและความถนัด</span>
+            <h1 data-th="เรื่องไหนหรือโจทย์แบบใดที่ทำให้คุณสนุกเวลาทำ?" data-en="What subjects or problems energize you?" class="font-headline text-headline-lg text-on-surface text-balance" data-design-text-token="headline-lg">
+              เรื่องไหนหรือโจทย์แบบใดที่ทำให้คุณสนุกเวลาทำ?
+            </h1>
+            <p data-th="เลือก 2–4 ด้านที่คุณชอบเรียนรู้โดยธรรมชาติ PathFinder จะนำไปจับคู่กับคณะและอาชีพที่ตรงกับสไตล์การคิดของคุณ" data-en="Pick 2–4 areas you naturally enjoy exploring. PathFinder uses these to match you with majors and careers that fit your thinking style." class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+              เลือก 2–4 ด้านที่คุณชอบเรียนรู้โดยธรรมชาติ PathFinder จะนำไปจับคู่กับคณะและอาชีพที่ตรงกับสไตล์การคิดของคุณ
+            </p>
+          </header>
+
+          <div class="flex flex-wrap gap-gutter-sm" role="group" aria-label="Student interests">
+            <button type="button" data-interest-chip aria-pressed="true" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-primary text-on-primary border border-primary font-label text-label-md transition-colors duration-state-change">
+              <span class="material-symbols-outlined text-[16px]" aria-hidden="true">check_circle</span>
+              <span data-th="เทคโนโลยี &amp; AI" data-en="Technology &amp; AI" data-design-text-token="label-md">เทคโนโลยี &amp; AI</span>
+            </button>
+            <button type="button" data-interest-chip aria-pressed="true" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-primary text-on-primary border border-primary font-label text-label-md transition-colors duration-state-change">
+              <span class="material-symbols-outlined text-[16px]" aria-hidden="true">check_circle</span>
+              <span data-th="ออกแบบผลิตภัณฑ์ &amp; UX" data-en="Product &amp; UX Design" data-design-text-token="label-md">ออกแบบผลิตภัณฑ์ &amp; UX</span>
+            </button>
+            <button type="button" data-interest-chip aria-pressed="false" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md hover:bg-surface-container-low transition-colors duration-state-change">
+              <span data-th="สุขภาพและการแพทย์" data-en="Healthcare &amp; Medicine" data-design-text-token="label-md">สุขภาพและการแพทย์</span>
+            </button>
+            <button type="button" data-interest-chip aria-pressed="false" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md hover:bg-surface-container-low transition-colors duration-state-change">
+              <span data-th="ธุรกิจและเศรษฐศาสตร์" data-en="Business &amp; Economics" data-design-text-token="label-md">ธุรกิจและเศรษฐศาสตร์</span>
+            </button>
+            <button type="button" data-interest-chip aria-pressed="false" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md hover:bg-surface-container-low transition-colors duration-state-change">
+              <span data-th="วิศวกรรมและหุ่นยนต์" data-en="Engineering &amp; Robotics" data-design-text-token="label-md">วิศวกรรมและหุ่นยนต์</span>
+            </button>
+            <button type="button" data-interest-chip aria-pressed="false" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md hover:bg-surface-container-low transition-colors duration-state-change">
+              <span data-th="สื่อและการเล่าเรื่อง" data-en="Media &amp; Storytelling" data-design-text-token="label-md">สื่อและการเล่าเรื่อง</span>
+            </button>
+            <button type="button" data-interest-chip aria-pressed="false" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md hover:bg-surface-container-low transition-colors duration-state-change">
+              <span data-th="ข้อมูลและงานวิจัย" data-en="Data &amp; Research" data-design-text-token="label-md">ข้อมูลและงานวิจัย</span>
+            </button>
+            <button type="button" data-interest-chip aria-pressed="false" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-sm rounded-full bg-surface text-on-surface border border-outline-variant font-label text-label-md hover:bg-surface-container-low transition-colors duration-state-change">
+              <span data-th="สิ่งแวดล้อมและความยั่งยืน" data-en="Environmental Science" data-design-text-token="label-md">สิ่งแวดล้อมและความยั่งยืน</span>
+            </button>
+          </div>
+
+          <div class="p-gutter-md rounded-lg bg-surface-container-low flex items-center justify-between gap-gutter-md">
+            <span data-th="สไตล์การแก้ปัญหาที่ถนัด: สร้างต้นแบบและออกแบบระบบภาพ" data-en="Problem-solving style: Building prototypes &amp; visual systems" class="font-body text-body-md text-on-surface" data-design-text-token="body-md">
+              สไตล์การแก้ปัญหาที่ถนัด: สร้างต้นแบบและออกแบบระบบภาพ
+            </span>
+            <span data-th="เลือก 2 ด้าน" data-en="2 selected" class="font-metric text-metric-md text-secondary-text shrink-0" data-design-text-token="metric-md">เลือก 2 ด้าน</span>
+          </div>
+        </div>
+
+        <!-- STEP 2: Academic Baseline (Grade M.4-M.6, GPAX Slider, Beyond 4.00 Mode) -->
+        <div data-step-panel="2" class="hidden flex flex-col gap-gutter-lg">
+          <header class="flex flex-col gap-gutter-xs">
+            <span data-th="ขั้นที่ 2 • พื้นฐานการเรียน" data-en="Step 2 • Academic Baseline" class="font-label text-label-sm text-secondary-text uppercase tracking-wider" data-design-text-token="label-sm">ขั้นที่ 2 • พื้นฐานการเรียน</span>
+            <h1 data-th="ตอนนี้คุณกำลังเรียนอยู่ระดับชั้นไหน?" data-en="Where are you in your high school journey?" class="font-headline text-headline-lg text-on-surface text-balance" data-design-text-token="headline-lg">
+              ตอนนี้คุณกำลังเรียนอยู่ระดับชั้นไหน?
+            </h1>
+            <p data-th="ระดับชั้นและเกรดเฉลี่ยสะสม (GPAX) จะช่วยคำนวณเวลาที่เหลือสำหรับเตรียมตัวสอบและทำ Portfolio ทั้ง 4 รอบ" data-en="Your grade level and current GPAX help calibrate how much time we have for TCAS 1–4 preparation." class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+              ระดับชั้นและเกรดเฉลี่ยสะสม (GPAX) จะช่วยคำนวณเวลาที่เหลือสำหรับเตรียมตัวสอบและทำ Portfolio ทั้ง 4 รอบ
+            </p>
+          </header>
+
+          <!-- Grade M.4 - M.6 -->
+          <div class="flex flex-col gap-gutter-sm">
+            <label data-th="ระดับชั้นปัจจุบัน" data-en="Current Grade Level" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">ระดับชั้นปัจจุบัน</label>
+            <div class="grid grid-cols-3 gap-gutter-sm">
+              <button type="button" data-th="ม.4 (Grade 10)" data-en="M.4 (Grade 10)" class="py-3 px-gutter-md rounded-lg border border-outline-variant bg-surface font-label text-label-lg text-on-surface hover:bg-surface-container-low">ม.4 (Grade 10)</button>
+              <button type="button" data-th="ม.5 (Grade 11)" data-en="M.5 (Grade 11)" class="py-3 px-gutter-md rounded-lg border border-primary bg-primary text-on-primary font-label text-label-lg">ม.5 (Grade 11)</button>
+              <button type="button" data-th="ม.6 (Grade 12)" data-en="M.6 (Grade 12)" class="py-3 px-gutter-md rounded-lg border border-outline-variant bg-surface font-label text-label-lg text-on-surface hover:bg-surface-container-low">ม.6 (Grade 12)</button>
+            </div>
+          </div>
+
+          <!-- GPAX Slider -->
+          <div class="flex flex-col gap-gutter-sm p-gutter-md rounded-lg bg-surface-container-low">
+            <div class="flex items-center justify-between gap-gutter-sm">
+              <label for="gpax-slider" data-th="เกรดเฉลี่ยสะสม (GPAX)" data-en="Current Cumulative GPAX" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">เกรดเฉลี่ยสะสม (GPAX)</label>
+              <span id="gpax-value" class="px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums" data-design-text-token="metric-md">3.75</span>
+            </div>
+            <input id="gpax-slider" type="range" min="2.00" max="4.00" step="0.05" value="3.75" class="w-full accent-primary cursor-pointer">
+            <div class="flex justify-between font-metric text-label-sm text-on-surface-variant tabular-nums">
+              <span>2.00</span>
+              <span>3.00</span>
+              <span>4.00</span>
+            </div>
+          </div>
+
+          <!-- Beyond 4.00 Mode Toggle -->
+          <div class="p-gutter-md rounded-lg bg-tertiary-container border border-outline-variant flex items-center justify-between gap-gutter-md">
+            <div class="flex items-start gap-gutter-sm">
+              <span class="material-symbols-outlined text-[22px] text-tertiary-text mt-0.5" aria-hidden="true">workspace_premium</span>
+              <div class="flex flex-col gap-0.5">
+                <span data-th="โหมด Beyond 4.00" data-en="Beyond 4.00 Mode" class="font-title text-title-md text-on-tertiary-container" data-design-text-token="title-md">โหมด Beyond 4.00</span>
+                <span data-th="เพิ่มรายการแข่งขัน งานวิจัย และกิจกรรมสร้างความแตกต่างให้ Portfolio" data-en="Include high-impact competitions, research, and portfolio differentiators" class="font-body text-body-md text-on-tertiary-container" data-design-text-token="body-md">เพิ่มรายการแข่งขัน งานวิจัย และกิจกรรมสร้างความแตกต่างให้ Portfolio</span>
+              </div>
+            </div>
+            <input type="checkbox" checked aria-label="Beyond 4.00 Mode" class="w-5 h-5 rounded-sm text-primary focus:ring-primary">
+          </div>
+        </div>
+
+        <!-- STEP 3: Target University & Weekly Hours -->
+        <div data-step-panel="3" class="hidden flex flex-col gap-gutter-lg">
+          <header class="flex flex-col gap-gutter-xs">
+            <span data-th="ขั้นที่ 3 • เป้าหมายและจังหวะเวลา" data-en="Step 3 • Destination &amp; Pace" class="font-label text-label-sm text-secondary-text uppercase tracking-wider" data-design-text-token="label-sm">ขั้นที่ 3 • เป้าหมายและจังหวะเวลา</span>
+            <h1 data-th="เลือกมหาวิทยาลัยเป้าหมายและชั่วโมงอ่านหนังสือต่อสัปดาห์" data-en="Set your target campus &amp; weekly study pace" class="font-headline text-headline-lg text-on-surface text-balance" data-design-text-token="headline-lg">
+              เลือกมหาวิทยาลัยเป้าหมายและชั่วโมงอ่านหนังสือต่อสัปดาห์
+            </h1>
+            <p data-th="เลือกมหาวิทยาลัยที่คุณสนใจและเวลาต่อสัปดาห์ที่ทำได้จริง เพื่อให้แผนการเตรียมตัวเดินหน้าได้อย่างสบายใจ" data-en="Choose universities you are curious about and a realistic number of hours per week so your plan stays sustainable." class="font-body text-body-md text-on-surface-variant text-pretty" data-design-text-token="body-md">
+              เลือกมหาวิทยาลัยที่คุณสนใจและเวลาต่อสัปดาห์ที่ทำได้จริง เพื่อให้แผนการเตรียมตัวเดินหน้าได้อย่างสบายใจ
+            </p>
+          </header>
+
+          <div class="flex flex-col gap-gutter-sm">
+            <label data-th="มหาวิทยาลัยเป้าหมาย" data-en="Target Universities" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">มหาวิทยาลัยเป้าหมาย</label>
+            <div class="flex flex-wrap gap-gutter-sm">
+              <span data-th="จุฬาลงกรณ์มหาวิทยาลัย" data-en="Chulalongkorn University" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-md">จุฬาลงกรณ์มหาวิทยาลัย</span>
+              <span data-th="มจธ. (KMUTT)" data-en="KMUTT" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-primary text-on-primary font-label text-label-md">มจธ. (KMUTT)</span>
+              <span data-th="มหาวิทยาลัยธรรมศาสตร์" data-en="Thammasat University" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface border border-outline-variant text-on-surface font-label text-label-md">มหาวิทยาลัยธรรมศาสตร์</span>
+              <span data-th="มหาวิทยาลัยมหิดล" data-en="Mahidol University" class="inline-flex items-center gap-gutter-xs px-gutter-md py-gutter-xs rounded-full bg-surface border border-outline-variant text-on-surface font-label text-label-md">มหาวิทยาลัยมหิดล</span>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-gutter-sm p-gutter-md rounded-lg bg-surface-container-low">
+            <div class="flex items-center justify-between gap-gutter-sm">
+              <span data-th="ชั่วโมงที่สะดวกต่อสัปดาห์" data-en="Comfortable Weekly Hours" class="font-label text-label-md text-on-surface" data-design-text-token="label-md">ชั่วโมงที่สะดวกต่อสัปดาห์</span>
+              <span data-th="6 ชม. / สัปดาห์" data-en="6 hrs / week" class="px-gutter-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-metric-md tabular-nums">6 ชม. / สัปดาห์</span>
+            </div>
+            <div class="grid grid-cols-4 gap-gutter-sm">
+              <button type="button" data-th="4 ชม." data-en="4 hrs" class="py-2 rounded-md border border-outline-variant bg-surface font-metric text-metric-md text-on-surface">4 ชม.</button>
+              <button type="button" data-th="6 ชม." data-en="6 hrs" class="py-2 rounded-md border border-primary bg-primary text-on-primary font-metric text-metric-md">6 ชม.</button>
+              <button type="button" data-th="10 ชม." data-en="10 hrs" class="py-2 rounded-md border border-outline-variant bg-surface font-metric text-metric-md text-on-surface">10 ชม.</button>
+              <button type="button" data-th="14+ ชม." data-en="14+ hrs" class="py-2 rounded-md border border-outline-variant bg-surface font-metric text-metric-md text-on-surface">14+ ชม.</button>
+            </div>
+          </div>
+
+          <div id="intake-complete-banner" class="hidden p-gutter-md rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-between gap-gutter-sm">
+            <span data-th="บันทึกโปรไฟล์แล้ว! พร้อมดู 3 อันดับคณะที่เหมาะกับคุณ" data-en="Profile saved! Your Top 3 Major Matches are ready." class="font-label text-label-md">บันทึกโปรไฟล์แล้ว! พร้อมดู 3 อันดับคณะที่เหมาะกับคุณ</span>
+            <span class="font-metric text-metric-md tabular-nums">100%</span>
+          </div>
+        </div>
+
+        <!-- Stepper Footer Controls -->
+        <footer class="pt-gutter-md border-t border-outline-variant flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-gutter-md">
+          <button id="desktop-prev-btn" type="button" disabled class="inline-flex items-center justify-center gap-gutter-xs px-gutter-lg py-3 rounded-full border border-outline-variant bg-surface-container text-on-surface-variant font-label text-label-md cursor-not-allowed">
+            <span class="material-symbols-outlined text-[18px]" aria-hidden="true">arrow_back</span>
+            <span data-th="ย้อนกลับ" data-en="Previous" data-design-text-token="label-md">ย้อนกลับ</span>
+          </button>
+
+          <button id="desktop-next-btn" data-component-id="button-primary" data-component-type="button" data-component-variant="primary" type="button" class="inline-flex items-center justify-center gap-gutter-sm px-gutter-xl py-3 rounded-full bg-primary text-on-primary font-label text-label-lg transition-colors duration-state-change hover:bg-on-primary-container shrink-0">
+            <span id="desktop-next-label" data-design-text-token="label-lg">ถัดไป: พื้นฐานการเรียน →</span>
+          </button>
+        </footer>
+
+      </section>
+    </main>
+
+    <!-- Accuracy Footer -->
+    <footer class="w-full border-t border-outline-variant bg-surface">
+      <div class="max-w-[1200px] mx-auto px-gutter-xl py-gutter-md flex items-center justify-between gap-gutter-md">
+        <span data-th="PathFinder • แบบประเมินค้นหาตัวตน" data-en="PathFinder • Guided Discovery Intake" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">PathFinder • แบบประเมินค้นหาตัวตน</span>
+        <span data-th="โปรดตรวจสอบเกณฑ์ค่าน้ำหนัก TCAS อย่างเป็นทางการที่ mytcas.com" data-en="Verify official yearly TCAS weightings on mytcas.com" class="font-label text-label-sm text-on-surface-variant" data-design-text-token="label-sm">โปรดตรวจสอบเกณฑ์ค่าน้ำหนัก TCAS อย่างเป็นทางการที่ mytcas.com</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    (function () {
+      var currentStep = 1;
+      var currentLang = 'th';
+      var labels = {
+        th: {
+          1: 'ถัดไป: พื้นฐานการเรียน →',
+          2: 'ถัดไป: เป้าหมายและเวลา →',
+          3: 'ดูคณะที่เหมาะกับฉัน 3 อันดับ →',
+          badge: function (s) { return 'ขั้นที่ ' + s + ' / 3'; }
+        },
+        en: {
+          1: 'Next: Academic Baseline →',
+          2: 'Next: Target & Pace →',
+          3: 'See My Top 3 Majors →',
+          badge: function (s) { return 'Step ' + s + ' of 3'; }
+        }
+      };
+      var progress = { 1: '33%', 2: '67%', 3: '100%' };
+
+      function renderStep(step) {
+        currentStep = step;
+        document.getElementById('desktop-step-badge').textContent = labels[currentLang].badge(step);
+        document.getElementById('desktop-progress-fill').style.width = progress[step];
+        document.getElementById('desktop-next-label').textContent = labels[currentLang][step];
+
+        var prevBtn = document.getElementById('desktop-prev-btn');
+        prevBtn.disabled = step === 1;
+        prevBtn.classList.toggle('cursor-not-allowed', step === 1);
+        prevBtn.classList.toggle('text-outline', step === 1);
+        prevBtn.classList.toggle('text-on-surface', step > 1);
+
+        document.querySelectorAll('[data-step-panel]').forEach(function (panel) {
+          panel.classList.toggle('hidden', Number(panel.getAttribute('data-step-panel')) !== step);
+        });
+      }
+
+      document.getElementById('desktop-next-btn').addEventListener('click', function () {
+        if (currentStep < 3) {
+          renderStep(currentStep + 1);
+        } else if (window.location.protocol === 'file:' || window.location.pathname.indexOf('/screens/') !== -1) {
+          window.location.href = '../major-matches-desktop/MajorMatchesDesktop.html';
+        } else {
+          document.getElementById('intake-complete-banner').classList.remove('hidden');
+        }
+      });
+      document.getElementById('desktop-prev-btn').addEventListener('click', function () {
+        if (currentStep > 1) renderStep(currentStep - 1);
+      });
+      document.getElementById('back-step1-btn').addEventListener('click', function () {
+        document.getElementById('intake-complete-banner').classList.add('hidden');
+        renderStep(1);
+      });
+      document.querySelectorAll('[data-step-nav]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          renderStep(Number(btn.getAttribute('data-step-nav')));
+        });
+      });
+
+      document.querySelectorAll('[data-interest-chip]').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var pressed = chip.getAttribute('aria-pressed') === 'true';
+          chip.setAttribute('aria-pressed', pressed ? 'false' : 'true');
+          chip.classList.toggle('bg-primary', !pressed);
+          chip.classList.toggle('text-on-primary', !pressed);
+          chip.classList.toggle('border-primary', !pressed);
+          chip.classList.toggle('bg-surface', pressed);
+          chip.classList.toggle('text-on-surface', pressed);
+          chip.classList.toggle('border-outline-variant', pressed);
+        });
+      });
+
+      var slider = document.getElementById('gpax-slider');
+      var gpaxVal = document.getElementById('gpax-value');
+      if (slider && gpaxVal) {
+        slider.addEventListener('input', function () {
+          gpaxVal.textContent = Number(slider.value).toFixed(2);
+        });
+      }
+
+      function setLang(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang;
+        document.querySelectorAll('[data-th][data-en]').forEach(function (el) {
+          el.textContent = el.getAttribute('data-' + lang);
+        });
+        document.querySelectorAll('[data-lang-btn]').forEach(function (btn) {
+          var active = btn.getAttribute('data-lang-btn') === lang;
+          btn.classList.toggle('bg-primary', active);
+          btn.classList.toggle('text-on-primary', active);
+          btn.classList.toggle('text-on-surface-variant', !active);
+        });
+        renderStep(currentStep);
+      }
+      document.querySelectorAll('[data-lang-btn]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          setLang(btn.getAttribute('data-lang-btn'));
+        });
+      });
+    })();
+  </script>
+
+</body></html>
