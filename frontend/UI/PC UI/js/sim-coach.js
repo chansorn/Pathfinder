@@ -795,10 +795,169 @@
     coachInput.style.height = Math.min(coachInput.scrollHeight, 160) + 'px';
   }
 
-  async function sendChat(q) {
+  // ---- attachments: images / PDF / text files sent with the next message (max 3, 4 MB each) ----
+  // big photos are shrunk in the browser first (longest side 1600px, JPEG) to keep uploads small.
+  // the files only go to the AI for this one answer; the chat history keeps just the names.
+  var CHAT_FILE_MAX = 4 * 1024 * 1024;
+  var CHAT_FILES_MAX = 3;
+  var CHAT_TYPES = { 'image/png': 1, 'image/jpeg': 1, 'image/webp': 1, 'application/pdf': 1, 'text/plain': 1, 'text/csv': 1, 'text/markdown': 1 };
+  var CHAT_EXT_TYPES = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', pdf: 'application/pdf', txt: 'text/plain', csv: 'text/csv', md: 'text/markdown' };
+  var pendingFiles = [];
+  var filesBox = document.getElementById('coach-chat-files');
+  var fileInput = document.getElementById('coach-chat-file-input');
+  var attachBtn = document.getElementById('coach-chat-attach');
+
+  function fileMime(f) {
+    if (CHAT_TYPES[f.type]) return f.type;
+    var ext = String(f.name || '').split('.').pop().toLowerCase();
+    return CHAT_EXT_TYPES[ext] || null;
+  }
+  function fmtSize(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; }
+  function readB64(blob) {
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve(String(r.result).replace(/^data:[^,]*,/, '')); };
+      r.onerror = function () { reject(r.error); };
+      r.readAsDataURL(blob);
+    });
+  }
+  // photos: longest side ≤ 1600px as JPEG (keeps text on screenshots readable, a few hundred KB)
+  async function shrinkImage(file, mime) {
+    if (!window.createImageBitmap || file.size < 600 * 1024) return { blob: file, mime: mime };
+    try {
+      var bmp = await createImageBitmap(file);
+      var k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+      if (k === 1 && file.size <= 1.5 * 1024 * 1024) return { blob: file, mime: mime };
+      var c = document.createElement('canvas');
+      c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+      var g = c.getContext('2d');
+      g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+      g.drawImage(bmp, 0, 0, c.width, c.height);
+      var out = await new Promise(function (res) { c.toBlob(res, 'image/jpeg', 0.85); });
+      return out && out.size < file.size ? { blob: out, mime: 'image/jpeg' } : { blob: file, mime: mime };
+    } catch (e) { return { blob: file, mime: mime }; }
+  }
+  function warnFile(th, en) { if (window.PF_AUTH) window.PF_AUTH.showToast(th, en); }
+
+  async function addChatFiles(list) {
+    var files = Array.prototype.slice.call(list || []);
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (pendingFiles.length >= CHAT_FILES_MAX) { warnFile('แนบได้สูงสุด ' + CHAT_FILES_MAX + ' ไฟล์ต่อข้อความ', 'Up to ' + CHAT_FILES_MAX + ' files per message'); break; }
+      var mime = fileMime(f);
+      if (!mime) { warnFile('ไฟล์ "' + f.name + '" ยังไม่รองรับ • ใช้รูป (PNG/JPG/WebP), PDF หรือไฟล์ข้อความ', '"' + f.name + '" is not supported • use an image (PNG/JPG/WebP), PDF or text file'); continue; }
+      var picked = mime.indexOf('image/') === 0 ? await shrinkImage(f, mime) : { blob: f, mime: mime };
+      if (picked.blob.size > CHAT_FILE_MAX) { warnFile('ไฟล์ "' + f.name + '" ใหญ่เกิน 4 MB', '"' + f.name + '" is over 4 MB'); continue; }
+      try {
+        var data = await readB64(picked.blob);
+        pendingFiles.push({
+          name: String(f.name || 'file').slice(0, 120), mime_type: picked.mime, data: data, size: picked.blob.size,
+          preview: picked.mime.indexOf('image/') === 0 ? URL.createObjectURL(picked.blob) : null
+        });
+      } catch (e) { warnFile('อ่านไฟล์ "' + f.name + '" ไม่ได้', 'Could not read "' + f.name + '"'); }
+    }
+    renderChatFiles();
+  }
+  function fileChip(f, removable, idx) {
+    var el = document.createElement('span');
+    el.className = 'inline-flex items-center gap-1.5 max-w-[220px] pl-1 pr-2 py-1 rounded-lg bg-surface-container-lowest border border-outline-variant font-label text-label-sm text-on-surface';
+    if (f.preview) {
+      var im = document.createElement('img');
+      im.src = f.preview; im.alt = ''; im.className = 'w-8 h-8 rounded object-cover shrink-0';
+      el.appendChild(im);
+    } else {
+      var ic = document.createElement('span');
+      ic.className = 'material-symbols-outlined text-[20px] text-primary shrink-0';
+      ic.setAttribute('aria-hidden', 'true');
+      ic.textContent = f.mime_type === 'application/pdf' ? 'picture_as_pdf' : 'description';
+      el.appendChild(ic);
+    }
+    var nm = document.createElement('span');
+    nm.className = 'truncate';
+    nm.textContent = f.name;
+    el.appendChild(nm);
+    if (f.size) {
+      var sz = document.createElement('span');
+      sz.className = 'shrink-0 text-on-surface-variant text-[11px]';
+      sz.textContent = fmtSize(f.size);
+      el.appendChild(sz);
+    }
+    if (removable) {
+      var x = document.createElement('button');
+      x.type = 'button';
+      x.setAttribute('data-chat-file-remove', String(idx));
+      x.setAttribute('aria-label', T('เอาไฟล์ ' + f.name + ' ออก', 'Remove ' + f.name));
+      x.className = 'ml-0.5 w-5 h-5 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container shrink-0';
+      x.innerHTML = '<span class="material-symbols-outlined text-[15px]" aria-hidden="true">close</span>';
+      el.appendChild(x);
+    }
+    return el;
+  }
+  function renderChatFiles() {
+    if (!filesBox) return;
+    filesBox.textContent = '';
+    pendingFiles.forEach(function (f, i) { filesBox.appendChild(fileChip(f, true, i)); });
+    filesBox.classList.toggle('hidden', !pendingFiles.length);
+    if (attachBtn) attachBtn.classList.toggle('text-primary', pendingFiles.length > 0);
+  }
+  function takeChatFiles() {
+    var out = pendingFiles;
+    pendingFiles = [];
+    renderChatFiles();
+    return out;
+  }
+  if (attachBtn && fileInput) {
+    attachBtn.addEventListener('click', function () { if (!chatBusy) fileInput.click(); });
+    fileInput.addEventListener('change', function () { addChatFiles(fileInput.files).then(function () { fileInput.value = ''; }); });
+  }
+  if (filesBox) {
+    filesBox.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-chat-file-remove]') : null;
+      if (!b) return;
+      var f = pendingFiles.splice(Number(b.getAttribute('data-chat-file-remove')), 1)[0];
+      if (f && f.preview) URL.revokeObjectURL(f.preview);
+      renderChatFiles();
+    });
+  }
+  // paste a screenshot straight into the message box
+  if (coachInput) {
+    coachInput.addEventListener('paste', function (e) {
+      var files = e.clipboardData && e.clipboardData.files;
+      if (files && files.length) { e.preventDefault(); addChatFiles(files); }
+    });
+  }
+  // drop files anywhere on the chat card
+  var chatCard = coachForm ? coachForm.closest('section') : null;
+  if (chatCard) {
+    ['dragenter', 'dragover'].forEach(function (t) {
+      chatCard.addEventListener(t, function (e) {
+        if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') !== -1) { e.preventDefault(); chatCard.classList.add('ring-2', 'ring-primary'); }
+      });
+    });
+    ['dragleave', 'drop'].forEach(function (t) {
+      chatCard.addEventListener(t, function (e) {
+        if (t === 'dragleave' && chatCard.contains(e.relatedTarget)) return;
+        chatCard.classList.remove('ring-2', 'ring-primary');
+      });
+    });
+    chatCard.addEventListener('drop', function (e) {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) { e.preventDefault(); addChatFiles(e.dataTransfer.files); }
+    });
+  }
+
+  async function sendChat(q, files) {
+    files = files || [];
     q = String(q || '').trim().slice(0, 2000);
+    // files without a question: ask the coach to look at them
+    if (!q && files.length) q = T('ช่วยดูไฟล์ที่แนบมาให้หน่อย', 'Please look at the attached file(s)');
     if (!q || chatBusy) return;
-    appendCoachMessage(q, true);
+    var sent = appendCoachMessage(q, true);
+    if (sent && files.length) {
+      var row = document.createElement('div');
+      row.className = 'flex flex-wrap justify-end gap-1 mt-1.5';
+      files.forEach(function (f) { row.appendChild(fileChip(f, false)); });
+      sent.bubble.appendChild(row);
+    }
     if (needLogin('เข้าสู่ระบบก่อนเพื่อคุยกับ AI โค้ช', 'Sign in to chat with the AI coach')) {
       appendCoachMessage({ th: 'เข้าสู่ระบบก่อนนะ แล้วพี่จะตอบโดยดูจากโปรไฟล์และแผนของน้อง', en: 'Please sign in first so I can answer based on your profile and plan.' }, false).done();
       return;
@@ -808,7 +967,7 @@
     var text = '';
     try {
       var done = await PF_API.stream('/chat', {
-        body: { message: q, context: chatContext() },
+        body: Object.assign({ message: q, context: chatContext() }, files.length ? { attachments: files.map(function (f) { return { name: f.name, mime_type: f.mime_type, data: f.data }; }) } : {}),
         onEvent: function (ev, d) {
           if (ev === 'delta' && d && d.text) {
             text += d.text;
@@ -887,10 +1046,10 @@
     coachForm.addEventListener('submit', function (e) {
       e.preventDefault();
       var q = coachInput.value.trim();
-      if (!q || chatBusy) return; // keep the text in the box while a reply is still streaming
+      if ((!q && !pendingFiles.length) || chatBusy) return; // keep the text in the box while a reply is still streaming
       coachInput.value = '';
       fitInput();
-      sendChat(q);
+      sendChat(q, takeChatFiles());
     });
     // Enter sends, Shift+Enter is a new line (and never while a Thai/IME word is being composed)
     coachInput.addEventListener('keydown', function (e) {

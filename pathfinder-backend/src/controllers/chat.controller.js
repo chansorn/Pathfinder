@@ -13,8 +13,8 @@ const send = (res, event, data) => res.write(`event: ${event}\ndata: ${JSON.stri
  * Anything that fails before the stream starts (validation, auth, db) is still a normal JSON error.
  */
 export async function chat(req, res) {
-  const { message, context } = req.valid.body;
-  const { systemPrompt, history, webSearch } = await prepareChat(req.db, req.user.id, message, context);
+  const { message, context, attachments = [] } = req.valid.body;
+  const { systemPrompt, history, webSearch } = await prepareChat(req.db, req.user.id, message, context, attachments);
 
   res.writeHead(200, {
     'Content-Type': 'text/event-stream; charset=utf-8',
@@ -34,7 +34,7 @@ export async function chat(req, res) {
     sources = list;
   };
   try {
-    for await (const text of chatStream({ systemPrompt, history, message, signal: controller.signal, webSearch, onSources, lang: req.lang })) {
+    for await (const text of chatStream({ systemPrompt, history, message, attachments, signal: controller.signal, webSearch, onSources, lang: req.lang })) {
       content += text;
       send(res, 'delta', { text });
     }

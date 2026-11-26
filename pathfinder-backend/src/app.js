@@ -64,7 +64,10 @@ export function createApp() {
       exposedHeaders: ['X-Request-Id', 'RateLimit', 'RateLimit-Policy', 'Retry-After'],
     }),
   );
-  app.use(express.json({ limit: '1mb' }));
+  // chat may carry attachments (≤ 8 MB of files, base64): a bigger limit for that one route only
+  const jsonSmall = express.json({ limit: '1mb' });
+  const jsonChat = express.json({ limit: '12mb' });
+  app.use((req, res, next) => (req.path === '/api/chat' ? jsonChat : jsonSmall)(req, res, next));
 
   // id + method + path + status. no query string, headers or body
   if (!isTest) {

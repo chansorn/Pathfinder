@@ -129,7 +129,7 @@ export function toGeminiTurns(history = []) {
  * The timeout is an idle timeout - it only fires if no new chunk shows up for geminiTimeoutMs,
  * so long answers are fine.
  */
-export async function* streamChat({ systemPrompt: basePrompt, history, message, signal, mockReply, useSearch = false, onSources, lang = 'th' }) {
+export async function* streamChat({ systemPrompt: basePrompt, history, message, attachments = [], signal, mockReply, useSearch = false, onSources, lang = 'th' }) {
   const systemPrompt = basePrompt + AI_LANGUAGE_RULE[lang];
   if (env.USE_MOCK_AI) {
     // split by code point so emoji don't get cut in half.
@@ -164,6 +164,10 @@ export async function* streamChat({ systemPrompt: basePrompt, history, message, 
   // (the saved chat_messages row keeps what the student actually typed)
   const newest = lang === 'en' ? `${message}\n\n(Reply in English.)` : message;
   const turns = toGeminiTurns([...history, { role: 'user', content: newest }]);
+  // files the student attached to this message: inline parts of the newest user turn (this request only)
+  if (attachments.length) {
+    turns.at(-1).parts.push(...attachments.map((f) => ({ inlineData: { mimeType: f.mime_type, data: f.data } })));
+  }
   const open = (search) =>
     ai.models.generateContentStream({
       model: geminiModel,

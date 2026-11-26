@@ -63,9 +63,37 @@ const chatContext = z.strictObject({
     .optional(),
 });
 
+// AI coach chat attachments: images / PDF / plain text, sent to Gemini with that one message only
+// (never stored: chat_messages keeps just the file names). Size + real file signature are checked.
+export const CHAT_FILE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'application/pdf', 'text/plain', 'text/csv', 'text/markdown'];
+const CHAT_FILE_MAX = 4 * 1024 * 1024; // per file, decoded
+const CHAT_FILES_TOTAL_MAX = 8 * 1024 * 1024;
+const b64Size = (b64) => Math.floor((b64.length * 3) / 4) - (b64.endsWith('==') ? 2 : b64.endsWith('=') ? 1 : 0);
+function looksLike(mime, b64) {
+  const head = Buffer.from(b64.slice(0, 24), 'base64');
+  if (mime === 'image/png') return head.subarray(0, 4).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47]));
+  if (mime === 'image/jpeg') return head[0] === 0xff && head[1] === 0xd8;
+  if (mime === 'image/webp') return head.subarray(0, 4).toString('latin1') === 'RIFF' && head.subarray(8, 12).toString('latin1') === 'WEBP';
+  if (mime === 'application/pdf') return head.subarray(0, 4).toString('latin1') === '%PDF';
+  return !head.includes(0); // text: no NUL bytes at the start
+}
+const chatAttachment = z
+  .strictObject({
+    name: z.string().trim().min(1).max(120),
+    mime_type: z.enum(CHAT_FILE_TYPES, 'ไฟล์ประเภทนี้ยังไม่รองรับ (รูป PNG/JPG/WebP, PDF หรือไฟล์ข้อความ)'),
+    data: z.string().min(8).max(6_000_000).regex(/^[A-Za-z0-9+/]+={0,2}$/, 'ไฟล์แนบเสียหาย'),
+  })
+  .refine((f) => b64Size(f.data) <= CHAT_FILE_MAX, 'ไฟล์แนบต้องไม่เกิน 4 MB ต่อไฟล์')
+  .refine((f) => looksLike(f.mime_type, f.data), 'เนื้อไฟล์ไม่ตรงกับชนิดไฟล์');
+
 export const chatBody = z.strictObject({
   message: text(2000, 'ข้อความ'),
   context: chatContext.optional(),
+  attachments: z
+    .array(chatAttachment)
+    .max(3, 'แนบไฟล์ได้สูงสุด 3 ไฟล์')
+    .refine((list) => list.reduce((n, f) => n + b64Size(f.data), 0) <= CHAT_FILES_TOTAL_MAX, 'ไฟล์แนบรวมกันต้องไม่เกิน 8 MB')
+    .optional(),
 });
 
 // POST /api/coach/high-yield

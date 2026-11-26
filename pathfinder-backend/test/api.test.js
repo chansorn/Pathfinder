@@ -1198,6 +1198,35 @@ async function buildStudentContextFor() {
   return buildStudentContext(fake.factory(), me.id);
 }
 
+test('POST /api/chat with attachments: checked, sent with the message, only the name is stored', async () => {
+  const png = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(64, 1)]).toString('base64');
+  const pdfBytes = Buffer.from('%PDF-1.4 test').toString('base64');
+  // its own account: these AI calls must not use up the main test user's hourly AI quota
+  const token = (await register('attach@test.com')).json.data.session.access_token;
+  const file = (name, mime_type, data) => ({ name, mime_type, data });
+  const parse = (txt) => txt.trim().split('\n\n').map((b) => ({ event: b.match(/^event: (.+)$/m)[1], data: JSON.parse(b.match(/^data: (.+)$/m)[1]) }));
+
+  const r = await call('POST', '/api/chat', { token, body: { message: 'ช่วยดูตารางสอบนี้หน่อย', attachments: [file('ตาราง.png', 'image/png', png), file('แผน.pdf', 'application/pdf', pdfBytes)] } });
+  assert.equal(r.status, 200, r.text);
+  const done = parse(r.text).at(-1);
+  assert.equal(done.event, 'done');
+  assert.match(done.data.content, /ตาราง\.png/); // mock reply names the files it got
+
+  const h = await call('GET', '/api/history?type=chat&limit=50', { token });
+  const saved = h.json.data.items.filter((m) => m.role === 'user').at(-1).content;
+  assert.match(saved, /📎 ตาราง\.png, แผน\.pdf$/);
+  assert.ok(!saved.includes(png.slice(0, 20)), 'file data is not stored');
+
+  // declared type must match the content, max 3 files, max 4 MB each, known types only
+  expectError(await call('POST', '/api/chat', { token, body: { message: 'x', attachments: [file('a.png', 'image/png', pdfBytes)] } }), 400, 'VALIDATION_ERROR');
+  expectError(await call('POST', '/api/chat', { token, body: { message: 'x', attachments: [1, 2, 3, 4].map((i) => file(i + '.png', 'image/png', png)) } }), 400, 'VALIDATION_ERROR');
+  const big = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47]), Buffer.alloc(4 * 1024 * 1024 + 10)]).toString('base64');
+  expectError(await call('POST', '/api/chat', { token, body: { message: 'x', attachments: [file('big.png', 'image/png', big)] } }), 400, 'VALIDATION_ERROR');
+  expectError(await call('POST', '/api/chat', { token, body: { message: 'x', attachments: [file('a.exe', 'application/x-msdownload', png)] } }), 400, 'VALIDATION_ERROR');
+  // other routes keep the small body limit
+  assert.ok([400, 413].includes((await call('POST', '/api/match/programs', { body: { interests: ['tech-ai'], custom_text: 'x'.repeat(1_200_000) } })).status));
+});
+
 test('POST /api/chat accepts page context', async () => {
   const r = await call('POST', '/api/chat', {
     token,

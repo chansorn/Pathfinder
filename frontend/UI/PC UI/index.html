@@ -55,7 +55,7 @@
   <div id="uni-river-bg" class="uni-river-bg" aria-hidden="true"></div>
   <aside id="uni-hover-card" role="tooltip" aria-hidden="true" class="p-gutter-md rounded-xl bg-surface-container-lowest border border-outline-variant shadow-xl flex flex-col gap-gutter-xs"></aside>
   <div id="uni-link-toast" role="dialog" aria-hidden="true" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[min(92vw,460px)] p-gutter-md rounded-xl bg-surface-container-lowest border border-primary shadow-xl flex flex-col gap-gutter-xs"></div>
-  <div class="pf-shell min-h-[1024px] flex flex-col justify-between relative z-10" data-stitch-vh="min-h-[1024px]===min-h-screen">
+  <div class="pf-shell min-h-[100dvh] flex flex-col justify-between relative z-10">
 
   <!-- #region [HTML 3.1] Top Sticky Header & User Account Menu -->
     <!-- Persistent Prototype Header -->
@@ -1204,13 +1204,19 @@
             </button>
           </div>
 
+          <!-- files waiting to be sent with the next message (js/sim-coach.js) -->
+          <div id="coach-chat-files" class="hidden flex flex-wrap gap-gutter-xs" aria-live="polite"></div>
           <form id="coach-chat-form" class="flex items-end gap-gutter-sm p-1.5 pl-gutter-md rounded-2xl bg-surface-container-low border border-outline-variant focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15">
+            <input id="coach-chat-file-input" type="file" multiple accept="image/png,image/jpeg,image/webp,application/pdf,text/plain,text/csv,text/markdown,.txt,.csv,.md" class="hidden">
+            <button id="coach-chat-attach" type="button" aria-label="แนบรูปหรือไฟล์" title="แนบรูปหรือไฟล์ (รูป, PDF, ไฟล์ข้อความ • สูงสุด 3 ไฟล์ ไฟล์ละ 4 MB)" data-th-title="แนบรูปหรือไฟล์" class="w-10 h-10 rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface flex items-center justify-center shrink-0">
+              <span class="material-symbols-outlined text-[22px]" aria-hidden="true">attach_file</span>
+            </button>
             <textarea id="coach-chat-input" rows="1" maxlength="2000" aria-label="ถามคำถาม AI โค้ช" placeholder="พิมพ์คำถามถึง AI โค้ช..." data-placeholder-th="พิมพ์คำถามถึง AI โค้ช..." data-placeholder-en="Message the AI Coach..." class="flex-1 min-w-0 max-h-40 my-auto py-2 resize-none border-0 bg-transparent font-body text-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:ring-0 focus:outline-none"></textarea>
             <button id="coach-chat-send" type="submit" aria-label="ส่งคำถาม" class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0 disabled:opacity-40 disabled:cursor-not-allowed">
               <span class="material-symbols-outlined text-[20px]" aria-hidden="true">arrow_upward</span>
             </button>
           </form>
-          <p class="font-label text-[11px] text-on-surface-variant text-center" data-th="Enter เพื่อส่ง • Shift+Enter ขึ้นบรรทัดใหม่ • AI อาจผิดพลาด ตรวจสอบเกณฑ์ทางการที่ mytcas.com" data-en="Enter to send • Shift+Enter for a new line • AI can be wrong, check official criteria on mytcas.com">Enter เพื่อส่ง • Shift+Enter ขึ้นบรรทัดใหม่ • AI อาจผิดพลาด ตรวจสอบเกณฑ์ทางการที่ mytcas.com</p>
+          <p class="font-label text-[11px] text-on-surface-variant text-center" data-th="Enter เพื่อส่ง • Shift+Enter ขึ้นบรรทัดใหม่ • 📎 แนบรูป/PDF/ไฟล์ข้อความได้ (วางหรือลากไฟล์มาก็ได้) อย่าแนบเอกสารที่มีเลขบัตรประชาชนหรือข้อมูลส่วนตัว • AI อาจผิดพลาด ตรวจสอบเกณฑ์ทางการที่ mytcas.com" data-en="Enter to send • Shift+Enter for a new line • 📎 attach images/PDF/text (paste or drop works too), no ID cards or personal documents • AI can be wrong, check official criteria on mytcas.com">Enter เพื่อส่ง • Shift+Enter ขึ้นบรรทัดใหม่ • 📎 แนบรูป/PDF/ไฟล์ข้อความได้ (วางหรือลากไฟล์มาก็ได้) อย่าแนบเอกสารที่มีเลขบัตรประชาชนหรือข้อมูลส่วนตัว • AI อาจผิดพลาด ตรวจสอบเกณฑ์ทางการที่ mytcas.com</p>
         </div>
       </section>
     </main>
@@ -1433,7 +1439,7 @@
   <!-- ==================== [HTML 3.9] OVERLAYS: WAYPOINT DRAWER, AUTH & PROFILE ==================== -->
   <div id="waypoint-drawer" role="dialog" aria-modal="true" aria-labelledby="wp-drawer-title" class="hidden fixed inset-0 z-50">
     <div id="wp-drawer-backdrop" class="fixed inset-0 bg-primary/40"></div>
-    <div class="fixed bottom-0 inset-x-0 sm:inset-x-auto sm:top-0 sm:right-0 sm:bottom-0 w-full sm:max-w-md max-h-[870px] sm:max-h-full overflow-y-auto bg-surface-container-lowest border-t sm:border-t-0 sm:border-l border-outline-variant rounded-t-2xl sm:rounded-t-none sm:rounded-l-2xl shadow-2xl p-gutter-lg flex flex-col justify-between gap-gutter-lg" data-stitch-vh="max-h-[870px]===max-h-[85vh]">
+    <div class="fixed bottom-0 inset-x-0 sm:inset-x-auto sm:top-0 sm:right-0 sm:bottom-0 w-full sm:max-w-md max-h-[85dvh] sm:max-h-full overflow-y-auto bg-surface-container-lowest border-t sm:border-t-0 sm:border-l border-outline-variant rounded-t-2xl sm:rounded-t-none sm:rounded-l-2xl shadow-2xl p-gutter-lg flex flex-col justify-between gap-gutter-lg">
       <div class="flex flex-col gap-gutter-md">
         <header class="flex items-start justify-between gap-gutter-sm">
           <div class="flex flex-wrap items-center gap-1.5">
@@ -1530,8 +1536,8 @@
        - Curved dropdowns: Any <select data-pf-dropdown="card"> is enhanced by initCurvedDropdowns().
        ===================================================================== -->
   <!-- Auth Modal (Login / Sign Up / Demo Student / Forgot Password / Social Auth) -->
-  <div id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" class="hidden fixed inset-0 z-50 bg-primary/40 flex items-center justify-center p-gutter-md">
-    <div class="relative w-full max-w-[440px] max-h-[942px] overflow-y-auto p-6 sm:p-7 rounded-2xl bg-surface-container-lowest border border-outline-variant/80 shadow-2xl flex flex-col gap-5" data-stitch-vh="max-h-[942px]===max-h-[92vh]">
+  <div id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" class="hidden fixed inset-0 z-50 bg-primary/40 flex items-center justify-center p-gutter-md overflow-y-auto">
+    <div class="relative w-full max-w-[440px] max-h-[calc(100dvh-2rem)] overflow-y-auto overflow-x-hidden overscroll-contain p-6 sm:p-7 rounded-2xl bg-surface-container-lowest border border-outline-variant/80 shadow-2xl flex flex-col gap-5">
       <!-- Top Bar: Brand + Mode Tabs + Close -->
       <div class="flex items-center justify-between gap-2">
         <div class="grid grid-cols-2 gap-1 p-1 rounded-full bg-surface-container-low border border-outline-variant/80" role="tablist">
@@ -1681,7 +1687,7 @@
 
   <!-- User Profile & Personal Information Full Window (Reference-aligned layout, zero blur, existing features only) -->
   <div id="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title" class="hidden fixed inset-0 z-50 bg-surface overflow-y-auto">
-    <div class="min-h-[1024px] w-full flex flex-col md:flex-row" data-stitch-vh="min-h-[1024px]===min-h-screen">
+    <div class="min-h-[100dvh] w-full flex flex-col md:flex-row">
       <!-- Left Sidebar (Matches reference screenshot structure with PathFinder navigation) -->
       <aside class="w-full md:w-64 shrink-0 bg-surface-container-lowest border-b md:border-b-0 md:border-r border-outline-variant p-gutter-lg flex flex-col justify-between gap-gutter-lg">
         <div class="flex flex-col gap-gutter-lg">

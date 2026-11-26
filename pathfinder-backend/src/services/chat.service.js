@@ -38,7 +38,11 @@ async function coachContext(context) {
   return out;
 }
 
-export async function prepareChat(db, userId, message, context) {
+// what is saved for a message with files: the text + the file names (the files themselves are not kept)
+const withFileNames = (message, attachments = []) =>
+  attachments.length ? `${message}\n\n📎 ${attachments.map((f) => f.name).join(', ')}` : message;
+
+export async function prepareChat(db, userId, message, context, attachments = []) {
   const [student, historyRes] = await Promise.all([
     buildStudentContext(db, userId),
     db
@@ -54,7 +58,7 @@ export async function prepareChat(db, userId, message, context) {
   const [tcas, page] = await Promise.all([safeTcasContext(student.target_faculties), coachContext(context)]);
   const webSearch = env.TCAS_WEB_SEARCH;
 
-  const { error } = await db.from('chat_messages').insert({ user_id: userId, role: 'user', content: message });
+  const { error } = await db.from('chat_messages').insert({ user_id: userId, role: 'user', content: withFileNames(message, attachments) });
   if (error) throw dbError(error, 'save user message');
 
   return {
@@ -64,8 +68,9 @@ export async function prepareChat(db, userId, message, context) {
   };
 }
 
-export function chatStream({ systemPrompt, history, message, signal, webSearch, onSources, lang }) {
-  return streamChat({ systemPrompt, history, message, signal, mockReply: chatMockReply, useSearch: webSearch, onSources, lang });
+export function chatStream({ systemPrompt, history, message, attachments = [], signal, webSearch, onSources, lang }) {
+  const mockReply = attachments.length ? `(ตัวอย่าง) ได้รับไฟล์แนบ: ${attachments.map((f) => f.name).join(', ')} • ${chatMockReply}` : chatMockReply;
+  return streamChat({ systemPrompt, history, message, attachments, signal, mockReply, useSearch: webSearch, onSources, lang });
 }
 
 export async function saveAssistantMessage(db, userId, content) {

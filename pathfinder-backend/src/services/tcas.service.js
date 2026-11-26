@@ -27,6 +27,10 @@ export async function latestYear(db = anonClient(), table = 'tcas_programs') {
 // "แพทยศาสตร์" vs "แพทยศาสตรบัณฑิต": the trailing ์ disappears once a word is followed by
 // บัณฑิต etc., so match on the word without it
 const matchStem = (term) => term.replace(/์$/, '');
+// search text inside a PostgREST filter: its syntax characters (, ( ) " : * \) would change the filter itself
+// ("x)" broke it, "a,academic_year.eq.2570" added a condition) and % _ are LIKE wildcards. Program and
+// university names don't need any of them, so they are dropped.
+const filterSafe = (s) => String(s ?? '').replace(/[,()"':*\\%_]/g, ' ').replace(/\s+/g, ' ').trim();
 
 // "วท.บ. สาขาวิชาวิทยาการคอมพิวเตอร์ (ภาษาไทย ปกติ)" -> "วิทยาการคอมพิวเตอร์"
 const coreProgram = (name) =>
@@ -59,10 +63,10 @@ export async function searchPrograms({ q, university, year, limit = 20 }, db = a
   if (!year) return { academic_year: null, items: [] };
 
   let query = db.from('tcas_programs').select(PROGRAM_COLS).eq('academic_year', year);
-  const term = q && coreFaculty(q);
+  const term = q && coreFaculty(filterSafe(q));
   const stem = term && matchStem(term);
   if (stem) query = query.or(`faculty.ilike.%${stem}%,program.ilike.%${stem}%`);
-  const uni = university && coreUniversity(university);
+  const uni = university && coreUniversity(filterSafe(university));
   if (uni) query = query.ilike('university', `%${uni}%`);
 
   // with a search term, pull a wider pool and rank it here; plain substring matching
