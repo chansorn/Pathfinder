@@ -1,0 +1,207 @@
+/* =========================================================================
+ * PathFinder — 3. Curved Dropdowns, Liquid Tab Bar & Icon Pills
+ * Sections 2.4 (curved dropdowns & form controls) and 2.6 (liquid tab bar & icon-only pills).
+ * Load order: base.css > transitions.css > components.css > visualizers.css
+ * ========================================================================= */
+
+/* [CSS 2.4] Curved Dropdowns & Interactive Form Controls */
+.pf-dd-wrap {
+  position: relative;
+  width: 100%;
+}
+.pf-dd-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+.pf-dd-chevron {
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  flex-shrink: 0;
+}
+.pf-dd-wrap.is-open .pf-dd-chevron {
+  transform: rotate(180deg);
+}
+.pf-dd-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 80;
+  padding: 6px;
+  border-radius: 18px;
+  background: #FFFFFF;
+  border: 1px solid #C7C6C4;
+  box-shadow: 0 18px 38px -12px rgba(31, 58, 61, 0.24), 0 4px 12px -4px rgba(31, 58, 61, 0.08);
+  transform-origin: top center;
+  opacity: 0;
+  transform: translateY(-8px) scaleY(0.86);
+  max-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition:
+    opacity 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.pf-dd-wrap.is-open .pf-dd-menu {
+  opacity: 1;
+  transform: translateY(0) scaleY(1);
+  max-height: 260px;
+  overflow-y: auto;
+  pointer-events: auto;
+}
+.pf-dd-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: #1A1C1B;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 180ms ease,
+    color 180ms ease;
+}
+.pf-dd-wrap.is-open .pf-dd-option {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: calc(var(--dd-idx, 0) * 28ms);
+}
+.pf-dd-option:hover {
+  background: #EAE4D7;
+}
+.pf-dd-option.is-selected {
+  background: #1F3A3D;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.pf-vibrant-bg {
+  background-color: #FAF9F6;
+}
+.pf-vibrant-bg::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: #FAF9F6;
+  background-image:
+    radial-gradient(ellipse 68% 55% at 10% 8%, rgba(210, 250, 231, 0.72) 0%, transparent 65%),
+    radial-gradient(ellipse 58% 50% at 92% 14%, rgba(255, 237, 228, 0.78) 0%, transparent 62%),
+    radial-gradient(ellipse 65% 55% at 52% 94%, rgba(217, 246, 250, 0.65) 0%, transparent 65%),
+    radial-gradient(rgba(31, 58, 61, 0.055) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 24px 24px;
+}
+
+/* [CSS 2.6] Liquid Tab Bar & Icon-Only Pill Transitions */
+.flow-tab-bar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 9999px;
+  background: #1F3A3D;
+  border: 1px solid #1F3A3D;
+  box-shadow: 0 10px 28px -14px rgba(31, 58, 61, 0.45);
+}
+.flow-pill {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  height: calc(100% - 12px);
+  border-radius: 9999px;
+  background: #B8F25C;
+  pointer-events: none;
+  z-index: 1;
+  transition:
+    left 340ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    width 300ms cubic-bezier(0.22, 1.28, 0.36, 1);
+}
+.flow-droplet {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #B8F25C;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition:
+    left 460ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 380ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 280ms ease;
+}
+.flow-tab-btn {
+  position: relative;
+  z-index: 2;
+  overflow: visible;
+}
+.flow-tab-btn:hover, .flow-tab-btn:active {
+  transform: none;
+  box-shadow: none;
+}
+.flow-tab-btn .flow-label {
+  transition: opacity 220ms cubic-bezier(0.22, 1, 0.36, 1), color 180ms ease;
+}
+.flow-tab-btn.is-fading .flow-label {
+  opacity: 0.25;
+}
+
+/* Icon-only tab bars: collapse label unless chosen (bg-primary / aria-selected="true") or hovered */
+.icon-collapse-tab {
+  gap: 0 !important;
+  transition:
+    gap 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 200ms ease,
+    box-shadow 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.icon-collapse-tab .tab-label {
+  display: inline-block;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition:
+    max-width 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 200ms ease;
+}
+.icon-collapse-tab.bg-primary,
+.icon-collapse-tab[aria-selected="true"],
+.icon-collapse-tab:focus-visible {
+  gap: 6px !important;
+}
+.icon-collapse-tab.bg-primary .tab-label,
+.icon-collapse-tab[aria-selected="true"] .tab-label,
+.icon-collapse-tab:focus-visible .tab-label {
+  max-width: 150px;
+  opacity: 1;
+}
+@media (hover: hover) {
+  .icon-collapse-tab:hover {
+    gap: 6px !important;
+  }
+  .icon-collapse-tab:hover .tab-label {
+    max-width: 150px;
+    opacity: 1;
+  }
+}

@@ -1,0 +1,180 @@
+/* =========================================================================
+ * PathFinder — 2. Blur-Free Transitions & Motion
+ * Sections 2.2 (hover, ripple, TH/EN bubble) and 2.3 (page, panel & modal motion).
+ * Load order: base.css > transitions.css > components.css > visualizers.css
+ * ========================================================================= */
+
+/* [CSS 2.2] Blur-Free Hover, Ripple & Language Switch Transitions */
+button:not(.uni-river-item):not(#floating-ai-coach-btn), .pf-bubble, article[data-destination-card] {
+  position: relative;
+  overflow: hidden;
+  transition:
+    background-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 200ms ease,
+    box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#floating-ai-coach-btn {
+  position: fixed;
+  overflow: hidden;
+  transition: background-color 220ms ease, box-shadow 220ms ease;
+}
+
+@media (hover: hover) {
+  button:not(:disabled):not(.uni-river-item):not(#floating-ai-coach-btn):hover, .pf-bubble:hover {
+    box-shadow: 0 4px 12px -4px rgba(31, 58, 61, 0.14);
+  }
+}
+
+button:not(:disabled):not(.uni-river-item):not(#floating-ai-coach-btn):active, .pf-bubble:active {
+  box-shadow: 0 1px 3px 0 rgba(31, 58, 61, 0.12);
+}
+
+@media (hover: hover) {
+  article[data-destination-card]:hover {
+    box-shadow: 0 10px 24px -10px rgba(31, 58, 61, 0.14);
+  }
+}
+
+/* Bubble click ripple */
+.pf-ripple {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.38);
+  transform: scale(0);
+  animation: bubbleRipple 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+}
+.pf-ripple-dark {
+  background: rgba(31, 58, 61, 0.14);
+}
+@keyframes bubbleRipple {
+  to {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+/* Language bubble sliding indicator + text cross-fade */
+.lang-switch {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 2px;
+  border-radius: 9999px;
+  background: #EAE4D7;
+  border: 1px solid #C7C6C4;
+}
+.lang-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  height: calc(100% - 4px);
+  border-radius: 9999px;
+  background: #1F3A3D;
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.lang-switch[data-active-lang="en"] .lang-thumb {
+  transform: translateX(100%);
+}
+.lang-switch button {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+.lang-switch button:hover, .lang-switch button:active {
+  transform: none;
+  box-shadow: none;
+}
+button:disabled {
+  font-family: inherit;
+}
+
+/* Synchronized text language transition (opacity-only to prevent subpixel blur) */
+[data-th][data-en] {
+  transition: opacity 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+body.lang-fading [data-th][data-en] {
+  opacity: 0;
+}
+
+/* [CSS 2.3] Page, Panel & Modal Transitions */
+[data-page-view].page-enter {
+  animation: pageSlideIn 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-page-view].page-exit {
+  animation: pageSlideOut 150ms cubic-bezier(0.4, 0, 1, 1);
+}
+@keyframes pageSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pageSlideOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-6px); }
+}
+
+[data-round-panel]:not(.hidden),
+[data-step-panel]:not(.hidden),
+[data-rm-panel]:not(.hidden),
+#reroute-modal:not(.hidden) > div,
+#auth-modal:not(.hidden) > div {
+  animation: panelSlideIn 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes panelSlideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* [CSS 2.9] Quiet feedback motion for the Step 2-3 answers (js/discovery-matches.js)
+   - .pf-settle: a thin ring that fades out = "this is where your answer went / what it changed"
+   - .pf-swap-in: new text settles in from 3px below (only when the meaning changes, e.g. the pace category)
+   Short, ease-out, no bounce; off for people who ask the OS for less motion. */
+@keyframes pf-settle {
+  from { box-shadow: 0 0 0 2px rgba(31, 58, 61, 0.45); }
+  to   { box-shadow: 0 0 0 6px rgba(31, 58, 61, 0); }
+}
+.pf-settle { animation: pf-settle 700ms cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes pf-swap-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to   { opacity: 1; transform: none; }
+}
+.pf-swap-in { display: inline-block; animation: pf-swap-in 220ms cubic-bezier(0.22, 1, 0.36, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .pf-settle, .pf-swap-in { animation: none !important; }
+}
+
+/* [CSS 2.10] Motion that explains something (home card, matches, deck, lock, timeline, simulator, chat).
+   Same rules as 2.9: short, ease-out, no bounce, and nothing moves for prefers-reduced-motion. */
+@keyframes pf-fade { from { opacity: 0; } to { opacity: 1; } }
+.pf-fade-in { animation: pf-fade 320ms ease-out; }
+/* result cards come in by rank (delay set per card in js/matches.js) */
+@keyframes pf-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.pf-rise { animation: pf-rise 380ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+/* "% ตรงกัน" bar fills once */
+@keyframes pf-bar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.pf-bar-grow { transform-origin: left center; animation: pf-bar-grow 760ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+/* the next card of a deck moves up into place */
+@keyframes pf-deck-in { from { opacity: 0; transform: translateY(14px) scale(0.97); } to { opacity: 1; transform: none; } }
+.pf-deck-in { animation: pf-deck-in 280ms cubic-bezier(0.22, 1, 0.36, 1); }
+/* home card round tabs: one highlight that slides to the picked tab */
+.pf-tab-indicator { transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms cubic-bezier(0.22, 1, 0.36, 1); }
+/* lock: the shackle shuts, the program name arrives on the roadmap */
+@keyframes pf-lock-shut { 0% { transform: translateY(-3px) rotate(-10deg); } 70% { transform: translateY(1px); } 100% { transform: none; } }
+.pf-lock-shut { display: inline-block; animation: pf-lock-shut 320ms cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes pf-slide-in { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+.pf-slide-in { animation: pf-slide-in 360ms cubic-bezier(0.22, 1, 0.36, 1); }
+/* roadmap timeline: "today" travels to its date, the next event pings twice */
+.pf-today-line { transition: left 800ms cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes pf-ping { from { box-shadow: 0 0 0 0 rgba(217, 138, 78, 0.6); } to { box-shadow: 0 0 0 9px rgba(217, 138, 78, 0); } }
+.pf-ping-once { animation: pf-ping 1100ms ease-out 800ms 2; }
+/* chat: a caret while the coach is writing */
+@keyframes pf-caret { 50% { opacity: 0; } }
+.pf-caret { display: inline-block; width: 2px; height: 1.05em; margin-left: 2px; vertical-align: -0.15em; border-radius: 1px; background: currentColor; animation: pf-caret 1s steps(1) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .pf-fade-in, .pf-rise, .pf-bar-grow, .pf-deck-in, .pf-lock-shut, .pf-slide-in, .pf-ping-once, .pf-caret { animation: none !important; }
+  .pf-tab-indicator, .pf-today-line { transition: none !important; }
+}

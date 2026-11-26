@@ -1,0 +1,32 @@
+{
+  "academic_year": 2570,
+  "source_note": "Each university's own TCAS70 application windows, copied from its official admission site / announcement PDF (checked 24 Nov 2026). Round 3 is central and lives in tcas70-calendar.json. Universities whose sites couldn't be read (Chula, CMU, PSU, SWU, KMITL, KMUTT, KMUTNB, NU) are not here yet.",
+  "programs": [],
+  "calendar": [
+    { "university": "มหาวิทยาลัยเกษตรศาสตร์", "round": 1, "event": "รอบ 1.1 Portfolio รับสมัคร (วิทยาเขตบางเขน)", "start_date": "2026-09-18", "end_date": "2026-10-14", "source_url": "https://admission.ku.ac.th/" },
+    { "university": "มหาวิทยาลัยเกษตรศาสตร์", "round": 1, "event": "รอบ 1.2 Portfolio รับสมัคร (วิทยาเขตบางเขน)", "start_date": "2027-01-04", "end_date": "2027-02-04", "source_url": "https://admission.ku.ac.th/" },
+    { "university": "มหาวิทยาลัยเกษตรศาสตร์", "round": 2, "event": "รอบ 2 Quota รับสมัคร (วิทยาเขตบางเขน)", "start_date": "2027-03-15", "end_date": "2027-03-22", "source_url": "https://admission.ku.ac.th/" },
+
+    { "university": "มหาวิทยาลัยมหิดล", "round": 1, "event": "รอบ 1/1 Portfolio รับสมัครออนไลน์ (ยกเว้นแพทย์ศิริราช/รามาธิบดี ซึ่งมีกำหนดการแยก)", "start_date": "2026-08-17", "end_date": "2026-09-10", "source_url": "https://tcas.mahidol.ac.th/announce/update-AdmissionCalendar_Round1-3.pdf" },
+    { "university": "มหาวิทยาลัยมหิดล", "round": 1, "event": "รอบ 1/1 สอบสัมภาษณ์", "start_date": "2026-11-01", "end_date": null, "source_url": "https://tcas.mahidol.ac.th/announce/update-AdmissionCalendar_Round1-3.pdf" },
+    { "university": "มหาวิทยาลัยมหิดล", "round": 1, "event": "รอบ 1/2 Portfolio รับสมัครออนไลน์", "start_date": "2026-12-15", "end_date": "2027-01-15", "source_url": "https://tcas.mahidol.ac.th/announce/update-AdmissionCalendar_Round1-3.pdf" },
+    { "university": "มหาวิทยาลัยมหิดล", "round": 1, "event": "รอบ 1/2 สอบสัมภาษณ์", "start_date": "2027-03-05", "end_date": null, "source_url": "https://tcas.mahidol.ac.th/announce/update-AdmissionCalendar_Round1-3.pdf" },
+    { "university": "มหาวิทยาลัยมหิดล", "round": 2, "event": "รอบ 2 Quota รับสมัครออนไลน์", "start_date": "2027-03-22", "end_date": "2027-04-08", "source_url": "https://tcas.mahidol.ac.th/announce/update-AdmissionCalendar_Round1-3.pdf" },
+    { "university": "มหาวิทยาลัยมหิดล", "round": 2, "event": "รอบ 2 Quota สอบสัมภาษณ์", "start_date": "2027-04-25", "end_date": null, "source_url": "https://tcas.mahidol.ac.th/announce/update-AdmissionCalendar_Round1-3.pdf" },
+
+    { "university": "มหาวิทยาลัยธรรมศาสตร์", "round": 1, "event": "รอบ 1 Portfolio รับสมัคร (โครงการรับตรง และ สอวน./สสวท.) ขยายถึง 17 ธ.ค. ปิด 15.00 น.", "start_date": "2026-09-14", "end_date": "2026-12-17", "source_url": "https://www.tuadmissions.in.th/img/2026111906121730.pdf" },
+    { "university": "มหาวิทยาลัยธรรมศาสตร์", "round": 2, "event": "รอบ 2 Quota (โครงการโควตาพื้นที่) รับสมัคร ปิด 15.00 น.", "start_date": "2027-03-15", "end_date": "2027-03-30", "source_url": "https://www.tuadmissions.in.th/img/2026111102545340.pdf" },
+    { "university": "มหาวิทยาลัยธรรมศาสตร์", "round": 2, "event": "รอบ 2 Quota (โครงการโควตาพื้นที่) สอบสัมภาษณ์", "start_date": "2027-04-27", "end_date": "2027-04-28", "source_url": "https://www.tuadmissions.in.th/img/2026111102545340.pdf" },
+
+    { "university": "มหาวิทยาลัยขอนแก่น", "round": 1, "event": "รอบ 1.1 Portfolio รับสมัคร", "start_date": "2026-10-15", "end_date": "2026-11-02", "source_url": "https://admissions.kku.ac.th/tcas70/" },
+    { "university": "มหาวิทยาลัยขอนแก่น", "round": 1, "event": "รอบ 1.1 Portfolio สอบสัมภาษณ์", "start_date": "2026-12-08", "end_date": "2026-12-09", "source_url": "https://admissions.kku.ac.th/tcas70/" },
+    { "university": "มหาวิทยาลัยขอนแก่น", "round": 1, "event": "รอบ 1.2 Portfolio รับสมัคร", "start_date": "2027-02-10", "end_date": "2027-02-15", "source_url": "https://admissions.kku.ac.th/tcas70/" },
+    { "university": "มหาวิทยาลัยขอนแก่น", "round": 1, "event": "รอบ 1.2 Portfolio สอบสัมภาษณ์", "start_date": "2027-03-03", "end_date": null, "source_url": "https://admissions.kku.ac.th/tcas70/" },
+    { "university": "มหาวิทยาลัยขอนแก่น", "round": 2, "event": "รอบ 2 Quota (โควตาภาค) รับสมัคร", "start_date": "2027-03-16", "end_date": "2027-03-30", "source_url": "https://admissions.kku.ac.th/tcas70/" },
+    { "university": "มหาวิทยาลัยขอนแก่น", "round": 2, "event": "รอบ 2 Quota สอบสัมภาษณ์", "start_date": "2027-04-21", "end_date": "2027-04-22", "source_url": "https://admissions.kku.ac.th/tcas70/" },
+
+    { "university": "มหาวิทยาลัยศิลปากร", "round": 1, "event": "รอบ 1 Portfolio ช่วงที่ 1 รับสมัคร (09.00 - 22.00 น. วันสุดท้าย)", "start_date": "2026-08-20", "end_date": "2026-09-08", "source_url": "https://admission.su.ac.th/" },
+    { "university": "มหาวิทยาลัยศิลปากร", "round": 1, "event": "รอบ 1 Portfolio ช่วงที่ 2 รับสมัคร (09.00 - 22.00 น. วันสุดท้าย)", "start_date": "2026-10-20", "end_date": "2026-11-16", "source_url": "https://admission.su.ac.th/" },
+    { "university": "มหาวิทยาลัยศิลปากร", "round": 2, "event": "รอบ 2 Quota รับสมัคร", "start_date": "2027-03-16", "end_date": "2027-03-30", "source_url": "https://admission.su.ac.th/" }
+  ]
+}

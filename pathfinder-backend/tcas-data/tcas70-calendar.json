@@ -1,0 +1,51 @@
+{
+  "academic_year": 2570,
+  "source_note": "TCAS70 calendar. Round 1-4 dates: mytcas.com home page (UPDATE 16/11/2026), same in PPTV and TruePlookpanya. Exam dates: PPTV (26 Apr 2026) and TruePlookpanya (16 Sep 2026). A-Level results date left out because the two news sources disagree - check mytcas.com.",
+  "programs": [],
+  "calendar": [
+    { "round": null, "event": "เปิดระบบ TCAS70", "start_date": "2026-07-15", "end_date": null, "source_url": "https://www.pptvhd36.com/news/%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%A1/274111" },
+
+    { "round": null, "event": "รับสมัครสอบ TGAT/TPAT 2-5", "start_date": "2026-11-04", "end_date": "2026-11-10", "source_url": "https://www.trueplookpanya.com/tcas/article/detail/97424" },
+    { "round": null, "event": "รับคำร้องสมัครสอบ TGAT/TPAT 2-5 ล่าช้า", "start_date": "2026-11-11", "end_date": "2026-11-12", "source_url": "https://www.pptvhd36.com/news/%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%A1/274111" },
+    { "round": null, "event": "พิมพ์บัตรที่นั่งสอบ TGAT/TPAT 2-5", "start_date": "2026-12-07", "end_date": "2027-02-01", "source_url": "https://www.pptvhd36.com/news/%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%A1/274111" },
+    { "round": null, "event": "สอบ TGAT และ TPAT3", "start_date": "2027-01-30", "end_date": null, "source_url": "https://www.pptvhd36.com/news/%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%A1/274111" },
+    { "round": null, "event": "สอบ TPAT2 และ TPAT5", "start_date": "2027-01-31", "end_date": null, "source_url": "https://www.pptvhd36.com/news/%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%A1/274111" },
+    { "round": null, "event": "สอบ TPAT4", "start_date": "2027-02-01", "end_date": null, "source_url": "https://www.pptvhd36.com/news/%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%A1/274111" },
+    { "round": null, "event": "สอบ TPAT1 วิชาเฉพาะ กสพท.", "start_date": "2027-02-13", "end_date": null, "source_url": "https://www.pptvhd36.com/news/%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%A1/274111" },
+    { "round": null, "event": "ประกาศผลสอบ TGAT/TPAT 2-5", "start_date": "2027-02-28", "end_date": null, "source_url": "https://www.trueplookpanya.com/tcas/article/detail/97424" },
+    { "round": null, "event": "ขอทบทวนคะแนนสอบ TGAT/TPAT 2-5", "start_date": "2027-03-01", "end_date": "2027-03-06", "source_url": "https://www.trueplookpanya.com/tcas/article/detail/97424" },
+
+    { "round": null, "event": "รับสมัครสอบ A-Level", "start_date": "2027-01-14", "end_date": "2027-01-20", "source_url": "https://www.trueplookpanya.com/tcas/article/detail/97424" },
+    { "round": null, "event": "รับสมัครสอบ A-Level เพิ่มเติม/ล่าช้า", "start_date": "2027-01-21", "end_date": "2027-01-22", "source_url": "https://www.trueplookpanya.com/tcas/article/detail/97424" },
+    { "round": null, "event": "พิมพ์บัตรที่นั่งสอบ A-Level", "start_date": "2027-02-15", "end_date": "2027-03-15", "source_url": "https://www.pptvhd36.com/news/%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%A1/274111" },
+    { "round": null, "event": "สอบ A-Level ชีววิทยา ฟิสิกส์ ภาษาไทย สังคมศึกษา", "start_date": "2027-03-13", "end_date": null, "source_url": "https://www.pptvhd36.com/news/%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%A1/274111" },
+    { "round": null, "event": "สอบ A-Level คณิตศาสตร์ประยุกต์ 1 ภาษาอังกฤษ เคมี", "start_date": "2027-03-14", "end_date": null, "source_url": "https://www.pptvhd36.com/news/%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%A1/274111" },
+    { "round": null, "event": "สอบ A-Level คณิตศาสตร์ประยุกต์ 2 วิทยาศาสตร์ประยุกต์ ภาษาอื่นๆ", "start_date": "2027-03-15", "end_date": null, "source_url": "https://www.pptvhd36.com/news/%E0%B8%AA%E0%B8%B1%E0%B8%87%E0%B8%84%E0%B8%A1/274111" },
+    { "round": null, "event": "เปิดระบบโต้แย้งเฉลย A-Level", "start_date": "2027-03-27", "end_date": "2027-03-31", "source_url": "https://www.trueplookpanya.com/tcas/article/detail/97424" },
+
+    { "round": 1, "event": "รอบ 1 Portfolio รับสมัคร (มหาวิทยาลัยกำหนดเอง ตั้งแต่วันนี้เป็นต้นไป)", "start_date": "2026-08-15", "end_date": null, "source_url": "https://www.mytcas.com/" },
+    { "round": 1, "event": "รอบ 1 Portfolio ประกาศผลในระบบ", "start_date": "2027-03-10", "end_date": null, "source_url": "https://www.mytcas.com/" },
+    { "round": 1, "event": "รอบ 1 Portfolio ยืนยันสิทธิ์ในระบบ", "start_date": "2027-03-10", "end_date": "2027-03-11", "source_url": "https://www.mytcas.com/" },
+    { "round": 1, "event": "รอบ 1 Portfolio สละสิทธิ์ในระบบ ครั้งที่ 1", "start_date": "2027-03-12", "end_date": null, "source_url": "https://www.mytcas.com/" },
+    { "round": 1, "event": "รอบ 1 Portfolio สละสิทธิ์ในระบบ ครั้งที่ 2", "start_date": "2027-05-05", "end_date": null, "source_url": "https://www.mytcas.com/" },
+
+    { "round": 2, "event": "รอบ 2 Quota รับสมัคร (มหาวิทยาลัยกำหนดเอง ตั้งแต่วันนี้เป็นต้นไป)", "start_date": "2027-03-13", "end_date": null, "source_url": "https://www.mytcas.com/" },
+    { "round": 2, "event": "รอบ 2 Quota ประกาศผลในระบบ", "start_date": "2027-05-03", "end_date": null, "source_url": "https://www.mytcas.com/" },
+    { "round": 2, "event": "รอบ 2 Quota ยืนยันสิทธิ์ในระบบ", "start_date": "2027-05-03", "end_date": "2027-05-04", "source_url": "https://www.mytcas.com/" },
+    { "round": 2, "event": "รอบ 2 Quota สละสิทธิ์ในระบบ", "start_date": "2027-05-05", "end_date": null, "source_url": "https://www.mytcas.com/" },
+
+    { "round": 3, "event": "รอบ 3 Admission รับสมัครที่ mytcas.com", "start_date": "2027-05-07", "end_date": "2027-05-11", "source_url": "https://www.mytcas.com/" },
+    { "round": 3, "event": "รอบ 3 Admission รับสมัครเพิ่มเติม", "start_date": "2027-05-12", "end_date": "2027-05-13", "source_url": "https://www.mytcas.com/" },
+    { "round": 3, "event": "รอบ 3 Admission ประกาศผลครั้งที่ 1", "start_date": "2027-05-22", "end_date": null, "source_url": "https://www.mytcas.com/" },
+    { "round": 3, "event": "รอบ 3 Admission ยืนยันสิทธิ์ในระบบ", "start_date": "2027-05-22", "end_date": "2027-05-23", "source_url": "https://www.mytcas.com/" },
+    { "round": 3, "event": "รอบ 3 Admission ประกาศผลครั้งที่ 2", "start_date": "2027-05-27", "end_date": null, "source_url": "https://www.mytcas.com/" },
+    { "round": 3, "event": "รอบ 3 Admission สละสิทธิ์ในระบบ (เฉพาะผู้ยืนยันสิทธิ์รอบ 3 ที่ไม่เคยสละสิทธิ์มาก่อน)", "start_date": "2027-05-28", "end_date": null, "source_url": "https://www.mytcas.com/" },
+
+    { "round": 4, "event": "รอบ 4 Direct Admission ประกาศจำนวนที่นั่งที่ mytcas.com", "start_date": "2027-05-29", "end_date": null, "source_url": "https://www.mytcas.com/" },
+    { "round": 4, "event": "รอบ 4 Direct Admission รับสมัคร (ระบบของมหาวิทยาลัย)", "start_date": "2027-05-29", "end_date": "2027-06-15", "source_url": "https://www.mytcas.com/" },
+    { "round": 4, "event": "รอบ 4 Direct Admission ประกาศผลครั้งที่ 1", "start_date": "2027-06-07", "end_date": null, "source_url": "https://www.mytcas.com/" },
+    { "round": 4, "event": "รอบ 4 Direct Admission ยืนยันสิทธิ์ครั้งที่ 1", "start_date": "2027-06-07", "end_date": "2027-06-08", "source_url": "https://www.mytcas.com/" },
+    { "round": 4, "event": "รอบ 4 Direct Admission ประกาศผลครั้งที่ 2", "start_date": "2027-06-18", "end_date": null, "source_url": "https://www.mytcas.com/" },
+    { "round": 4, "event": "รอบ 4 Direct Admission ยืนยันสิทธิ์ครั้งที่ 2", "start_date": "2027-06-18", "end_date": "2027-06-19", "source_url": "https://www.mytcas.com/" }
+  ]
+}

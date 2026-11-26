@@ -1,0 +1,13 @@
+{
+  "name": "ku-open-house",
+  "private": true,
+  "description": "Root shortcuts - the backend lives in pathfinder-backend/",
+  "scripts": {
+    "test": "npm --prefix pathfinder-backend test",
+    "test:all": "npm --prefix pathfinder-backend test",
+    "dev": "npm --prefix pathfinder-backend run dev",
+    "start": "npm --prefix pathfinder-backend start",
+    "tcas:import": "npm --prefix pathfinder-backend run tcas:import --",
+    "tcas:cutoffs": "npm --prefix pathfinder-backend run tcas:cutoffs --"
+  }
+}

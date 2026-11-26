@@ -1,0 +1,42 @@
+{
+  "academic_year": 2569,
+  "source_note": "TEMPLATE ONLY - every value below is made up to show the format. Replace with real data from mytcas.com / official university announcements before importing.",
+  "programs": [
+    {
+      "university": "มหาวิทยาลัยตัวอย่าง",
+      "faculty": "วิศวกรรมศาสตร์",
+      "program": "วิศวกรรมคอมพิวเตอร์",
+      "campus": "",
+      "url": "https://example.com/programs/computer-engineering",
+      "tuition_note": "ตัวอย่าง: ประมาณ 25,000 บาท/ภาคการศึกษา",
+      "admissions": [
+        {
+          "round": 1,
+          "project_name": "ตัวอย่าง: โครงการ Portfolio ทั่วไป",
+          "seats": 30,
+          "min_gpax": 3.0,
+          "requirements": "ตัวอย่าง: แฟ้มสะสมผลงานไม่เกิน 10 หน้า, สัมภาษณ์",
+          "score_weights": null,
+          "last_year_min_score": null,
+          "source_url": "https://example.com/admission/round1",
+          "notes": null
+        },
+        {
+          "round": 3,
+          "project_name": "ตัวอย่าง: Admission",
+          "seats": 60,
+          "min_gpax": null,
+          "requirements": null,
+          "score_weights": { "TGAT": 20, "TPAT3": 30, "A-Level คณิตศาสตร์ประยุกต์ 1": 25, "A-Level ฟิสิกส์": 25 },
+          "last_year_min_score": 62.5,
+          "source_url": "https://example.com/admission/round3",
+          "notes": null
+        }
+      ]
+    }
+  ],
+  "calendar": [
+    { "round": 1, "event": "ตัวอย่าง: ยื่นใบสมัครรอบ 1 Portfolio", "start_date": "2026-02-01", "end_date": "2026-02-10", "source_url": "https://example.com/calendar" },
+    { "round": null, "event": "ตัวอย่าง: สอบ TGAT/TPAT", "start_date": "2026-03-01", "end_date": "2026-03-03", "source_url": "https://example.com/calendar" }
+  ]
+}

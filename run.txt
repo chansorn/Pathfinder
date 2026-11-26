@@ -1,0 +1,42 @@
+#github link for commit 
+https://github.com/supanaipaksee-source/Pathfinder
+
+#run web 
+npm start
+http://localhost:4000/
+
+#ตั้ง KEEP_ALIVE_URL 
+
+วันที่ deploy ต้องทำตามลำดับนี้ เพราะสองฝั่งต้องรู้ URL ของกันและกัน
+
+Deploy backend ก่อน ใส่ env ตาม .env ไปก่อน แล้วใส่ FRONTEND_URL เป็นค่าชั่วคราวไว้ จะได้ URL ของ backend มา
+Deploy frontend โดยใส่ URL ของ backend เป็น API base URL
+กลับไปแก้ env ของ backend แล้ว save (Render จะ deploy ใหม่ให้เอง):
+FRONTEND_URL = URL ของ frontend จริง ถ้าไม่ตรง CORS จะบล็อกทุก request
+KEEP_ALIVE_URL = URL ของ backend
+ถ้ามีหน้า share หรือ reset password ที่ไม่ได้อยู่ใต้ FRONTEND_URL ให้ตั้ง SHARE_BASE_URL, PASSWORD_RESET_REDIRECT_URL, OAUTH_REDIRECT_URL ด้วย
+Supabase > Authentication > URL Configuration เพิ่ม URL ของ frontend ใน Site URL และ Redirect URLs ไม่อย่างนั้นลิงก์ reset password กับ Google sign-in จะใช้ไม่ได้
+ข้อเสียของการ deploy วันเดียวกับงาน: ถ้าอะไรพัง (env ผิด, CORS ไม่ผ่าน, Supabase rate limit) จะไม่มีเวลาแก้ ควร deploy ทั้งคู่ล่วงหน้าอย่างน้อย 1–2 วัน แล้วรันนี่กับ server จริง:
+
+
+node scripts/load-test.js --url https://<backend> --users 100
+จากนั้นเปิด /api/health/deep ให้เห็น status: "ok" ก่อนเปิดบูธ
+
+
+#ตั้งUptimeRobot 
+
+ตั้งหลังจาก deploy backend เสร็จแล้วได้เลย ไม่ต้องรอ frontend เพราะใช้แค่ URL ของ backend ทำตอนข้อ 3 ของลำดับเมื่อกี้ได้
+ถ้าตั้ง UptimeRobot แล้ว จะไม่ตั้ง KEEP_ALIVE_URL ก็ได้ เพราะ UptimeRobot ทำได้ทั้งปลุก server และแจ้งเตือนเมื่อล่ม จะตั้งทั้งคู่ก็ไม่เสียหาย
+
+ขั้นตอน:
+
+สมัคร https://uptimerobot.com (แผนฟรีพอ)
+กด + New monitor แล้วตั้งค่า:
+Type: HTTP(s)
+URL: https://<backend>.onrender.com/api/health/deep
+Interval: 5 minutes (ต้องน้อยกว่า 15 นาที ไม่อย่างนั้น Render จะหลับ)
+ในส่วน alert ใส่อีเมลของคุณหรือของทีม
+กด Create monitor
+UptimeRobot จะถือว่าล่มเมื่อ /api/health/deep ตอบ 503 (ต่อ DB ไม่ได้) หรือ server ไม่ตอบเลย แล้วส่งอีเมลแจ้ง ถ้าแค่ Gemini มีปัญหา (status: "degraded") ยังตอบ 200 จึงไม่มีอีเมลแจ้ง เพราะช่วงนั้นระบบตอบแบบสำรองอยู่ ถ้าอยากเช็กเรื่อง AI ให้เปิดหน้า /api/health/deep ดูเอง
+
+ช่วงหลังงาน: หยุด (Pause) monitor ไว้ได้ ถ้า backend ไม่ได้ใช้แล้ว ไม่อย่างนั้น Render จะตื่นตลอดและกินชั่วโมงฟรีของ Render (750 ชั่วโมงต่อเดือน)

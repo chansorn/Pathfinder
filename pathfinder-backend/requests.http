@@ -1,0 +1,210 @@
+### PathFinder API - for the VS Code "REST Client" extension (humao.rest-client)
+### click "Send Request" above each one
+### register/login first - the token is picked up from the "login" response automatically
+
+@base = http://localhost:4000/api
+@token = {{login.response.body.data.access_token}}
+@refresh = {{login.response.body.data.refresh_token}}
+
+### ---------- system ----------
+
+GET {{base}}/health
+
+### ---------- Auth (public) ----------
+
+GET {{base}}/schools
+
+###
+GET {{base}}/grade-levels
+
+###
+POST {{base}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "student01@example.com",
+  "password": "password123",
+  "display_name": "น้องเอ",
+  "school_id": 1,
+  "grade_level_id": 2,
+  "accept_terms": true
+}
+
+###
+# @name login
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "student01@example.com",
+  "password": "password123"
+}
+
+###
+POST {{base}}/auth/refresh
+Content-Type: application/json
+
+{ "refresh_token": "{{refresh}}" }
+
+###
+POST {{base}}/auth/forgot-password
+Content-Type: application/json
+
+{ "email": "student01@example.com" }
+
+###
+# token_hash comes from the link in the reset email (?token_hash=...)
+POST {{base}}/auth/reset-password
+Content-Type: application/json
+
+{ "token_hash": "PASTE_TOKEN_HASH_HERE", "password": "newpass123" }
+
+###
+POST {{base}}/auth/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "current_password": "password123", "new_password": "brandnew123" }
+
+### ---------- Profile ----------
+
+GET {{base}}/profile
+Authorization: Bearer {{token}}
+
+###
+PUT {{base}}/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "gpax": 3.45,
+  "subject_grades": { "คณิตศาสตร์": 4, "ฟิสิกส์": 3.5, "ภาษาอังกฤษ": 3 },
+  "interests": ["เทคโนโลยี", "หุ่นยนต์"],
+  "skills": ["Python", "ตัดต่อวิดีโอ"],
+  "activities": [{ "name": "ค่ายคอมพิวเตอร์", "role": "ผู้เข้าร่วม", "year": 2568 }],
+  "awards": [{ "name": "เหรียญทองแดงโครงงานวิทยาศาสตร์", "level": "จังหวัด" }],
+  "target_faculties": [{ "faculty": "วิศวกรรมคอมพิวเตอร์", "university": "มหาวิทยาลัยเกษตรศาสตร์" }]
+}
+
+###
+GET {{base}}/exam-scores
+Authorization: Bearer {{token}}
+
+###
+# @name addScore
+POST {{base}}/exam-scores
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "exam_type": "TPAT", "subject": "TPAT3", "score": 62.5, "max_score": 100, "taken_at": "2026-10-01" }
+
+###
+DELETE {{base}}/exam-scores/{{addScore.response.body.data.id}}
+Authorization: Bearer {{token}}
+
+### ---------- AI ----------
+
+GET {{base}}/assessment/questions
+Authorization: Bearer {{token}}
+
+###
+# all 30 questions, value 1-5
+POST {{base}}/assessment/analyze
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "answers": [
+    { "question_id": "R1", "value": 3 }, { "question_id": "R2", "value": 4 }, { "question_id": "R3", "value": 2 },
+    { "question_id": "I1", "value": 5 }, { "question_id": "I2", "value": 5 }, { "question_id": "I3", "value": 4 },
+    { "question_id": "A1", "value": 3 }, { "question_id": "A2", "value": 2 }, { "question_id": "A3", "value": 4 },
+    { "question_id": "S1", "value": 3 }, { "question_id": "S2", "value": 3 }, { "question_id": "S3", "value": 4 },
+    { "question_id": "E1", "value": 2 }, { "question_id": "E2", "value": 2 }, { "question_id": "E3", "value": 3 },
+    { "question_id": "C1", "value": 4 }, { "question_id": "C2", "value": 4 }, { "question_id": "C3", "value": 3 },
+    { "question_id": "AP1", "value": 3 }, { "question_id": "AP2", "value": 3 }, { "question_id": "AP3", "value": 5 },
+    { "question_id": "AP4", "value": 4 }, { "question_id": "AP5", "value": 4 }, { "question_id": "AP6", "value": 3 },
+    { "question_id": "AP7", "value": 3 }, { "question_id": "AP8", "value": 3 },
+    { "question_id": "L1", "value": 4 }, { "question_id": "L2", "value": 2 }, { "question_id": "L3", "value": 3 },
+    { "question_id": "L4", "value": 5 }
+  ]
+}
+
+###
+POST {{base}}/recommend/faculties
+Authorization: Bearer {{token}}
+
+###
+POST {{base}}/recommend/careers
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "faculty": "วิศวกรรมคอมพิวเตอร์" }
+
+###
+POST {{base}}/plan/tcas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "target_faculty": "วิศวกรรมคอมพิวเตอร์", "target_university": "มหาวิทยาลัยเกษตรศาสตร์" }
+
+###
+POST {{base}}/recommend/portfolio
+Authorization: Bearer {{token}}
+
+###
+POST {{base}}/recommend/skills
+Authorization: Bearer {{token}}
+
+###
+# SSE - REST Client shows the whole stream once it ends
+POST {{base}}/chat
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "message": "อยากเข้าวิศวะคอม ต้องเตรียมอะไรบ้าง" }
+
+###
+GET {{base}}/history
+Authorization: Bearer {{token}}
+
+###
+GET {{base}}/history?type=faculty&limit=5
+Authorization: Bearer {{token}}
+
+###
+GET {{base}}/history?type=chat
+Authorization: Bearer {{token}}
+
+###
+DELETE {{base}}/history/faculty/PASTE_ID_HERE
+Authorization: Bearer {{token}}
+
+###
+DELETE {{base}}/chat/messages
+Authorization: Bearer {{token}}
+
+### ---------- account / PDPA ----------
+
+GET {{base}}/account/consent
+Authorization: Bearer {{token}}
+
+###
+POST {{base}}/account/consent
+Authorization: Bearer {{token}}
+
+###
+GET {{base}}/account/export
+Authorization: Bearer {{token}}
+
+###
+# permanent! wipes the account and all its data
+DELETE {{base}}/account
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "password": "password123" }
+
+### ---------- logout (run last) ----------
+
+POST {{base}}/auth/logout
+Authorization: Bearer {{token}}
