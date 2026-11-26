@@ -1062,6 +1062,21 @@
   }
 
   window.PF_CHAT = { load: loadChatHistory, send: sendChat };
+
+  // simulator "นำคะแนนเป้าหมายไปใช้ในแผน TCAS": open the coach page at its readiness summary
+  // (the summary already shows these simulator numbers: zone, total, safe-zone target, focus subject)
+  var applyTargetBtn = document.getElementById('sim-apply-target');
+  if (applyTargetBtn) {
+    applyTargetBtn.addEventListener('click', function () {
+      goToPage('6');
+      setTimeout(function () {
+        var sec = document.getElementById('coach-summary');
+        if (!sec) return;
+        sec.scrollIntoView({ behavior: window.pfReducedMotion && window.pfReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+        if (window.pfMotion) setTimeout(function () { window.pfMotion(sec, 'pf-settle'); }, 350);
+      }, 450);
+    });
+  }
   window.addEventListener('pf:auth-expired', function () { loadChatHistory(); });
 
   // --- share an AI result with a QR code (POST /share) ---

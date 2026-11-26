@@ -1064,7 +1064,8 @@
               <p id="sim-strategy-tip" class="font-body text-label-md text-on-tertiary-container"></p>
             </div>
 
-            <button type="button" data-go-page="4" class="w-full py-3 rounded-full bg-primary text-on-primary font-label text-label-md">
+            <!-- goes to the coach page summary ("บทวิเคราะห์ความพร้อมล่าสุด"), js/sim-coach.js -->
+            <button type="button" id="sim-apply-target" class="w-full py-3 rounded-full bg-primary text-on-primary font-label text-label-md">
               <span data-th="นำคะแนนเป้าหมายไปใช้ในแผน TCAS" data-en="Apply Target to TCAS Roadmap">นำคะแนนเป้าหมายไปใช้ในแผน TCAS</span>
             </button>
           </div>
@@ -1108,7 +1109,7 @@
       </div>
 
       <!-- Coach Readiness Summary -->
-      <section class="p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
+      <section id="coach-summary" class="scroll-mt-28 p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant flex flex-col gap-gutter-md">
         <div class="flex flex-wrap items-center justify-between gap-gutter-md">
           <div class="flex flex-col gap-gutter-xs max-w-2xl">
             <span class="font-label text-label-sm text-secondary-text" data-th="บทวิเคราะห์ความพร้อมล่าสุด" data-en="Latest Readiness Diagnosis">บทวิเคราะห์ความพร้อมล่าสุด</span>
