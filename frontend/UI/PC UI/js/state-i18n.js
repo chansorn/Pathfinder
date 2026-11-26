@@ -398,6 +398,8 @@ function setLang(lang) {
     document.getElementById('desktop-next-label').textContent = stepNextLabels[lang][currentStep];
     renderHoursPace();
     if (window.PF_GUIDANCE) window.PF_GUIDANCE.render();
+    // Page 3 cards are built in JS: redraw them in the new language
+    if (window.PF_MATCHES && typeof window.PF_MATCHES.render === 'function') window.PF_MATCHES.render();
     renderSummaryStrip();
     if (typeof syncMajorMatches === 'function') syncMajorMatches();
     if (typeof updateAIInterestSummary === 'function') updateAIInterestSummary();

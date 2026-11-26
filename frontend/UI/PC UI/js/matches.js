@@ -106,7 +106,8 @@ var PF_MATCHES = window.PF_MATCHES = (function () {
       .replace(/^\([ก-๙]{1,6}\.[ก-๙.]{1,4}\)\s*/, '') // "(กศ.บ.) ..."
       .replace(/^(สาขาวิชา|สาขา)\s*/, '')
       .replace(/วิชาเอก\s*วิชาเอก/g, 'วิชาเอก') // myTCAS sometimes repeats the word
-      .trim();
+      .trim()
+      .replace(/^\(([^()]+)\)$/, '$1'); // "วิทยาศาสตรบัณฑิต (สถิติและวิทยาการข้อมูล)" -> "สถิติและวิทยาการข้อมูล"
     return { core: core || name, track: track };
   }
   function shortSubject(s) { return pfSubjectLabel(s); }
@@ -185,6 +186,98 @@ var PF_MATCHES = window.PF_MATCHES = (function () {
         '</button></span>' +
       '</div>' +
     '</article>';
+  }
+
+  // ---- "เส้นทางอื่นๆ ที่คุณอาจสนใจ": ranks 6-10 for the same answers (the top 5 excluded) ----
+  var moreItems = [];
+  var moreSeq = 0;
+  var moreBox = document.getElementById('matches-more');
+  var moreGrid = document.getElementById('matches-more-grid');
+  function moreCardHtml(c) {
+    var name = splitProgram(c.program);
+    var logo = logoFor(c);
+    var locked = PF_STATE.lockedProgram && PF_STATE.lockedProgram.id === c.id;
+    var uniColor = UNI_COLORS[c.university_id] || '#6B9080';
+    var tag = c.target_university ? [T('มหาวิทยาลัยที่คุณเลือก', 'Your pick'), 'bg-tertiary-container text-on-tertiary-container']
+      : (c.near_home === 'province' || c.near_home === 'metro') ? [T('ใกล้บ้าน', 'Near you'), 'bg-secondary-container text-on-secondary-container']
+      : c.main_public ? [T('รัฐหลัก', 'Major public'), 'bg-primary/10 text-primary'] : null;
+    var open = c.rounds.filter(function (r) { return r.projects > 0; }).map(function (r) { return r.round; });
+    var w = c.weights ? c.weights.parts.slice(0, 2).map(function (p) { return shortSubject(p.subject) + ' ' + p.weight + '%'; }).join(' + ') : null;
+    var facts = [
+      open.length ? T('เปิดรอบ ', 'Rounds ') + open.join(', ') : T('ยังไม่มีโครงการ', 'No projects yet'),
+      c.min_gpax != null ? 'GPAX ≥ ' + Number(c.min_gpax).toFixed(2) : null,
+      w
+    ].filter(Boolean).join(' • ');
+    return '<article data-more-card="' + esc(c.id) + '" class="flex flex-col gap-gutter-xs p-gutter-md rounded-xl border bg-surface-container-lowest" style="border-color:' + mix(uniColor, 0.5) + ';border-top:3px solid ' + uniColor + ';">' +
+      '<div class="flex items-start justify-between gap-2">' +
+        '<div class="flex flex-wrap items-center gap-1">' +
+          '<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-metric text-label-sm tabular-nums">' + T('ตรงกัน ', '') + c.match_pct + '%</span>' +
+          (tag ? '<span class="px-2 py-0.5 rounded-full font-label text-[11px] ' + tag[1] + '">' + esc(tag[0]) + '</span>' : '') +
+        '</div>' +
+        '<span class="relative w-9 h-9 shrink-0">' +
+          '<span class="absolute inset-0 rounded-full bg-primary text-on-primary flex items-center justify-center font-title text-label-md" aria-hidden="true">' + esc(c.university.replace(/^(มหาวิทยาลัย|สถาบัน)/, '').charAt(0)) + '</span>' +
+          (logo ? '<img data-match-logo src="' + esc(logo) + '" alt="' + esc(c.university) + '" loading="lazy" class="absolute inset-0 w-9 h-9 rounded-full object-contain bg-white border border-outline-variant p-0.5">' : '') +
+        '</span>' +
+      '</div>' +
+      '<h3 class="font-title text-title-md text-on-surface leading-snug line-clamp-2" title="' + esc(c.program) + '">' + esc(name.core) + '</h3>' +
+      '<p class="font-label text-label-sm text-on-surface-variant line-clamp-2">' + esc(c.university) + (c.campus ? ' (' + esc(c.campus) + ')' : '') + ' • ' + esc(c.faculty) + '</p>' +
+      '<p class="p-2 rounded-lg bg-surface-container-low font-label text-[11px] text-on-surface-variant">' + esc(facts) + '</p>' +
+      '<button type="button" data-more-lock="' + esc(c.id) + '" class="mt-auto inline-flex items-center justify-center gap-1 px-gutter-sm py-1.5 rounded-full font-label text-label-sm ' + (locked ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface border border-outline-variant hover:border-primary') + '">' +
+        '<span class="material-symbols-outlined text-[15px]" aria-hidden="true">' + (locked ? 'lock' : 'lock_open') + '</span>' + (locked ? T('ล็อกแล้ว • ดูแผน', 'Locked • view plan') : T('ล็อกเส้นทางนี้', 'Lock this path')) +
+        '<span class="material-symbols-outlined text-[15px]" aria-hidden="true">arrow_forward</span></button>' +
+    '</article>';
+  }
+  function renderMore() {
+    if (!moreBox || !moreGrid) return;
+    moreBox.classList.toggle('hidden', !moreItems.length);
+    if (!moreItems.length) return;
+    var cnt = document.getElementById('matches-more-count');
+    if (cnt) cnt.textContent = T('อีก ' + moreItems.length + ' ตัวเลือก', moreItems.length + ' more');
+    moreGrid.innerHTML = moreItems.map(moreCardHtml).join('');
+  }
+  async function loadMore() {
+    var my = ++moreSeq;
+    if (!items.length) { moreItems = []; renderMore(); return; }
+    // the next pages often repeat a top-5 university with another program: keep paging (max 4 calls)
+    // until there are 5 universities not already in the top 5
+    var unis = items.map(function (c) { return c.university; });
+    var exclude = items.map(function (c) { return c.id; });
+    var found = [];
+    try {
+      for (var page = 0; page < 4 && found.length < 5; page++) {
+        var b = body();
+        b.exclude_ids = exclude.concat(b.exclude_ids || []).slice(0, 60);
+        b.limit = 8;
+        var data = await PF_API.request('/match/programs', { method: 'POST', body: b, timeoutMs: 30000 });
+        if (my !== moreSeq) return;
+        var got = data.items || [];
+        got.forEach(function (c) {
+          exclude.push(c.id);
+          if (unis.indexOf(c.university) === -1 && found.length < 5) { unis.push(c.university); found.push(c); }
+        });
+        if (!data.has_more || !got.length || exclude.length >= 60) break;
+      }
+      moreItems = found;
+      renderMore();
+      if (moreGrid && window.pfMotion) {
+        moreGrid.querySelectorAll('[data-more-card]').forEach(function (el, i) { el.style.animationDelay = (i * 45) + 'ms'; el.classList.add('pf-rise'); });
+      }
+    } catch (e) {
+      if (my !== moreSeq) return;
+      moreItems = []; renderMore();
+    }
+  }
+  if (moreGrid) {
+    moreGrid.addEventListener('error', function (e) {
+      if (e.target && e.target.hasAttribute && e.target.hasAttribute('data-match-logo')) e.target.remove();
+    }, true);
+    moreGrid.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('[data-more-lock]') : null;
+      if (!b) return;
+      var id = b.getAttribute('data-more-lock');
+      var c = moreItems.find(function (x) { return x.id === id; });
+      if (c) lock(id, c);
+    });
   }
 
   // ---- Card Shuffle view of the 5 results (follows Step 2 "รูปแบบการแสดงผลลัพธ์" = Card Shuffle) ----
@@ -275,6 +368,7 @@ var PF_MATCHES = window.PF_MATCHES = (function () {
 
   function render() {
     if (!grid) return;
+    renderMore(); // lock state / language follow the main list
     var list = filtered();
     syncViewButtons();
     if (!items.length) return;
@@ -364,6 +458,7 @@ var PF_MATCHES = window.PF_MATCHES = (function () {
       }
       items.forEach(function (c) { if (shown.indexOf(c.id) === -1) shown.push(c.id); });
       render();
+      loadMore();
       if (window.PF_HERO) window.PF_HERO.refresh();
       var msg = '';
       if (data.method === 'ai') msg = T('AI เลือกให้จากหลักสูตรจริงที่ตรงกับคุณ', 'AI picked these from real programs that fit you');
@@ -552,5 +647,5 @@ var PF_MATCHES = window.PF_MATCHES = (function () {
     });
   });
 
-  return { load: load, refresh: refresh, lock: lock, items: function () { return items.slice(); }, requestBody: function () { return body(); } };
+  return { load: load, refresh: refresh, lock: lock, render: render, items: function () { return items.slice(); }, requestBody: function () { return body(); } };
 })();

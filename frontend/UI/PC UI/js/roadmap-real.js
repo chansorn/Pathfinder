@@ -152,7 +152,8 @@ var PF_RM_REAL = window.PF_RM_REAL = (function () {
   // "วท.บ. สาขาวิชาวิทยาการคอมพิวเตอร์ (ภาษาไทย ปกติ)" -> "วิทยาการคอมพิวเตอร์"
   function coreProgram(name) {
     return String(name || '').replace(/\s*\([^()]*(?:ภาษา|นานาชาติ|พิเศษ|ปกติ)[^()]*\)\s*$/, '')
-      .replace(/^หลักสูตร/, '').replace(/^[ก-๙]{1,6}\.[ก-๙]{1,3}\.\s*/, '').replace(/^[ก-๙]+บัณฑิต\s*/, '').replace(/^(สาขาวิชา|สาขา)\s*/, '').trim() || name;
+      .replace(/^หลักสูตร/, '').replace(/^[ก-๙]{1,6}\.[ก-๙]{1,3}\.\s*/, '').replace(/^[ก-๙]+บัณฑิต\s*/, '').replace(/^(สาขาวิชา|สาขา)\s*/, '').trim()
+      .replace(/^\(([^()]+)\)$/, '$1') || name;
   }
   function paintTitle(p) {
     var el = $('roadmap-major-title');

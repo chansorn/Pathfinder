@@ -682,6 +682,18 @@
 
       <section id="matches-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-gutter-lg" aria-live="polite"></section>
 
+      <!-- "เส้นทางอื่นๆ ที่คุณอาจสนใจ": the next 5 real programs after the top 5 (js/matches.js loadMore) -->
+      <section id="matches-more" class="hidden flex flex-col gap-gutter-md p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant">
+        <header class="flex flex-wrap items-end justify-between gap-gutter-sm">
+          <div class="flex flex-col gap-0.5">
+            <span class="font-label text-label-sm text-secondary-text" data-th="ตัวเลือกเพิ่มเติมจากคำตอบเดียวกัน" data-en="More options from the same answers">ตัวเลือกเพิ่มเติมจากคำตอบเดียวกัน</span>
+            <h2 class="inline-flex items-center gap-gutter-xs font-headline text-headline-md text-on-surface"><span class="material-symbols-outlined text-[24px] text-primary" aria-hidden="true">alt_route</span><span data-th="เส้นทางอื่นๆ ที่คุณอาจสนใจ" data-en="Other paths you might like">เส้นทางอื่นๆ ที่คุณอาจสนใจ</span></h2>
+          </div>
+          <span id="matches-more-count" class="px-gutter-sm py-0.5 rounded-full bg-surface-container-low border border-outline-variant font-label text-label-sm text-on-surface-variant"></span>
+        </header>
+        <div id="matches-more-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-gutter-sm"></div>
+      </section>
+
       <!-- 8. saved programs (heart on a card) - account: /api/saved-programs, guest: this device (js/matches.js) -->
       <section id="saved-programs" class="hidden flex flex-col gap-gutter-sm p-gutter-lg rounded-xl bg-surface-container-lowest border border-outline-variant">
         <div class="flex flex-wrap items-center justify-between gap-2">
