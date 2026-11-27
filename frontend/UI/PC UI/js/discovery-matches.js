@@ -906,7 +906,8 @@ function syncMajorMatches() {
 window.syncMajorMatches = syncMajorMatches;
 syncMajorMatches();
 
-PF_STATE.lockedMajorId = PF_STATE.lockedMajorId || '1';
-PF_STATE.checkedWaypoints = PF_STATE.checkedWaypoints || { '1-r1-0': true, '1-r2-0': true };
+// no target until the student picks one (a new account / guest starts with an empty roadmap)
+PF_STATE.lockedMajorId = PF_STATE.lockedMajorId || null;
+PF_STATE.checkedWaypoints = PF_STATE.checkedWaypoints || {};
 
 

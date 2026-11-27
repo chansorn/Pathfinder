@@ -148,7 +148,7 @@ var PF_ANALYTICS = window.PF_ANALYTICS = (function () {
       gpax: PF_STATE.gpaxSet && isFinite(Number(PF_STATE.gpax)) ? Number(PF_STATE.gpax) : null,
       readinessPct: pct,
       weeklyHours: PF_STATE.hoursSet && isFinite(Number(PF_STATE.weeklyHours)) ? Number(PF_STATE.weeklyHours) : null,
-      lockedMajorId: String(PF_STATE.lockedMajorId || '1'),
+      lockedMajorId: PF_STATE.lockedMajorId ? String(PF_STATE.lockedMajorId) : null,
       completedCount: done,
       totalCount: total,
       roundBreakdown: rb
