@@ -18,6 +18,7 @@
   /* [JS 4.7] State Persistence (localStorage) & Shareable Plan URL */
   var PF_STORAGE_KEY = 'pathfinder_v1_state';
   function savePFState() {
+    if (window.PF_STATE_FROZEN) return; // account switch in progress, page about to reload
     try {
       localStorage.setItem(PF_STORAGE_KEY, JSON.stringify(PF_STATE));
     } catch (e) {}

@@ -561,6 +561,27 @@ var PF_AUTH = window.PF_AUTH = (function () {
     };
   }
 
+  // PF_STATE in localStorage belongs to one account (or the guest). Switching to another
+  // account wipes it and reloads, so the next account never sees the previous one's data.
+  var OWNER_KEY = 'pathfinder_v1_owner';
+  function localOwner() {
+    try { return localStorage.getItem(OWNER_KEY); } catch (e) { return null; }
+  }
+  function wipeLocalStateFor(owner) {
+    window.PF_STATE_FROZEN = true; // stop savePFState writing the old state back before the reload
+    try {
+      localStorage.setItem('pathfinder_v1_state', JSON.stringify({ lang: PF_STATE.lang }));
+      localStorage.removeItem('pf_my_plan_v1');
+      localStorage.setItem(OWNER_KEY, owner);
+      sessionStorage.removeItem('pf_page');
+      sessionStorage.removeItem('pf_step');
+      return localStorage.getItem(OWNER_KEY) === owner;
+    } catch (e) {
+      window.PF_STATE_FROZEN = false;
+      return false;
+    }
+  }
+
   async function loadUser() {
     var r = await Promise.all([
       PF_API.request('/me', { auth: true }),
@@ -569,6 +590,11 @@ var PF_AUTH = window.PF_AUTH = (function () {
       PF_API.request('/me/progress', { auth: true }).catch(function () { return { items: [] }; }),
       PF_API.request('/me/state', { auth: true }).catch(function () { return { state: {} }; })
     ]);
+    if (localOwner() !== String(r[0].id) && wipeLocalStateFor(String(r[0].id))) {
+      // a different account than the one this device's state came from: start clean
+      window.location.reload();
+      return new Promise(function () {}); // the page is going away
+    }
     currentUser = await buildUser(r[0], r[1], r[2], r[3]);
     PF_SYNC.reset(); // next change pushes the merged state (account + what this device had)
     hydrateUserPlan(currentUser);
@@ -707,22 +733,19 @@ var PF_AUTH = window.PF_AUTH = (function () {
       }
       PF_API.setSession(data.session, true);
 
-      // carry the guest's progress over. Failing here must not undo the sign-up
+      // a new account starts clean: only the sign-up form's own fields go to the profile,
+      // nothing from this device's earlier state. Failing here must not undo the sign-up
       var profilePatch = {
         nickname: String(payload.nickname || '').trim().slice(0, 50) || null,
         avatar_icon: payload.avatarPreset || 'rocket',
         avatar_bg_color: payload.avatarColor || '#1F3A3D'
       };
-      if (typeof PF_STATE.gpax === 'number') profilePatch.gpax = Math.min(4, Math.max(0, PF_STATE.gpax));
-      if (Array.isArray(PF_STATE.interests) && PF_STATE.interests.length) profilePatch.interests = PF_STATE.interests.slice(0, 30);
-      await Promise.all([
-        PF_API.request('/profile', { method: 'PUT', auth: true, body: profilePatch }),
-        PF_API.request('/me/state', { method: 'PATCH', auth: true, body: PF_SYNC.statePatch() })
-      ].map(function (p) { return p.catch(function (e) { if (window.console) console.warn('[signup] migrate step failed:', e && e.code); }); }));
+      await PF_API.request('/profile', { method: 'PUT', auth: true, body: profilePatch })
+        .catch(function (e) { if (window.console) console.warn('[signup] profile step failed:', e && e.code); });
 
+      // loadUser wipes the previous local state and reloads for the new account
       var user = await loadUser();
-      PF_ANALYTICS.recordSnapshot('checkin');
-      showToast('สร้างบัญชีและบันทึกแผนปัจจุบันแล้ว!', 'Account created & guest plan migrated!');
+      showToast('สร้างบัญชีเรียบร้อยแล้ว!', 'Account created!');
       return { ok: true, user: user };
     } catch (err) {
       return fail(err);
@@ -732,6 +755,9 @@ var PF_AUTH = window.PF_AUTH = (function () {
   // the account no longer exists (deleted): clear what this page knows about it, no server call
   async function forgetLocalUser() {
     currentUser = null;
+    // drop the deleted account's local copy too; the next page load starts as a guest
+    // (reload after the "deleted" toast has been seen)
+    if (wipeLocalStateFor('guest')) setTimeout(function () { window.location.reload(); }, 1800);
     PF_STATE.savedPrograms = [];
     if (window.PF_PROFILE_UI) window.PF_PROFILE_UI.refreshHeader();
     if (window.PF_ANALYTICS) window.PF_ANALYTICS.render();
@@ -746,7 +772,8 @@ var PF_AUTH = window.PF_AUTH = (function () {
     PF_API.clearSession();
     PF_SYNC.reset();
     currentUser = null;
-    // the account's saved programs stay in the account, not on this (possibly shared) screen
+    // the account's data stays in the account, not on this (possibly shared) screen
+    if (wipeLocalStateFor('guest')) { window.location.reload(); return; }
     PF_STATE.savedPrograms = [];
     if (window.PF_PROFILE_UI) window.PF_PROFILE_UI.refreshHeader();
     if (window.PF_ANALYTICS) window.PF_ANALYTICS.render();
