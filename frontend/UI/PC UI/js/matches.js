@@ -576,6 +576,7 @@ var PF_MATCHES = window.PF_MATCHES = (function () {
     if (!c) return;
     var majorId = TEMPLATE_OF_INTEREST[(c.matched_interests || [])[0] || (PF_STATE.interests || [])[0]] || '1';
     PF_STATE.lockedProgram = { id: c.id, university: c.university, faculty: c.faculty, program: c.program, campus: c.campus || null };
+    PF_STATE.rmRank1Id = c.id;
     PF_STATE.lockedMajorId = majorId;
     PF_STATE.rmPrograms = PF_STATE.rmPrograms || {};
     PF_STATE.rmPrograms[majorId] = c.id;

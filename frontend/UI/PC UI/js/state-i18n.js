@@ -297,6 +297,7 @@ function goToPage(nextPage) {
   // roadmap timeline motion once the page is on screen (js/roadmap-real.js)
   if (nextPage === '4' && window.PF_RM_REAL && window.PF_RM_REAL.replayTimeline) setTimeout(window.PF_RM_REAL.replayTimeline, 450);
   // coach page: the signed-in account's past chat (and nothing left over from another account)
+  if (nextPage === '5' && typeof window.PF_SIM_SYNC === 'function') window.PF_SIM_SYNC();
   if (nextPage === '6' && window.PF_CHAT) window.PF_CHAT.load();
   if (nextPage === '6' && window.PF_GUIDANCE) window.PF_GUIDANCE.render();
   if (nextPage === '7' && window.PF_ANALYTICS && typeof window.PF_ANALYTICS.render === 'function') {

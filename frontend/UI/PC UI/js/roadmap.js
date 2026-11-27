@@ -297,23 +297,34 @@ function renderRoadmap(majorId) {
 
   var data = ROADMAP_CATALOG[id] || ROADMAP_CATALOG['1'];
 
-  // Rank switcher (อันดับ 1 | 2 | 3)
+  // Rank switcher: อันดับ 1 = the locked program, อันดับ 2 = the backup (first saved/heart program,
+  // else the next best match on Page 3). Switching swaps the real program this roadmap is built from;
+  // each program keeps its own checklist. The account still syncs only the locked one (js/sync.js).
   var rankBox = document.getElementById('rm-rank-switcher');
   if (rankBox) {
-    var targetIds = (PF_STATE.savedIds && PF_STATE.savedIds.length) ? PF_STATE.savedIds.slice(0, 3) : ['1', '2', '3'];
-    if (targetIds.indexOf(id) === -1) targetIds.unshift(id);
-    targetIds = targetIds.slice(0, 3);
-    rankBox.classList.toggle('hidden', targetIds.length <= 1);
-    rankBox.innerHTML = targetIds.map(function (tid, rIdx) {
-      var active = String(tid) === id;
+    var shownId = (PF_STATE.rmPrograms || {})[id] || (window.PF_RM_REAL ? window.PF_RM_REAL.programId(id) : null);
+    var firstId = (PF_STATE.lockedProgram && PF_STATE.lockedProgram.id) || PF_STATE.rmRank1Id || shownId;
+    var backup = (PF_STATE.savedPrograms || []).find(function (p) { return p && p.id && p.id !== firstId; }) ||
+      ((window.PF_MATCHES && window.PF_MATCHES.items) ? window.PF_MATCHES.items() : []).find(function (c) { return c.id !== firstId; }) || null;
+    if (firstId && shownId !== (backup && backup.id)) PF_STATE.rmRank1Id = firstId; // remember rank 1 while rank 2 is shown
+    var ranks = firstId && backup ? [{ id: firstId }, { id: backup.id, card: backup }] : [];
+    rankBox.classList.toggle('hidden', ranks.length < 2);
+    var label = function (c) { return c ? c.university + ' • ' + c.program : ''; };
+    rankBox.innerHTML = ranks.map(function (r, rIdx) {
+      var active = r.id === shownId || (rIdx === 0 && shownId !== ranks[1].id);
       var cls = active ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-primary/50';
-      return '<button type="button" data-rm-rank-id="' + tid + '" class="px-2.5 py-0.5 rounded-full border font-label text-xs font-medium ' + cls + '">' +
+      var tip = rIdx === 0 ? (PF_STATE.lockedProgram ? label(PF_STATE.lockedProgram) : '') : label(r.card);
+      return '<button type="button" data-rm-rank-program="' + rmEsc(r.id) + '" aria-pressed="' + (active ? 'true' : 'false') + '" title="' + rmEsc(tip) + '" class="px-2.5 py-0.5 rounded-full border font-label text-xs font-medium ' + cls + '">' +
         (currentLang === 'th' ? 'อันดับ ' : 'Rank ') + (rIdx + 1) +
+        (rIdx === 1 ? '<span class="font-normal opacity-80">' + (currentLang === 'th' ? ' • สำรอง' : ' • backup') + '</span>' : '') +
       '</button>';
     }).join('');
-    rankBox.querySelectorAll('[data-rm-rank-id]').forEach(function (rb) {
+    rankBox.querySelectorAll('[data-rm-rank-program]').forEach(function (rb) {
       rb.addEventListener('click', function () {
-        renderRoadmap(rb.getAttribute('data-rm-rank-id'));
+        PF_STATE.rmPrograms = PF_STATE.rmPrograms || {};
+        PF_STATE.rmPrograms[id] = rb.getAttribute('data-rm-rank-program');
+        if (typeof window.savePFState === 'function') window.savePFState();
+        renderRoadmap(id);
         if (typeof window.PF_REFRESH_BADGES === 'function') window.PF_REFRESH_BADGES();
       });
     });

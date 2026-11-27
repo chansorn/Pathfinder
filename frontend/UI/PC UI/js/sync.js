@@ -29,8 +29,10 @@ var PF_SYNC = window.PF_SYNC = (function () {
     if (window.console) console.warn('[sync] ' + what + ' failed:', err && err.code);
   }
 
+  // the locked program (not whatever the roadmap shows: "อันดับ 2 • สำรอง" must not replace it)
   function lockedProgramId() {
-    var id = PF_STATE.lockedMajorId && window.PF_RM_REAL ? window.PF_RM_REAL.programId(PF_STATE.lockedMajorId) : null;
+    var id = (PF_STATE.lockedProgram && PF_STATE.lockedProgram.id) ||
+      (PF_STATE.lockedMajorId && window.PF_RM_REAL ? window.PF_RM_REAL.programId(PF_STATE.lockedMajorId) : null);
     return /^[0-9a-f-]{36}$/i.test(String(id || '')) ? String(id) : null;
   }
 

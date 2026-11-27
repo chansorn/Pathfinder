@@ -295,6 +295,11 @@
       if (seq !== sim.seq) return;
       sim.group = data.group || null;
       sim.programs = data.items || [];
+      // the program the roadmap is built from may not be in this group's top 10 (or in any group): keep it first
+      var pin = PF_STATE.simPinned;
+      if (pin && pin.id === PF_STATE.simProgramId && !sim.programs.some(function (p) { return p.id === pin.id; })) {
+        sim.programs.unshift({ id: pin.id, university: pin.university, program: pin.program });
+      }
       var sel = document.getElementById('sim-program-select');
       if (sel) {
         sel.innerHTML = sim.programs.map(function (p) {
@@ -305,6 +310,7 @@
       var keep = sim.programs.some(function (p) { return p.id === PF_STATE.simProgramId; });
       PF_STATE.simProgramId = keep ? PF_STATE.simProgramId : (sim.programs[0] ? sim.programs[0].id : null);
       if (sel && PF_STATE.simProgramId) sel.value = PF_STATE.simProgramId;
+      sim.loadedFor = PF_STATE.simProgramId;
       if (!PF_STATE.simProgramId) {
         renderSimResult();
         return;
@@ -556,10 +562,32 @@
       loadPrograms();
     });
   }
+  // the simulator follows the program the roadmap (Page 4) is built from: locked, picked in its dropdown or
+  // switched with อันดับ 1 / 2 (js/roadmap-real.js calls PF_SIM_FOLLOW). Picking another program here still works
+  // until the roadmap program changes again.
+  var SIM_RULES = [
+    [/แพทยศาสตรบัณฑิต/, 'med'], [/วิศวกรรมคอมพิวเตอร์/, 'comp-eng'], [/บริหารธุรกิจ|BBA/, 'bba'],
+    [/สถาปัตยกรรม|ออกแบบ/, 'arch-ux'], [/นิเทศ|วารสาร|สื่อสารมวลชน/, 'comm-arts'], [/นิติศาสตร/, 'law']
+  ];
+  window.PF_SIM_FOLLOW = function (p) {
+    // already followed = same id AND pinned (lock() may have set the id without the pin)
+    if (!p || !p.id || (p.id === PF_STATE.simProgramId && PF_STATE.simPinned && PF_STATE.simPinned.id === p.id)) return;
+    PF_STATE.simProgramId = p.id;
+    PF_STATE.simPinned = { id: p.id, university: p.university, program: p.program };
+    var rule = SIM_RULES.find(function (r) { return r[0].test(p.program || ''); });
+    if (rule) PF_STATE.simFacultyKey = rule[1];
+    if (typeof window.savePFState === 'function') window.savePFState();
+    if (currentPage === '5') loadPrograms();
+  };
+  // opening Page 5: reload when the followed program changed meanwhile
+  window.PF_SIM_SYNC = function () {
+    if (PF_STATE.simProgramId && PF_STATE.simProgramId !== sim.loadedFor) loadPrograms();
+  };
   var simProgramSelect = document.getElementById('sim-program-select');
   if (simProgramSelect) {
     simProgramSelect.addEventListener('change', function () {
       PF_STATE.simProgramId = simProgramSelect.value || null;
+      sim.loadedFor = PF_STATE.simProgramId;
       sim.renderedFor = null;
       sim.subjects = null;
       renderScoreSim(true);

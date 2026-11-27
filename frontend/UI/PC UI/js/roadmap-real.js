@@ -128,6 +128,8 @@ var PF_RM_REAL = window.PF_RM_REAL = (function () {
       cur.error = PF_API.errorText(err);
     }
     cur.loading = false;
+    // the score simulator (Page 5) follows the program this roadmap is built from
+    if (cur.program && typeof window.PF_SIM_FOLLOW === 'function') window.PF_SIM_FOLLOW(cur.program);
     // the Page 4 task list is built from this program (tasksFor): redraw the whole roadmap once it arrives
     if (cur.program && lastTasksFor !== cur.program.id && typeof window.renderRoadmap === 'function') {
       lastTasksFor = cur.program.id;
