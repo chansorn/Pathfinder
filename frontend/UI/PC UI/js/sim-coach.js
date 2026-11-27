@@ -37,6 +37,14 @@
       Object.keys(saved).forEach(function (k) {
         if (saved[k] !== undefined && k !== 'page' && k !== 'step') PF_STATE[k] = saved[k];
       });
+      // older builds saved a demo target ('1' + two pre-checked waypoints) for everyone.
+      // A real pick always sets lockedProgram (js/matches.js lock), so a target without one is that default
+      if (PF_STATE.lockedMajorId && !(PF_STATE.lockedProgram && PF_STATE.lockedProgram.id)) {
+        PF_STATE.lockedMajorId = null;
+        var cw = PF_STATE.checkedWaypoints || {};
+        var cwKeys = Object.keys(cw).filter(function (k) { return cw[k]; }).sort().join(',');
+        if (cwKeys === '1-r1-0,1-r2-0') PF_STATE.checkedWaypoints = {};
+      }
 
       if (Array.isArray(PF_STATE.interests)) {
         PF_STATE.interests = PF_STATE.interests.slice(0, window.MAX_INTERESTS || 4);
